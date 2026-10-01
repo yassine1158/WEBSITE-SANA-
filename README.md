@@ -1,26 +1,34 @@
 # SANA — Site vitrine
 
-Site vitrine de **SANA — Société Africaine de Nutrition Animale** : vente de **poulets**, d'**œufs** et d'**aliments pour volailles fabriqués selon la composition demandée par le client**.
+Site vitrine de **SANA — Société Africaine de Nutrition Animale** : aliments composés pour tous les animaux (volailles, bovins, ovins & caprins, lapins, poissons), **poulets** (poussins, élevage, abattage) et **œufs frais**.
 
-## Contenu
-- **Accueil / À propos** : présentation de la société.
-- **Produits** : poulets (poussins, chair, prêts à cuire, fermiers), œufs, aliments.
-- **Composition sur mesure** : le client choisit une formule de base (démarrage, croissance, finition, pondeuse, fermier), ajuste chaque ingrédient (maïs, soja, son, orge, huile, calcaire, phosphate, CMV, sel) et voit en temps réel le total (100 %) et les valeurs estimées (protéines, énergie, calcium, phosphore, cellulose).
-- **Commande** : formulaire envoyé directement sur **WhatsApp** ou par **e-mail**, pré-rempli avec la formule composée.
+## Contenu du site
+- **La société** : présentation.
+- **Poulets** : offres selon l'usage — poussins d'un jour, poulets pour l'élevage, poulets pour l'abattage.
+- **Œufs & aliments**.
+- **Formule sur mesure** : le client choisit l'espèce et une formule de référence, ajuste chaque matière première et voit en temps réel le total (100 %) et les valeurs estimées (protéines, énergie EM ou UFL, matières grasses, cellulose, calcium, phosphore).
+- **Commande** : formulaire envoyé sur **WhatsApp** ou par **e-mail**, pré-rempli avec la formule.
 
-## Lancer le site
-Site statique, sans dépendances : ouvrir `index.html` dans un navigateur, ou :
-```bash
-npx serve .
-```
+## Administration (`admin.html`)
+Tout le contenu est dans `data/content.js`. La page `admin.html` (lien « Administration » en bas du site) permet de tout modifier sans toucher au code :
+coordonnées, textes d'accueil, offres de poulets (ajout, masquage, ordre, prix), œufs, aliments, espèces et formules, matières premières et leurs valeurs nutritionnelles.
 
-## Personnalisation
-- Numéro WhatsApp et e-mail : `CONTACT` en haut de `assets/js/main.js`.
-- Adresse, téléphone, horaires : section `#contact` de `index.html`.
-- Ingrédients, valeurs nutritionnelles et formules de base : `INGREDIENTS` et `PRESETS` dans `assets/js/main.js`.
+1. Les modifications sont enregistrées automatiquement **sur votre appareil** (brouillon).
+2. **Aperçu du site** : affiche le site avec le brouillon (visible uniquement sur votre appareil).
+3. **Publier** : envoie le contenu sur GitHub ; le site est à jour en une à deux minutes.
+
+Pour publier, créez une fois un jeton GitHub : *GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token*, accès limité au dépôt `WEBSITE-SANA-`, permission **Contents : Read and write**. Collez-le dans l'onglet **Publication** de l'administration.
+
+La page d'administration est publique, mais rien ne peut être publié sans ce jeton.
+
+## Mise en ligne (GitHub Pages)
+*Settings → Pages* → branche `main`, dossier `/ (root)`. L'administration publie sur la branche `main` (modifiable dans l'onglet Publication).
+
+## Lancer en local
+Site statique, sans dépendances : ouvrir `index.html`, ou `npx serve .`
 
 ## Logo
 Fichiers dans `assets/img/` (extraits du logo officiel en PDF) :
 - `logo-sana.svg` / `logo-sana.png` : logo couleur.
-- `logo-sana-white.svg` : version blanche pour fond vert (pied de page).
-- `emblem-sana.svg` : emblème seul (favicon, filigrane du hero).
+- `logo-sana-white.svg` : version blanche pour fond vert.
+- `emblem-sana.svg` : emblème seul (favicon, filigrane).
