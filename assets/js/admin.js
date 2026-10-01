@@ -1,0 +1,478 @@
+/* =========================================================
+   SANA — Administration du contenu
+   Modifie data/content.js : brouillon local, aperçu, puis publication sur GitHub.
+   ========================================================= */
+
+const DRAFT_KEY = "sana-draft";
+const PREVIEW_KEY = "sana-preview";
+const GH_KEY = "sana-github";
+const TAB_KEY = "sana-admin-tab";
+
+const NUTRIENTS = {
+  cp: "Protéines brutes (%)", em: "Énergie EM (kcal/kg)", ufl: "Énergie UFL (/kg)",
+  mg: "Matières grasses (%)", cb: "Cellulose brute (%)", ca: "Calcium (%)", p: "Phosphore (%)",
+};
+const ICONS = { chick: "Poussin", chicken: "Poule", drumstick: "Cuisse", cow: "Vache", sheep: "Mouton", rabbit: "Lapin", fish: "Poisson" };
+const CATS = { energy: "Énergie", protein: "Protéines", fiber: "Fibres", mineral: "Minéraux & additifs" };
+
+const $ = (s, el = document) => el.querySelector(s);
+const clone = o => JSON.parse(JSON.stringify(o));
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const round = (n, d = 1) => Math.round(n * 10 ** d) / 10 ** d;
+const slug = s => (String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "x") + "-" + Math.random().toString(36).slice(2, 6);
+
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
+  del(k) { try { localStorage.removeItem(k); } catch (e) {} },
+};
+
+let published = clone(window.SANA_CONTENT);
+let data = (() => { try { return JSON.parse(store.get(DRAFT_KEY)) || clone(published); } catch (e) { return clone(published); } })();
+let tab = store.get(TAB_KEY) || "societe";
+let ghMemory = null; // jeton non mémorisé
+
+// ---------------------------------------------------------
+// Accès aux valeurs par chemin ("chickens.offers.0.title")
+// ---------------------------------------------------------
+const getP = path => path.split(".").reduce((o, k) => (o == null ? o : o[k]), data);
+function setP(path, v) {
+  const keys = path.split(".");
+  const last = keys.pop();
+  const obj = keys.reduce((o, k) => (o[k] ??= {}), data);
+  obj[last] = v;
+}
+function delP(path) {
+  const keys = path.split(".");
+  const last = keys.pop();
+  const obj = keys.reduce((o, k) => (o == null ? o : o[k]), data);
+  if (obj) delete obj[last];
+}
+
+// ---------------------------------------------------------
+// Champs de formulaire
+// ---------------------------------------------------------
+const help = h => (h ? `<em class="help">${h}</em>` : "");
+const F = {
+  text: (label, path, o = {}) => `<label class="field ${o.cls || ""}"><span>${label}</span>${help(o.help)}<input data-path="${path}" value="${esc(getP(path))}" placeholder="${esc(o.ph || "")}"></label>`,
+  area: (label, path, o = {}) => `<label class="field ${o.cls || ""}"><span>${label}</span>${help(o.help)}<textarea data-path="${path}" rows="${o.rows || 3}">${esc(getP(path))}</textarea></label>`,
+  lines: (label, path, o = {}) => `<label class="field ${o.cls || ""}"><span>${label}</span>${help(o.help || "Un élément par ligne.")}<textarea data-path="${path}" data-type="lines" rows="${o.rows || 4}">${esc((getP(path) || []).join("\n"))}</textarea></label>`,
+  num: (label, path, o = {}) => `<label class="field ${o.cls || ""}"><span>${label}</span>${help(o.help)}<input type="number" step="any" data-path="${path}" data-type="number" ${o.optional ? 'data-optional="1"' : ""} value="${getP(path) ?? ""}"></label>`,
+  bool: (label, path) => `<label class="check"><input type="checkbox" data-path="${path}" data-type="bool" ${getP(path) !== false ? "checked" : ""}><span>${label}</span></label>`,
+  select: (label, path, options, o = {}) => `<label class="field ${o.cls || ""}"><span>${label}</span><select data-path="${path}" ${o.rerender ? 'data-rerender="1"' : ""}>${Object.entries(options).map(([v, t]) => `<option value="${v}" ${getP(path) === v ? "selected" : ""}>${esc(t)}</option>`).join("")}</select></label>`,
+};
+const card = (title, body, tools = "") => `<section class="a-card"><header><h3>${title}</h3><div class="tools">${tools}</div></header>${body}</section>`;
+const btn = (label, act, attrs = "", cls = "btn-ghost") => `<button type="button" class="btn ${cls} btn-sm" data-act="${act}" ${attrs}>${label}</button>`;
+const del = (act, attrs) => `<button type="button" class="btn btn-danger btn-sm" data-act="${act}" data-confirm="1" ${attrs}>Supprimer</button>`;
+
+// ---------------------------------------------------------
+// Onglets
+// ---------------------------------------------------------
+const TABS = {
+  societe: () => `
+    <h2>Société &amp; contact</h2>
+    <p class="intro">Ces informations apparaissent dans l'en-tête, la section contact et le pied de page.</p>
+    ${card("Identité", `<div class="grid-2">
+      ${F.text("Nom court", "company.name")}
+      ${F.text("Nom complet", "company.fullName")}</div>`)}
+    ${card("Coordonnées", `<div class="grid-2">
+      ${F.text("Téléphone affiché", "company.phone", { ph: "+216 00 000 000" })}
+      ${F.text("Numéro WhatsApp", "company.whatsapp", { help: "Format international sans + ni espaces, ex. : 21698123456.", ph: "216…" })}
+      ${F.text("E-mail", "company.email")}
+      ${F.text("Horaires", "company.hours")}</div>
+      ${F.text("Adresse", "company.address")}`)}`,
+
+  accueil: () => `
+    <h2>Accueil</h2>
+    ${card("Bandeau principal", `
+      ${F.text("Titre", "hero.title")}
+      ${F.text("Suite du titre (en orange)", "hero.highlight")}
+      ${F.area("Texte d'introduction", "hero.lead", { rows: 4 })}`)}
+    ${card("La société", `
+      ${F.text("Titre", "about.title")}
+      ${F.lines("Paragraphes", "about.paragraphs", { help: "Un paragraphe par ligne.", rows: 6 })}`)}`,
+
+  poulets: () => `
+    <h2>Poulets</h2>
+    <p class="intro">Les offres de poulets : poussins, élevage, abattage… Ajoutez, masquez ou réordonnez-les librement.</p>
+    ${card("Section", `${F.text("Titre", "chickens.title")}${F.area("Introduction", "chickens.intro", { rows: 2 })}`)}
+    ${data.chickens.offers.map((o, i) => card(esc(o.title || "Nouvelle offre"), `
+      ${F.bool("Afficher sur le site", `chickens.offers.${i}.visible`)}
+      <div class="grid-2">
+        ${F.text("Nom de l'offre", `chickens.offers.${i}.title`)}
+        ${F.text("Usage (étiquette)", `chickens.offers.${i}.usage`, { ph: "Pour l'abattage" })}
+        ${F.text("Prix (optionnel)", `chickens.offers.${i}.price`, { ph: "Ex. : à partir de 2,500 DT / pièce" })}
+        ${F.select("Icône", `chickens.offers.${i}.icon`, { chick: "Poussin", chicken: "Poule", drumstick: "Cuisse" })}
+      </div>
+      ${F.area("Description", `chickens.offers.${i}.desc`, { rows: 2 })}
+      ${F.lines("Points forts", `chickens.offers.${i}.items`)}`,
+      `${i > 0 ? btn("↑", "move-offer", `data-i="${i}" data-d="-1" aria-label="Monter"`) : ""}
+       ${i < data.chickens.offers.length - 1 ? btn("↓", "move-offer", `data-i="${i}" data-d="1" aria-label="Descendre"`) : ""}
+       ${del("del-offer", `data-i="${i}"`)}`)).join("")}
+    ${btn("+ Ajouter une offre de poulets", "add-offer", "", "btn-primary")}`,
+
+  oeufs: () => `
+    <h2>Œufs</h2>
+    ${card("Carte Œufs", `
+      ${F.bool("Afficher sur le site", "eggs.visible")}
+      <div class="grid-2">${F.text("Titre", "eggs.title")}${F.text("Prix (optionnel)", "eggs.price", { ph: "Ex. : 12 DT le plateau" })}</div>
+      ${F.area("Description", "eggs.desc", { rows: 2 })}
+      ${F.lines("Points forts", "eggs.items")}`)}`,
+
+  aliments: () => `
+    <h2>Aliments</h2>
+    ${card("Carte Aliments", `
+      <div class="grid-2">${F.text("Titre", "feed.title")}${F.num("Commande minimum (kg)", "feed.minKg")}</div>
+      ${F.area("Description", "feed.desc", { rows: 2 })}
+      ${F.lines("Points forts", "feed.items", { help: "Un élément par ligne. La liste des espèces est ajoutée automatiquement." })}
+      ${F.lines("Présentations proposées", "feed.forms", { help: "Une par ligne : Farine, Granulés…" })}`)}`,
+
+  especes: () => `
+    <h2>Espèces &amp; formules</h2>
+    <p class="intro">Chaque espèce a ses matières premières, ses valeurs affichées et ses formules de référence. Le total de chaque formule doit faire 100 %.</p>
+    ${data.species.map((s, si) => card(esc(s.name || "Nouvelle espèce"), `
+      <div class="grid-2">${F.text("Nom", `species.${si}.name`)}${F.select("Icône", `species.${si}.icon`, ICONS)}</div>
+      <fieldset class="chips"><legend>Matières premières utilisables</legend>
+        ${data.ingredients.map(ing => `<label class="chip"><input type="checkbox" data-act="toggle-ing" data-sp="${si}" data-ing="${ing.id}" ${s.ingredients.includes(ing.id) ? "checked" : ""}><span>${esc(ing.name)}</span></label>`).join("")}
+      </fieldset>
+      <fieldset class="chips"><legend>Valeurs nutritionnelles affichées</legend>
+        ${Object.entries(NUTRIENTS).map(([k, l]) => `<label class="chip"><input type="checkbox" data-act="toggle-nut" data-sp="${si}" data-nut="${k}" ${s.nutrients.includes(k) ? "checked" : ""}><span>${l}</span></label>`).join("")}
+      </fieldset>
+      <div class="formulas">
+        ${s.formulas.map((f, fi) => `
+          <div class="formula">
+            <div class="formula-head">
+              ${F.text("Nom de la formule", `species.${si}.formulas.${fi}.label`, { cls: "grow" })}
+              <span class="ftotal" data-total="${si}.${fi}"></span>
+              ${btn("Dupliquer", "dup-formula", `data-sp="${si}" data-f="${fi}"`)}
+              ${del("del-formula", `data-sp="${si}" data-f="${fi}"`)}
+            </div>
+            <p class="sub">Composition (%)</p>
+            <div class="mix">${s.ingredients.map(id => {
+              const ing = data.ingredients.find(x => x.id === id);
+              return ing ? F.num(esc(ing.name), `species.${si}.formulas.${fi}.mix.${id}`, { optional: true }) : "";
+            }).join("")}</div>
+            <p class="sub">Valeurs recommandées (laisser vide si aucune)</p>
+            <div class="mix">${s.nutrients.map(k => F.num(NUTRIENTS[k], `species.${si}.formulas.${fi}.target.${k}`, { optional: true })).join("")}</div>
+          </div>`).join("")}
+      </div>
+      ${btn("+ Ajouter une formule", "add-formula", `data-sp="${si}"`)}`,
+      `${del("del-species", `data-sp="${si}"`)}`)).join("")}
+    ${btn("+ Ajouter une espèce", "add-species", "", "btn-primary")}`,
+
+  matieres: () => `
+    <h2>Matières premières</h2>
+    <p class="intro">Valeurs nutritionnelles par kg d'aliment brut. Elles servent au calcul automatique sur le site. « Max » est la limite du curseur (%).</p>
+    <div class="table-wrap"><table class="ing-table">
+      <thead><tr><th>Nom</th><th>Rôle</th><th>Catégorie</th>${Object.keys(NUTRIENTS).map(k => `<th title="${NUTRIENTS[k]}">${k.toUpperCase()}</th>`).join("")}<th>Max</th><th></th></tr></thead>
+      <tbody>${data.ingredients.map((ing, i) => `<tr>
+        <td><input data-path="ingredients.${i}.name" value="${esc(ing.name)}" aria-label="Nom"></td>
+        <td><input data-path="ingredients.${i}.info" value="${esc(ing.info)}" aria-label="Rôle"></td>
+        <td><select data-path="ingredients.${i}.cat" aria-label="Catégorie">${Object.entries(CATS).map(([v, t]) => `<option value="${v}" ${ing.cat === v ? "selected" : ""}>${t}</option>`).join("")}</select></td>
+        ${Object.keys(NUTRIENTS).map(k => `<td><input type="number" step="any" class="n" data-path="ingredients.${i}.${k}" data-type="number" value="${ing[k] ?? 0}" aria-label="${NUTRIENTS[k]}"></td>`).join("")}
+        <td><input type="number" step="any" class="n" data-path="ingredients.${i}.max" data-type="number" value="${ing.max}" aria-label="Maximum"></td>
+        <td>${del("del-ing", `data-i="${i}"`)}</td></tr>`).join("")}</tbody>
+    </table></div>
+    <p class="legend-n">${Object.entries(NUTRIENTS).map(([k, l]) => `<b>${k.toUpperCase()}</b> ${l}`).join(" · ")}</p>
+    ${btn("+ Ajouter une matière première", "add-ing", "", "btn-primary")}`,
+
+  publication: () => {
+    const gh = ghSettings();
+    const issues = validate();
+    return `
+    <h2>Publication</h2>
+    ${card("État", `
+      <p>${isDirty() ? "Vous avez des modifications <strong>non publiées</strong>. Elles sont enregistrées sur cet appareil." : "Le contenu est identique à la version publiée."}</p>
+      ${issues.length ? `<ul class="issues">${issues.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+      <div class="row">${btn("Publier maintenant", "publish", "", "btn-accent")}
+        ${isDirty() ? del("discard", "").replace("Supprimer", "Annuler mes modifications") : ""}</div>`)}
+    ${card("Connexion GitHub", `
+      <p class="intro">Le site est hébergé sur GitHub. Pour publier, collez un jeton d'accès GitHub (« fine-grained token ») limité à ce dépôt, avec la permission <em>Contents : Read and write</em>.</p>
+      <div class="grid-2">
+        <label class="field"><span>Propriétaire</span><input id="gh-owner" value="${esc(gh.owner)}"></label>
+        <label class="field"><span>Dépôt</span><input id="gh-repo" value="${esc(gh.repo)}"></label>
+        <label class="field"><span>Branche publiée</span><input id="gh-branch" value="${esc(gh.branch)}"></label>
+        <label class="field"><span>Fichier de contenu</span><input id="gh-path" value="${esc(gh.path)}"></label>
+      </div>
+      <label class="field"><span>Jeton d'accès</span><input id="gh-token" type="password" autocomplete="off" value="${esc(gh.token)}" placeholder="github_pat_…"></label>
+      <label class="check"><input type="checkbox" id="gh-remember" ${gh.remember ? "checked" : ""}><span>Mémoriser le jeton sur cet appareil</span></label>
+      <div class="row">${btn("Enregistrer la connexion", "save-gh", "", "btn-primary")}</div>`)}
+    ${card("Sauvegarde", `
+      <p class="intro">Téléchargez une copie du contenu, ou rechargez une copie précédente.</p>
+      <div class="row">${btn("Télécharger une copie", "export")}${btn("Importer une copie", "import")}</div>`)}`;
+  },
+};
+
+// ---------------------------------------------------------
+// Rendu
+// ---------------------------------------------------------
+function render() {
+  if (!TABS[tab]) tab = "societe";
+  document.querySelectorAll("#adminNav button").forEach(b => b.setAttribute("aria-current", b.dataset.tab === tab ? "page" : "false"));
+  $("#panel").innerHTML = TABS[tab]();
+  updateTotals();
+  updateStatus();
+}
+
+function formulaTotal(si, fi) {
+  const f = data.species[si].formulas[fi];
+  return round(data.species[si].ingredients.reduce((s, id) => s + (+f.mix[id] || 0), 0), 2);
+}
+function updateTotals() {
+  document.querySelectorAll("[data-total]").forEach(el => {
+    const [si, fi] = el.dataset.total.split(".").map(Number);
+    const t = formulaTotal(si, fi);
+    el.textContent = `Total : ${t.toLocaleString("fr-FR")} %`;
+    el.classList.toggle("bad", Math.abs(t - 100) >= 0.05);
+  });
+}
+
+const isDirty = () => JSON.stringify(data) !== JSON.stringify(published);
+function updateStatus() {
+  const s = $("#status");
+  const dirty = isDirty();
+  s.textContent = dirty ? "Modifications non publiées" : "À jour";
+  s.className = "status " + (dirty ? "dirty" : "ok");
+}
+
+function save() {
+  if (isDirty()) store.set(DRAFT_KEY, JSON.stringify(data));
+  else store.del(DRAFT_KEY);
+  updateStatus();
+}
+
+let toastTimer;
+function toast(text, type = "info") {
+  const t = $("#toast");
+  t.textContent = text;
+  t.className = `toast ${type}`;
+  t.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.hidden = true; }, type === "error" ? 9000 : 5000);
+}
+
+function validate() {
+  const out = [];
+  data.species.forEach((s, si) => {
+    if (!s.formulas.length) out.push(`${s.name} : ajoutez au moins une formule.`);
+    s.formulas.forEach((f, fi) => {
+      const t = formulaTotal(si, fi);
+      if (Math.abs(t - 100) >= 0.05) out.push(`${s.name} — « ${f.label} » : le total fait ${t.toLocaleString("fr-FR")} % au lieu de 100 %.`);
+    });
+  });
+  if (!data.species.length) out.push("Ajoutez au moins une espèce.");
+  data.ingredients.forEach(i => { if (!i.name.trim()) out.push("Une matière première n'a pas de nom."); });
+  return out;
+}
+
+// ---------------------------------------------------------
+// Saisie
+// ---------------------------------------------------------
+function onEdit(e) {
+  const el = e.target;
+  if (el.dataset.act === "toggle-ing" || el.dataset.act === "toggle-nut") return onToggle(el);
+  const path = el.dataset.path;
+  if (!path) return;
+  let v;
+  switch (el.dataset.type) {
+    case "number": v = el.value === "" ? null : parseFloat(el.value.replace(",", ".")); break;
+    case "lines": v = el.value.split("\n").map(x => x.trim()).filter(Boolean); break;
+    case "bool": v = el.checked; break;
+    default: v = el.value;
+  }
+  if (v === null || Number.isNaN(v)) { if (el.dataset.optional) delP(path); else setP(path, 0); }
+  else setP(path, v);
+  save();
+  updateTotals();
+  if (el.dataset.rerender && e.type === "change") render();
+}
+
+function onToggle(el) {
+  const s = data.species[+el.dataset.sp];
+  const list = el.dataset.act === "toggle-ing" ? s.ingredients : s.nutrients;
+  const key = el.dataset.ing || el.dataset.nut;
+  const order = el.dataset.act === "toggle-ing" ? data.ingredients.map(i => i.id) : Object.keys(NUTRIENTS);
+  if (el.checked && !list.includes(key)) list.push(key);
+  if (!el.checked) {
+    list.splice(list.indexOf(key), 1);
+    if (el.dataset.ing) s.formulas.forEach(f => delete f.mix[key]);
+  }
+  list.sort((a, b) => order.indexOf(a) - order.indexOf(b));
+  save();
+  render();
+}
+
+// ---------------------------------------------------------
+// Actions
+// ---------------------------------------------------------
+const ACTIONS = {
+  "add-offer": () => data.chickens.offers.push({ id: slug("offre"), icon: "chicken", title: "Nouvelle offre", usage: "", desc: "", items: [], price: "", visible: true }),
+  "del-offer": b => data.chickens.offers.splice(+b.dataset.i, 1),
+  "move-offer": b => {
+    const i = +b.dataset.i, j = i + +b.dataset.d, a = data.chickens.offers;
+    [a[i], a[j]] = [a[j], a[i]];
+  },
+  "add-species": () => data.species.push({ id: slug("espece"), name: "Nouvelle espèce", icon: "cow", nutrients: ["cp", "ufl", "cb", "ca", "p"], ingredients: ["orge", "mais", "son", "soja"].filter(id => data.ingredients.some(i => i.id === id)), formulas: [{ id: slug("formule"), label: "Nouvelle formule", mix: {}, target: {} }] }),
+  "del-species": b => data.species.splice(+b.dataset.sp, 1),
+  "add-formula": b => data.species[+b.dataset.sp].formulas.push({ id: slug("formule"), label: "Nouvelle formule", mix: {}, target: {} }),
+  "dup-formula": b => {
+    const fs = data.species[+b.dataset.sp].formulas, f = clone(fs[+b.dataset.f]);
+    f.id = slug(f.label); f.label += " (copie)";
+    fs.splice(+b.dataset.f + 1, 0, f);
+  },
+  "del-formula": b => data.species[+b.dataset.sp].formulas.splice(+b.dataset.f, 1),
+  "add-ing": () => data.ingredients.push({ id: slug("matiere"), name: "Nouvelle matière", info: "", cat: "energy", cp: 0, em: 0, ufl: 0, mg: 0, cb: 0, ca: 0, p: 0, max: 20 }),
+  "del-ing": b => {
+    const [ing] = data.ingredients.splice(+b.dataset.i, 1);
+    data.species.forEach(s => {
+      s.ingredients = s.ingredients.filter(id => id !== ing.id);
+      s.formulas.forEach(f => delete f.mix[ing.id]);
+    });
+  },
+  discard: () => { data = clone(published); store.del(PREVIEW_KEY); toast("Modifications annulées."); },
+  "save-gh": () => { readGhForm(); toast("Connexion enregistrée.", "success"); return false; },
+  export: () => {
+    const blob = new Blob([serialize()], { type: "text/javascript" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "content.js";
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    return false;
+  },
+  import: () => { $("#importFile").click(); return false; },
+  publish: () => { publish(); return false; },
+};
+
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-act]");
+  if (!b || b.tagName === "INPUT") return;
+  // suppression en deux clics
+  if (b.dataset.confirm && !b.dataset.armed) {
+    b.dataset.armed = "1";
+    b.dataset.label = b.textContent;
+    b.textContent = "Confirmer ?";
+    setTimeout(() => { if (b.isConnected) { delete b.dataset.armed; b.textContent = b.dataset.label; } }, 3000);
+    return;
+  }
+  const res = ACTIONS[b.dataset.act]?.(b);
+  if (res !== false) { save(); render(); }
+});
+
+$("#panel").addEventListener("input", onEdit);
+$("#panel").addEventListener("change", onEdit);
+
+$("#adminNav").addEventListener("click", e => {
+  const b = e.target.closest("[data-tab]");
+  if (!b) return;
+  tab = b.dataset.tab;
+  store.set(TAB_KEY, tab);
+  render();
+  window.scrollTo({ top: 0 });
+});
+
+// Aperçu : le site lit le brouillon sur cet appareil
+$("#previewBtn").addEventListener("click", () => {
+  store.set(DRAFT_KEY, JSON.stringify(data));
+  store.set(PREVIEW_KEY, "1");
+});
+
+$("#importFile").addEventListener("change", async e => {
+  const file = e.target.files[0];
+  e.target.value = "";
+  if (!file) return;
+  try {
+    const txt = (await file.text()).trim().replace(/^window\.SANA_CONTENT\s*=\s*/, "").replace(/;\s*$/, "");
+    const obj = JSON.parse(txt);
+    if (!obj.company || !Array.isArray(obj.species) || !Array.isArray(obj.ingredients)) throw new Error("format");
+    data = obj;
+    save(); render();
+    toast("Copie importée. Vérifiez puis publiez.", "success");
+  } catch (err) {
+    toast("Ce fichier n'est pas une copie valide du contenu SANA.", "error");
+  }
+});
+
+// ---------------------------------------------------------
+// Publication GitHub
+// ---------------------------------------------------------
+function ghSettings() {
+  let s = {};
+  try { s = JSON.parse(store.get(GH_KEY)) || {}; } catch (e) {}
+  return {
+    owner: s.owner || "yassine1158", repo: s.repo || "WEBSITE-SANA-", branch: s.branch || "main",
+    path: s.path || "data/content.js", token: s.token || ghMemory || "", remember: !!s.remember,
+  };
+}
+function readGhForm() {
+  if (!$("#gh-owner")) return ghSettings();
+  const s = {
+    owner: $("#gh-owner").value.trim(), repo: $("#gh-repo").value.trim(), branch: $("#gh-branch").value.trim(),
+    path: $("#gh-path").value.trim(), remember: $("#gh-remember").checked,
+  };
+  const token = $("#gh-token").value.trim();
+  ghMemory = token;
+  store.set(GH_KEY, JSON.stringify(s.remember ? { ...s, token } : s));
+  return { ...s, token };
+}
+
+const serialize = () => `window.SANA_CONTENT = ${JSON.stringify(data, null, 2)};\n`;
+function b64(str) {
+  const bytes = new TextEncoder().encode(str);
+  let bin = "";
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return btoa(bin);
+}
+
+let publishing = false;
+async function publish() {
+  if (publishing) return;
+  const issues = validate();
+  if (issues.length) {
+    tab = "publication"; render();
+    toast("Corrigez les points signalés avant de publier.", "error");
+    return;
+  }
+  const gh = readGhForm();
+  if (!gh.token) {
+    tab = "publication"; render();
+    toast("Ajoutez votre jeton GitHub dans « Connexion GitHub » pour publier.", "error");
+    $("#gh-token")?.focus();
+    return;
+  }
+  publishing = true;
+  toast("Publication en cours…");
+  const url = `https://api.github.com/repos/${encodeURIComponent(gh.owner)}/${encodeURIComponent(gh.repo)}/contents/${gh.path.split("/").map(encodeURIComponent).join("/")}`;
+  const headers = { Authorization: `Bearer ${gh.token}`, Accept: "application/vnd.github+json" };
+  try {
+    let sha;
+    const cur = await fetch(`${url}?ref=${encodeURIComponent(gh.branch)}`, { headers, cache: "no-store" });
+    if (cur.ok) sha = (await cur.json()).sha;
+    else if (cur.status !== 404) throw cur;
+    const put = await fetch(url, {
+      method: "PUT", headers,
+      body: JSON.stringify({ message: "Mise à jour du contenu depuis l'administration", content: b64(serialize()), branch: gh.branch, sha }),
+    });
+    if (!put.ok) throw put;
+    published = clone(data);
+    store.del(DRAFT_KEY);
+    store.del(PREVIEW_KEY);
+    render();
+    toast("Publié. Le site sera à jour d'ici une à deux minutes.", "success");
+  } catch (err) {
+    const code = err && err.status;
+    const why = code === 401 ? "le jeton est invalide ou expiré."
+      : code === 403 || code === 404 ? "le jeton n'a pas accès à ce dépôt ou à cette branche (permission Contents : Read and write)."
+      : code === 409 || code === 422 ? "le fichier a changé entre-temps. Réessayez."
+      : "connexion à GitHub impossible. Vérifiez votre connexion internet.";
+    toast(`Échec de la publication : ${why} Vos modifications restent enregistrées sur cet appareil.`, "error");
+  } finally {
+    publishing = false;
+  }
+}
+
+window.addEventListener("beforeunload", e => {
+  if (isDirty()) store.set(DRAFT_KEY, JSON.stringify(data));
+});
+
+render();
