@@ -1,6 +1,6 @@
 # SANA — Site vitrine
 
-Site vitrine de la société **SANA** : vente de **poulets**, d'**œufs** et d'**aliments pour volailles fabriqués selon la composition demandée par le client**.
+Site vitrine de **SANA — Société Africaine de Nutrition Animale** : vente de **poulets**, d'**œufs** et d'**aliments pour volailles fabriqués selon la composition demandée par le client**.
 
 ## Contenu
 - **Accueil / À propos** : présentation de la société.
@@ -18,3 +18,9 @@ npx serve .
 - Numéro WhatsApp et e-mail : `CONTACT` en haut de `assets/js/main.js`.
 - Adresse, téléphone, horaires : section `#contact` de `index.html`.
 - Ingrédients, valeurs nutritionnelles et formules de base : `INGREDIENTS` et `PRESETS` dans `assets/js/main.js`.
+
+## Logo
+Fichiers dans `assets/img/` (extraits du logo officiel en PDF) :
+- `logo-sana.svg` / `logo-sana.png` : logo couleur.
+- `logo-sana-white.svg` : version blanche pour fond vert (pied de page).
+- `emblem-sana.svg` : emblème seul (favicon, filigrane du hero).

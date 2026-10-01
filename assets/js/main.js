@@ -12,15 +12,15 @@ const CONTACT = {
 // cp = protéines brutes %, em = énergie métabolisable kcal/kg,
 // ca = calcium %, p = phosphore %, cb = cellulose brute %
 const INGREDIENTS = [
-  { id: "mais",     name: "Maïs",                   info: "Source d'énergie",      emoji: "🌽", cp: 8.5, em: 3350, ca: 0.02, p: 0.08, cb: 2.2, max: 75 },
-  { id: "soja",     name: "Tourteau de soja 44",    info: "Source de protéines",   emoji: "🫘", cp: 44,  em: 2250, ca: 0.30, p: 0.20, cb: 6.0, max: 45 },
-  { id: "son",      name: "Son de blé",             info: "Fibres",                emoji: "🌾", cp: 15.5,em: 1300, ca: 0.12, p: 0.30, cb: 10,  max: 20 },
-  { id: "orge",     name: "Orge",                   info: "Céréale complémentaire",emoji: "🌿", cp: 11,  em: 2650, ca: 0.05, p: 0.12, cb: 5.0, max: 30 },
-  { id: "huile",    name: "Huile végétale",         info: "Énergie concentrée",    emoji: "🫗", cp: 0,   em: 8800, ca: 0,    p: 0,    cb: 0,   max: 6 },
-  { id: "calcaire", name: "Carbonate de calcium",   info: "Calcium (coquille, os)",emoji: "🪨", cp: 0,   em: 0,    ca: 38,   p: 0,    cb: 0,   max: 12 },
-  { id: "phos",     name: "Phosphate bicalcique",   info: "Phosphore & calcium",   emoji: "⚗️", cp: 0,   em: 0,    ca: 23,   p: 18,   cb: 0,   max: 3 },
-  { id: "cmv",      name: "CMV (prémix)",           info: "Vitamines & minéraux",  emoji: "💊", cp: 0,   em: 0,    ca: 0,    p: 0,    cb: 0,   max: 3 },
-  { id: "sel",      name: "Sel",                    info: "Sodium",                emoji: "🧂", cp: 0,   em: 0,    ca: 0,    p: 0,    cb: 0,   max: 1 },
+  { id: "mais",     name: "Maïs",                   info: "Source d'énergie",      cat: "energy", cp: 8.5, em: 3350, ca: 0.02, p: 0.08, cb: 2.2, max: 75 },
+  { id: "soja",     name: "Tourteau de soja 44",    info: "Source de protéines",   cat: "protein", cp: 44,  em: 2250, ca: 0.30, p: 0.20, cb: 6.0, max: 45 },
+  { id: "son",      name: "Son de blé",             info: "Fibres",                cat: "fiber", cp: 15.5,em: 1300, ca: 0.12, p: 0.30, cb: 10,  max: 20 },
+  { id: "orge",     name: "Orge",                   info: "Céréale complémentaire",cat: "energy", cp: 11,  em: 2650, ca: 0.05, p: 0.12, cb: 5.0, max: 30 },
+  { id: "huile",    name: "Huile végétale",         info: "Énergie concentrée",    cat: "energy", cp: 0,   em: 8800, ca: 0,    p: 0,    cb: 0,   max: 6 },
+  { id: "calcaire", name: "Carbonate de calcium",   info: "Calcium (coquille, os)",cat: "mineral", cp: 0,   em: 0,    ca: 38,   p: 0,    cb: 0,   max: 12 },
+  { id: "phos",     name: "Phosphate bicalcique",   info: "Phosphore & calcium",   cat: "mineral", cp: 0,   em: 0,    ca: 23,   p: 18,   cb: 0,   max: 3 },
+  { id: "cmv",      name: "CMV (prémix)",           info: "Vitamines & minéraux",  cat: "mineral", cp: 0,   em: 0,    ca: 0,    p: 0,    cb: 0,   max: 3 },
+  { id: "sel",      name: "Sel",                    info: "Sodium",                cat: "mineral", cp: 0,   em: 0,    ca: 0,    p: 0,    cb: 0,   max: 1 },
 ];
 
 // ---- Formules de base (en %) + objectifs nutritionnels ----
@@ -43,15 +43,16 @@ const PRESETS = {
 };
 
 const NUTRIENTS = [
-  { key: "cp", label: "Protéines brutes", unit: "%",        dec: 1, tol: 1 },
+  { key: "cp", label: "Protéines brutes", unit: " %",        dec: 1, tol: 1 },
   { key: "em", label: "Énergie (EM)",     unit: " kcal/kg", dec: 0, tol: 100 },
-  { key: "ca", label: "Calcium",          unit: "%",        dec: 2, tol: 0.2 },
-  { key: "p",  label: "Phosphore",        unit: "%",        dec: 2, tol: 0.1 },
-  { key: "cb", label: "Cellulose brute",  unit: "%",        dec: 1 },
+  { key: "ca", label: "Calcium",          unit: " %",        dec: 2, tol: 0.2 },
+  { key: "p",  label: "Phosphore",        unit: " %",        dec: 2, tol: 0.1 },
+  { key: "cb", label: "Cellulose brute",  unit: " %",        dec: 1 },
 ];
 
 const $ = (s, el = document) => el.querySelector(s);
 const round = (n, d = 1) => Math.round(n * 10 ** d) / 10 ** d;
+const fmt = (n, d = 1) => round(n, d).toLocaleString("fr-FR", { maximumFractionDigits: d });
 
 // ---------------------------------------------------------
 // Menu mobile
@@ -75,9 +76,8 @@ const ingBox = $("#ingredients");
 
 function renderIngredients() {
   ingBox.innerHTML = INGREDIENTS.map(i => `
-    <div class="ing" data-id="${i.id}">
-      <div class="ing-emoji">${i.emoji}</div>
-      <div class="ing-name">${i.name}<small>${i.info}</small></div>
+    <div class="ing" data-id="${i.id}" data-cat="${i.cat}">
+      <div class="ing-name"><i class="dot dot-${i.cat}"></i><span>${i.name}<small>${i.info}</small></span></div>
       <input type="range" min="0" max="${i.max}" step="0.1" aria-label="${i.name}">
       <div class="ing-num"><input type="number" min="0" max="100" step="0.1" aria-label="${i.name} en %"><span>%</span></div>
     </div>`).join("");
@@ -86,12 +86,17 @@ function renderIngredients() {
     const id = row.dataset.id;
     const range = $("input[type=range]", row);
     const num = $("input[type=number]", row);
-    range.addEventListener("input", () => { state[id] = +range.value; num.value = range.value; update(); });
+    range.addEventListener("input", () => { state[id] = +range.value; num.value = range.value; paint(range); update(); });
     num.addEventListener("input", () => {
       let v = Math.max(0, Math.min(100, parseFloat(num.value) || 0));
-      state[id] = v; range.value = v; update();
+      state[id] = v; range.value = v; paint(range); update();
     });
   });
+}
+
+// remplissage coloré de la piste du curseur
+function paint(range) {
+  range.style.setProperty("--p", `${(range.value / range.max) * 100}%`);
 }
 
 function loadPreset(key) {
@@ -103,7 +108,9 @@ function loadPreset(key) {
 function syncInputs() {
   ingBox.querySelectorAll(".ing").forEach(row => {
     const v = state[row.dataset.id] || 0;
-    $("input[type=range]", row).value = v;
+    const range = $("input[type=range]", row);
+    range.value = v;
+    paint(range);
     $("input[type=number]", row).value = round(v, 1);
   });
 }
@@ -125,10 +132,10 @@ function computeNutrients() {
 function update() {
   const t = round(total(), 1);
   const ok = Math.abs(t - 100) < 0.05;
-  $("#totalVal").textContent = `${t} %`;
+  $("#totalVal").textContent = `${fmt(t)} %`;
   $("#totalBar").style.width = `${Math.min(t, 100)}%`;
   $("#totalBox").classList.toggle("bad", !ok);
-  $("#totalMsg").textContent = ok ? "Formule équilibrée ✔"
+  $("#totalMsg").textContent = ok ? "Formule complète"
     : t < 100 ? `Il manque ${round(100 - t, 1)} %` : `Dépassement de ${round(t - 100, 1)} %`;
 
   const res = computeNutrients();
@@ -139,9 +146,9 @@ function update() {
     let cls = "", tgTxt = "";
     if (tg !== undefined) {
       cls = Math.abs(v - tg) <= n.tol ? "ok" : "warn";
-      tgTxt = `<span class="target">Recommandé : ${tg}${n.unit} ${cls === "ok" ? "· conforme" : "· à ajuster"}</span>`;
+      tgTxt = `<span class="target">Recommandé : ${fmt(tg, n.dec)}${n.unit} ${cls === "ok" ? "· conforme" : "· à ajuster"}</span>`;
     }
-    return `<div class="nutri-item"><span>${n.label}</span><span class="val ${cls}">${round(v, n.dec)}${n.unit}</span>${tgTxt}</div>`;
+    return `<div class="nutri-item"><span>${n.label}</span><span class="val ${cls}">${fmt(v, n.dec)}${n.unit}</span>${tgTxt}</div>`;
   }).join("");
 }
 
@@ -241,9 +248,3 @@ $("#year").textContent = new Date().getFullYear();
 $("#waFloat").href = `https://wa.me/${CONTACT.whatsapp}`;
 $("#waFloat").target = "_blank";
 $("#waFloat").rel = "noopener";
-
-const io = new IntersectionObserver(entries => {
-  entries.forEach(en => { if (en.isIntersecting) { en.target.classList.add("visible"); io.unobserve(en.target); } });
-}, { threshold: 0.12 });
-document.querySelectorAll(".section-head, .feature, .product, .steps li, .composer, .contact-grid > *")
-  .forEach(el => { el.classList.add("reveal"); io.observe(el); });
