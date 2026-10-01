@@ -17,9 +17,19 @@ coordonnées, textes d'accueil, offres de poulets (ajout, masquage, ordre, prix)
 2. **Aperçu du site** : affiche le site avec le brouillon (visible uniquement sur votre appareil).
 3. **Publier** : envoie le contenu sur GitHub ; le site est à jour en une à deux minutes.
 
-Pour publier, créez une fois un jeton GitHub : *GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token*, accès limité au dépôt `WEBSITE-SANA-`, permission **Contents : Read and write**. Collez-le dans l'onglet **Publication** de l'administration.
+### Mot de passe
+L'administration est protégée par un **mot de passe**. À la première ouverture sur un appareil :
+1. choisissez un mot de passe (8 caractères minimum) ;
+2. collez votre jeton GitHub (voir ci-dessous).
 
-La page d'administration est publique, mais rien ne peut être publié sans ce jeton.
+Le jeton est enregistré **chiffré** par le mot de passe (AES-GCM, clé dérivée PBKDF2) dans le navigateur de cet appareil ; il n'est jamais stocké en clair ni envoyé ailleurs qu'à GitHub. Ensuite, le mot de passe suffit. Bouton **Verrouiller** en haut, verrouillage automatique après 30 minutes d'inactivité. Le mot de passe se change dans l'onglet **Publication**.
+
+**Mot de passe oublié ?** Cliquez sur « Mot de passe oublié ? » sur l'écran de connexion : l'accès de cet appareil est effacé (le brouillon est conservé), puis recréez-le avec un nouveau mot de passe et votre jeton.
+
+Sur un autre appareil (téléphone, autre ordinateur), créez l'accès de la même façon. Sans le jeton, personne ne peut publier, même en ouvrant `admin.html`.
+
+### Jeton GitHub
+*GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token*, accès limité au dépôt `WEBSITE-SANA-`, permission **Contents : Read and write**. Si le jeton est perdu ou volé, supprimez-le sur GitHub et créez-en un nouveau.
 
 ## Marketing
 Onglet **Marketing** de l'administration :

@@ -80,3 +80,22 @@ textarea { resize: vertical; }
   .grid-2 { grid-template-columns: 1fr; }
   .a-card { padding: 16px; }
 }
+
+/* ===== Écran de connexion ===== */
+.lock { display: none; min-height: 100vh; place-items: center; padding: 24px 16px; background: var(--forest); background-image: radial-gradient(60% 80% at 85% 10%, rgba(64,130,39,.45), transparent 60%); }
+body.locked .lock { display: grid; }
+body.locked .admin-bar, body.locked .admin-layout { display: none; }
+.lock-card { width: min(420px, 100%); background: var(--surface); border-radius: 18px; padding: 32px 28px; box-shadow: 0 30px 60px -20px rgba(0,0,0,.45); display: flex; flex-direction: column; }
+.lock-card img { height: 72px; width: auto; align-self: center; margin-bottom: 18px; }
+.lock-card h1 { font-size: 1.5rem; color: var(--forest); text-align: center; margin-bottom: 6px; }
+.lock-card > p { color: var(--muted); text-align: center; margin-bottom: 20px; font-size: .95rem; }
+.lock-msg { min-height: 1.4em; color: var(--danger) !important; font-weight: 600; margin: 0 0 10px !important; }
+.lock-reset, .lock-back { margin-top: 14px; align-self: center; background: none; border: 0; font: 600 .9rem var(--f-body); color: var(--muted); cursor: pointer; text-align: center; }
+.lock-reset:hover, .lock-back:hover { color: var(--forest); }
+.lock-reset[data-armed] { color: var(--danger); }
+.lock-back { margin-top: 8px; }
+.token-state { font-weight: 600; margin-bottom: 12px; }
+.token-state.ok { color: var(--green); }
+.token-state.missing { color: var(--warn); }
+.adv { margin: 4px 0 14px; }
+.adv summary { cursor: pointer; font: 600 .9rem var(--f-display); color: var(--muted); margin-bottom: 10px; }
