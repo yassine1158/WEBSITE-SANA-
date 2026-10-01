@@ -12,7 +12,20 @@
   <link rel="stylesheet" href="assets/css/style.css">
   <link rel="stylesheet" href="assets/css/admin.css">
 </head>
-<body class="admin">
+<body class="admin locked">
+
+<div class="lock" id="lock">
+  <form class="lock-card" id="lockForm" novalidate>
+    <img src="assets/img/logo-sana.svg" alt="SANA" width="110" height="72">
+    <h1 id="lockTitle">Administration</h1>
+    <p id="lockIntro"></p>
+    <div id="lockFields"></div>
+    <p class="lock-msg" id="lockMsg" role="alert"></p>
+    <button class="btn btn-accent btn-block" type="submit" id="lockSubmit">Se connecter</button>
+    <button type="button" class="lock-reset" id="lockReset">Mot de passe oublié ?</button>
+    <a class="lock-back" href="index.html">← Retour au site</a>
+  </form>
+</div>
 
 <header class="admin-bar">
   <a href="index.html" class="admin-brand" title="Voir le site">
@@ -23,6 +36,7 @@
   <div class="admin-actions">
     <a href="index.html" target="_blank" class="btn btn-line btn-sm" id="previewBtn">Aperçu du site</a>
     <button type="button" class="btn btn-accent btn-sm" data-act="publish">Publier</button>
+    <button type="button" class="btn btn-line btn-sm" id="lockBtn" title="Verrouiller l'administration">Verrouiller</button>
   </div>
 </header>
 

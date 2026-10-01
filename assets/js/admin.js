@@ -40,7 +40,8 @@ function withDefaults(obj, def) {
 let published = clone(window.SANA_CONTENT);
 let data = (() => { try { const d = JSON.parse(store.get(DRAFT_KEY)); return d ? withDefaults(d, published) : clone(published); } catch (e) { return clone(published); } })();
 let tab = store.get(TAB_KEY) || "societe";
-let ghMemory = null; // jeton non mémorisé
+let ghMemory = null; // jeton déchiffré, gardé en mémoire tant que l'admin est déverrouillée
+let vaultPass = null;
 
 // ---------------------------------------------------------
 // Accès aux valeurs par chemin ("chickens.offers.0.title")
@@ -266,16 +267,23 @@ const TABS = {
       <div class="row">${btn("Publier maintenant", "publish", "", "btn-accent")}
         ${isDirty() ? del("discard", "").replace("Supprimer", "Annuler mes modifications") : ""}</div>`)}
     ${card("Connexion GitHub", `
-      <p class="intro">Le site est hébergé sur GitHub. Pour publier, collez un jeton d'accès GitHub (« fine-grained token ») limité à ce dépôt, avec la permission <em>Contents : Read and write</em>.</p>
+      <p class="intro">Le site est hébergé sur GitHub. La publication utilise un jeton d'accès GitHub (« fine-grained token ») limité à ce dépôt, avec la permission <em>Contents : Read and write</em>. Il est enregistré chiffré par votre mot de passe.</p>
+      <p class="token-state ${gh.token ? "ok" : "missing"}">${gh.token ? "Jeton enregistré sur cet appareil (chiffré)." : "Aucun jeton : la publication est impossible tant qu'il n'est pas ajouté."}</p>
+      <label class="field"><span>${gh.token ? "Remplacer le jeton" : "Jeton d'accès"}</span><input id="gh-token" type="password" autocomplete="off" placeholder="github_pat_…"></label>
+      <details class="adv"><summary>Réglages avancés</summary>
       <div class="grid-2">
         <label class="field"><span>Propriétaire</span><input id="gh-owner" value="${esc(gh.owner)}"></label>
         <label class="field"><span>Dépôt</span><input id="gh-repo" value="${esc(gh.repo)}"></label>
         <label class="field"><span>Branche publiée</span><input id="gh-branch" value="${esc(gh.branch)}"></label>
         <label class="field"><span>Fichier de contenu</span><input id="gh-path" value="${esc(gh.path)}"></label>
+      </div></details>
+      <div class="row">${btn("Enregistrer", "save-gh", "", "btn-primary")}</div>`)}
+    ${card("Mot de passe de l'administration", `
+      <div class="grid-2">
+        <label class="field"><span>Nouveau mot de passe</span><input id="pw-new" type="password" autocomplete="new-password" minlength="8"></label>
+        <label class="field"><span>Confirmer</span><input id="pw-confirm" type="password" autocomplete="new-password" minlength="8"></label>
       </div>
-      <label class="field"><span>Jeton d'accès</span><input id="gh-token" type="password" autocomplete="off" value="${esc(gh.token)}" placeholder="github_pat_…"></label>
-      <label class="check"><input type="checkbox" id="gh-remember" ${gh.remember ? "checked" : ""}><span>Mémoriser le jeton sur cet appareil</span></label>
-      <div class="row">${btn("Enregistrer la connexion", "save-gh", "", "btn-primary")}</div>`)}
+      <div class="row">${btn("Changer le mot de passe", "change-pw", "", "btn-primary")}</div>`)}
     ${card("Sauvegarde", `
       <p class="intro">Téléchargez une copie du contenu, ou rechargez une copie précédente.</p>
       <div class="row">${btn("Télécharger une copie", "export")}${btn("Importer une copie", "import")}</div>`)}`;
@@ -433,7 +441,14 @@ const ACTIONS = {
     return false;
   },
   discard: () => { data = clone(published); store.del(PREVIEW_KEY); toast("Modifications annulées."); },
-  "save-gh": () => { readGhForm(); toast("Connexion enregistrée.", "success"); return false; },
+  "save-gh": () => { readGhForm().then(() => { render(); toast("Connexion enregistrée.", "success"); }); return false; },
+  "change-pw": () => {
+    const a = $("#pw-new").value, b = $("#pw-confirm").value;
+    if (a.length < 8) { toast("Le mot de passe doit contenir au moins 8 caractères.", "error"); return false; }
+    if (a !== b) { toast("Les deux mots de passe ne sont pas identiques.", "error"); return false; }
+    sealVault(a, { token: ghMemory || "" }).then(() => { vaultPass = a; render(); toast("Mot de passe changé.", "success"); });
+    return false;
+  },
   export: () => {
     const blob = new Blob([serialize()], { type: "text/javascript" });
     const a = document.createElement("a");
@@ -504,19 +519,22 @@ function ghSettings() {
   try { s = JSON.parse(store.get(GH_KEY)) || {}; } catch (e) {}
   return {
     owner: s.owner || "yassine1158", repo: s.repo || "WEBSITE-SANA-", branch: s.branch || "main",
-    path: s.path || "data/content.js", token: s.token || ghMemory || "", remember: !!s.remember,
+    path: s.path || "data/content.js", token: ghMemory || "",
   };
 }
-function readGhForm() {
+async function readGhForm() {
   if (!$("#gh-owner")) return ghSettings();
   const s = {
     owner: $("#gh-owner").value.trim(), repo: $("#gh-repo").value.trim(), branch: $("#gh-branch").value.trim(),
-    path: $("#gh-path").value.trim(), remember: $("#gh-remember").checked,
+    path: $("#gh-path").value.trim(),
   };
+  store.set(GH_KEY, JSON.stringify(s));
   const token = $("#gh-token").value.trim();
-  ghMemory = token;
-  store.set(GH_KEY, JSON.stringify(s.remember ? { ...s, token } : s));
-  return { ...s, token };
+  if (token && token !== ghMemory) {
+    ghMemory = token;
+    await sealVault(vaultPass, { token });
+  }
+  return ghSettings();
 }
 
 const serialize = () => `window.SANA_CONTENT = ${JSON.stringify(data, null, 2)};\n`;
@@ -536,7 +554,7 @@ async function publish() {
     toast("Corrigez les points signalés avant de publier.", "error");
     return;
   }
-  const gh = readGhForm();
+  const gh = await readGhForm();
   if (!gh.token) {
     tab = "publication"; render();
     toast("Ajoutez votre jeton GitHub dans « Connexion GitHub » pour publier.", "error");
@@ -578,4 +596,121 @@ window.addEventListener("beforeunload", e => {
   if (isDirty()) store.set(DRAFT_KEY, JSON.stringify(data));
 });
 
-render();
+// ---------------------------------------------------------
+// Mot de passe : le jeton GitHub est chiffré (AES-GCM, clé PBKDF2) sur l'appareil
+// ---------------------------------------------------------
+const VAULT_KEY = "sana-vault";
+const LOCK_AFTER_MS = 30 * 60 * 1000;
+const toB64 = u8 => { let b = ""; u8.forEach(c => { b += String.fromCharCode(c); }); return btoa(b); };
+const fromB64 = str => Uint8Array.from(atob(str), c => c.charCodeAt(0));
+
+async function deriveKey(pass, salt) {
+  const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(pass), "PBKDF2", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey({ name: "PBKDF2", salt, iterations: 310000, hash: "SHA-256" },
+    base, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
+}
+async function sealVault(pass, secret) {
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const key = await deriveKey(pass, salt);
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, new TextEncoder().encode(JSON.stringify(secret))));
+  store.set(VAULT_KEY, JSON.stringify({ v: 1, salt: toB64(salt), iv: toB64(iv), ct: toB64(ct) }));
+}
+async function openVault(pass) {
+  const v = JSON.parse(store.get(VAULT_KEY));
+  const key = await deriveKey(pass, fromB64(v.salt));
+  const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv: fromB64(v.iv) }, key, fromB64(v.ct));
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+const hasVault = () => !!store.get(VAULT_KEY);
+
+// jeton laissé en clair par une ancienne version : repris puis effacé
+function legacyToken() {
+  try { return (JSON.parse(store.get(GH_KEY)) || {}).token || ""; } catch (e) { return ""; }
+}
+function dropLegacyToken() {
+  try { const s = JSON.parse(store.get(GH_KEY)) || {}; delete s.token; delete s.remember; store.set(GH_KEY, JSON.stringify(s)); } catch (e) {}
+}
+
+function showLock() {
+  ghMemory = null;
+  vaultPass = null;
+  document.body.classList.add("locked");
+  const setup = !hasVault();
+  $("#lockTitle").textContent = setup ? "Créer votre accès" : "Administration";
+  $("#lockIntro").textContent = setup
+    ? "Première connexion sur cet appareil : choisissez un mot de passe (8 caractères minimum) et collez votre jeton GitHub."
+    : "Entrez votre mot de passe pour accéder à l'administration.";
+  $("#lockFields").innerHTML = setup ? `
+    <label class="field"><span>Mot de passe</span><input type="password" id="lk-pass" autocomplete="new-password" minlength="8" required></label>
+    <label class="field"><span>Confirmer le mot de passe</span><input type="password" id="lk-pass2" autocomplete="new-password" minlength="8" required></label>
+    <label class="field"><span>Jeton GitHub</span><em class="help">Commence par github_pat_. Vous pourrez aussi l'ajouter plus tard dans « Publication ».</em><input type="password" id="lk-token" autocomplete="off" placeholder="github_pat_…" value="${esc(legacyToken())}"></label>`
+    : `<label class="field"><span>Mot de passe</span><input type="password" id="lk-pass" autocomplete="current-password" required></label>`;
+  $("#lockSubmit").textContent = setup ? "Créer l'accès" : "Se connecter";
+  $("#lockReset").hidden = setup;
+  $("#lockMsg").textContent = "";
+  setTimeout(() => $("#lk-pass")?.focus(), 50);
+}
+
+function unlock(pass, token) {
+  vaultPass = pass;
+  ghMemory = token || "";
+  document.body.classList.remove("locked");
+  render();
+  bumpIdle();
+}
+
+$("#lockForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const msg = $("#lockMsg");
+  const pass = $("#lk-pass").value;
+  const submit = $("#lockSubmit");
+  if (!window.crypto?.subtle) { msg.textContent = "Ce navigateur ne permet pas le chiffrement. Ouvrez l'administration en https."; return; }
+  submit.disabled = true;
+  try {
+    if (!hasVault()) {
+      if (pass.length < 8) { msg.textContent = "Le mot de passe doit contenir au moins 8 caractères."; return; }
+      if (pass !== $("#lk-pass2").value) { msg.textContent = "Les deux mots de passe ne sont pas identiques."; return; }
+      const token = $("#lk-token").value.trim();
+      await sealVault(pass, { token });
+      dropLegacyToken();
+      unlock(pass, token);
+    } else {
+      msg.textContent = "Vérification…";
+      const secret = await openVault(pass);
+      unlock(pass, secret.token);
+    }
+  } catch (err) {
+    msg.textContent = "Mot de passe incorrect.";
+    $("#lk-pass").select();
+  } finally {
+    submit.disabled = false;
+  }
+});
+
+// mot de passe oublié : on efface l'accès (le brouillon est conservé) et on recommence
+$("#lockReset").addEventListener("click", e => {
+  const b = e.currentTarget;
+  if (!b.dataset.armed) {
+    b.dataset.armed = "1";
+    b.textContent = "Confirmer : effacer l'accès de cet appareil (il faudra recoller le jeton GitHub)";
+    setTimeout(() => { delete b.dataset.armed; b.textContent = "Mot de passe oublié ?"; }, 5000);
+    return;
+  }
+  delete b.dataset.armed;
+  b.textContent = "Mot de passe oublié ?";
+  store.del(VAULT_KEY);
+  showLock();
+});
+
+$("#lockBtn").addEventListener("click", showLock);
+
+// verrouillage automatique après 30 minutes sans activité
+let idleTimer;
+function bumpIdle() {
+  clearTimeout(idleTimer);
+  if (!document.body.classList.contains("locked")) idleTimer = setTimeout(showLock, LOCK_AFTER_MS);
+}
+["click", "keydown", "input"].forEach(ev => document.addEventListener(ev, bumpIdle, { passive: true }));
+
+showLock();
