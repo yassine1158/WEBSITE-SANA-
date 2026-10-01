@@ -11,7 +11,7 @@ window.SANA_CONTENT = {
   "hero": {
     "title": "L'aliment de tous vos animaux,",
     "highlight": "composé selon votre formule.",
-    "lead": "SANA fabrique des aliments pour volailles, bovins, ovins, lapins et poissons, et vend des poulets et des œufs frais. Vous fixez la composition et les quantités ; nous dosons, fabriquons et livrons."
+    "lead": "SANA fabrique des aliments pour volailles, bovins, ovins, porcins, lapins et poissons, et vend des poulets et des œufs frais. Vous fixez la composition et les quantités ; nous dosons, fabriquons et livrons."
   },
   "about": {
     "title": "Une production complète, de l'aliment à l'animal",
@@ -132,6 +132,22 @@ window.SANA_CONTENT = {
         { "id": "brebis", "label": "Brebis et chèvres — Lactation",
           "mix": { "orge": 40, "son": 20, "mais": 10, "soja": 12, "tournesol": 8, "luzerne": 6, "calcaire": 1.5, "phos": 0.5, "cmv": 1, "sel": 1 },
           "target": { "cp": 17, "ufl": 0.95, "ca": 0.9, "p": 0.3 } }
+      ]
+    },
+    {
+      "id": "porcins", "name": "Porcins", "icon": "pig",
+      "nutrients": ["cp", "mg", "cb", "ca", "p"],
+      "ingredients": ["mais", "orge", "son", "soja", "poisson", "pulpe", "huile", "calcaire", "phos", "cmv", "sel"],
+      "formulas": [
+        { "id": "porcelets", "label": "Porcelets — Premier âge",
+          "mix": { "mais": 50, "orge": 15, "soja": 26, "poisson": 3, "huile": 2, "calcaire": 1, "phos": 1.2, "cmv": 1.3, "sel": 0.5 },
+          "target": { "cp": 19, "ca": 0.8, "p": 0.4 } },
+        { "id": "porc-croissance", "label": "Porcs — Croissance et finition",
+          "mix": { "mais": 45, "orge": 25, "son": 8, "soja": 18, "calcaire": 1.2, "phos": 0.8, "cmv": 1.5, "sel": 0.5 },
+          "target": { "cp": 16, "ca": 0.7, "p": 0.3 } },
+        { "id": "truies", "label": "Truies gestantes",
+          "mix": { "orge": 40, "mais": 20, "son": 20, "soja": 10, "pulpe": 6, "calcaire": 1.5, "phos": 1, "cmv": 1, "sel": 0.5 },
+          "target": { "cp": 14, "cb": 6, "ca": 0.9, "p": 0.35 } }
       ]
     },
     {

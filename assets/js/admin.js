@@ -12,7 +12,7 @@ const NUTRIENTS = {
   cp: "Protéines brutes (%)", em: "Énergie EM (kcal/kg)", ufl: "Énergie UFL (/kg)",
   mg: "Matières grasses (%)", cb: "Cellulose brute (%)", ca: "Calcium (%)", p: "Phosphore (%)",
 };
-const ICONS = { chick: "Poussin", chicken: "Poule", drumstick: "Cuisse", cow: "Vache", sheep: "Mouton", rabbit: "Lapin", fish: "Poisson" };
+const ICONS = { chick: "Poussin", chicken: "Poule", drumstick: "Cuisse", cow: "Vache", sheep: "Mouton", pig: "Porc", rabbit: "Lapin", fish: "Poisson" };
 const CATS = { energy: "Énergie", protein: "Protéines", fiber: "Fibres", mineral: "Minéraux & additifs" };
 
 const $ = (s, el = document) => el.querySelector(s);
