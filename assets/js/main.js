@@ -6,12 +6,21 @@
 const DRAFT_KEY = "sana-draft";
 const PREVIEW_KEY = "sana-preview";
 
+// Complète un contenu ancien avec les champs ajoutés depuis
+function withDefaults(obj, def) {
+  for (const k in def) {
+    if (obj[k] === undefined) obj[k] = JSON.parse(JSON.stringify(def[k]));
+    else if (def[k] && typeof def[k] === "object" && !Array.isArray(def[k])) withDefaults(obj[k], def[k]);
+  }
+  return obj;
+}
+
 // Brouillon de l'admin : visible uniquement sur l'appareil qui l'a créé
 function loadContent() {
   try {
     if (localStorage.getItem(PREVIEW_KEY) === "1") {
       const draft = JSON.parse(localStorage.getItem(DRAFT_KEY));
-      if (draft) { document.getElementById("previewBar").hidden = false; return draft; }
+      if (draft) { document.getElementById("previewBar").hidden = false; return withDefaults(draft, window.SANA_CONTENT); }
     }
   } catch (e) { /* stockage indisponible */ }
   return window.SANA_CONTENT;
@@ -46,6 +55,124 @@ $("#mailLink").href = `mailto:${C.company.email}`;
 $("#factSpecies").textContent = C.species.length;
 $("#factMin").textContent = `${C.feed.minKg} kg`;
 $("#qty").min = C.feed.minKg;
+$("#footTel").href = $("#telLink").href;
+$("#footMail").href = $("#mailLink").href;
+const M = C.marketing;
+
+// ---------------------------------------------------------
+// Référencement (Google, partage sur les réseaux)
+// ---------------------------------------------------------
+function setMeta(attr, key, value) {
+  let el = document.head.querySelector(`meta[${attr}="${key}"]`);
+  if (!el) { el = document.createElement("meta"); el.setAttribute(attr, key); document.head.appendChild(el); }
+  el.content = value;
+}
+document.title = M.seo.title;
+setMeta("name", "description", M.seo.description);
+setMeta("property", "og:title", M.seo.title);
+setMeta("property", "og:description", M.seo.description);
+$("#ldjson").textContent = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  name: `${C.company.name} — ${C.company.fullName}`,
+  description: M.seo.description,
+  url: M.seo.siteUrl || location.href.split("#")[0],
+  logo: new URL("assets/img/logo-sana.png", M.seo.siteUrl || location.href).href,
+  image: new URL("assets/img/og-image.png", M.seo.siteUrl || location.href).href,
+  telephone: C.company.phone,
+  email: C.company.email,
+  address: { "@type": "PostalAddress", streetAddress: C.company.address, addressCountry: "TN" },
+  openingHours: C.company.hours,
+  sameAs: Object.values(M.social).filter(Boolean),
+});
+
+// ---------------------------------------------------------
+// Suivi des campagnes (liens ?utm_source=facebook&utm_campaign=…)
+// ---------------------------------------------------------
+const UTM_KEY = "sana-utm";
+(() => {
+  const q = new URLSearchParams(location.search);
+  const utm = ["utm_source", "utm_medium", "utm_campaign"].map(k => q.get(k)).filter(Boolean);
+  try { if (utm.length) sessionStorage.setItem(UTM_KEY, utm.join(" / ")); } catch (e) {}
+})();
+function campaign() { try { return sessionStorage.getItem(UTM_KEY) || ""; } catch (e) { return ""; } }
+
+// ---------------------------------------------------------
+// Mesure d'audience (activée seulement si les identifiants sont renseignés)
+// ---------------------------------------------------------
+function loadScript(src) { const s = document.createElement("script"); s.async = true; s.src = src; document.head.appendChild(s); }
+if (/^G-[A-Z0-9]+$/i.test(M.analytics.ga4)) {
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function () { dataLayer.push(arguments); };
+  gtag("js", new Date());
+  gtag("config", M.analytics.ga4);
+  loadScript(`https://www.googletagmanager.com/gtag/js?id=${M.analytics.ga4}`);
+}
+if (/^\d{6,20}$/.test(M.analytics.metaPixel)) {
+  const f = window.fbq = function () { f.callMethod ? f.callMethod.apply(f, arguments) : f.queue.push(arguments); };
+  f.push = f; f.loaded = true; f.version = "2.0"; f.queue = [];
+  if (!window._fbq) window._fbq = f;
+  fbq("init", M.analytics.metaPixel);
+  fbq("track", "PageView");
+  loadScript("https://connect.facebook.net/en_US/fbevents.js");
+}
+// Événements : contact WhatsApp, demande de devis, formule composée
+function track(event, params = {}) {
+  if (window.gtag) gtag("event", event, params);
+  if (window.fbq) fbq(event === "generate_lead" ? "track" : "trackCustom", event === "generate_lead" ? "Lead" : event, params);
+}
+
+// ---------------------------------------------------------
+// Bandeau promotionnel
+// ---------------------------------------------------------
+if (M.promo.visible && M.promo.text) {
+  $("#promoBar").hidden = false;
+  $("#promoText").textContent = M.promo.text;
+  if (M.promo.linkText) { $("#promoLink").textContent = M.promo.linkText; $("#promoLink").href = M.promo.link || "#contact"; }
+}
+
+// ---------------------------------------------------------
+// Réseaux sociaux
+// ---------------------------------------------------------
+const SOCIAL = { facebook: "Facebook", instagram: "Instagram", tiktok: "TikTok", youtube: "YouTube" };
+const socialsHtml = Object.entries(SOCIAL).filter(([k]) => M.social[k])
+  .map(([k, label]) => `<a href="${esc(M.social[k])}" target="_blank" rel="noopener" aria-label="${label}" title="${label}"><svg><use href="#i-${k}"/></svg></a>`).join("");
+document.querySelectorAll("[data-socials]").forEach(el => { el.innerHTML = socialsHtml; el.hidden = !socialsHtml; });
+
+// ---------------------------------------------------------
+// Sections éditables : atouts, étapes, avis, questions
+// ---------------------------------------------------------
+$("#features").innerHTML = C.about.features.map(f =>
+  `<li><svg class="ico-lg"><use href="#i-${esc(f.icon)}"/></svg><h3>${esc(f.title)}</h3><p>${esc(f.text)}</p></li>`).join("");
+$("#steps").innerHTML = C.steps.map((st, i) =>
+  `<li><span class="step-n">${i + 1}</span><h3>${esc(st.title)}</h3><p>${esc(st.text)}</p></li>`).join("");
+
+const reviews = (C.testimonials || []).filter(t => t.text);
+if (reviews.length) {
+  $("#avis").hidden = false;
+  $("#testimonials").innerHTML = reviews.map(t => `
+    <figure class="review">
+      <svg class="ico-lg"><use href="#i-quote"/></svg>
+      <blockquote>${esc(t.text)}</blockquote>
+      <figcaption><strong>${esc(t.name)}</strong>${t.role ? `<span>${esc(t.role)}</span>` : ""}</figcaption>
+    </figure>`).join("");
+}
+
+const faq = (C.faq || []).filter(f => f.q && f.a);
+$("#faq").hidden = !faq.length;
+$("#faqList").innerHTML = faq.map((f, i) => `
+  <details class="faq-item"${i === 0 ? " open" : ""}>
+    <summary><span>${esc(f.q)}</span><svg class="ico"><use href="#i-plus"/></svg></summary>
+    <p>${esc(f.a)}</p>
+  </details>`).join("");
+
+// Liens WhatsApp directs (bandeau d'appel, bouton flottant)
+function waLink(text) {
+  const src = campaign();
+  const body = text + (src ? `\n\n(Source : ${src})` : "");
+  return `https://wa.me/${C.company.whatsapp}?text=${encodeURIComponent(body)}`;
+}
+$("#ctaWa").href = waLink(`Bonjour ${C.company.name}, je souhaite un devis.`);
 
 // ---------------------------------------------------------
 // Produits
@@ -123,6 +250,12 @@ $("#speciesTabs").innerHTML = C.species.map((s, i) => `
   <button type="button" role="tab" class="species-tab" data-sp="${esc(s.id)}" aria-selected="${i === 0}">
     <svg class="ico-lg"><use href="#i-${esc(s.icon)}"/></svg><span>${esc(s.name)}</span>
   </button>`).join("");
+$("#speciesStrip").innerHTML = C.species.map(s => `
+  <a href="#composition" class="strip-item" data-sp="${esc(s.id)}"><svg class="ico-lg"><use href="#i-${esc(s.icon)}"/></svg><span>${esc(s.name)}</span></a>`).join("");
+$("#speciesStrip").addEventListener("click", e => {
+  const a = e.target.closest("[data-sp]");
+  if (a) selectSpecies(a.dataset.sp);
+});
 $("#speciesTabs").addEventListener("click", e => {
   const b = e.target.closest(".species-tab");
   if (b) selectSpecies(b.dataset.sp);
@@ -241,6 +374,7 @@ $("#useFormula").addEventListener("click", () => {
   const lines = Object.entries(state).filter(([, v]) => v > 0)
     .map(([id, v]) => `- ${ING[id].name} : ${fmt(v)} %`);
   const vals = species.nutrients.map(k => `${NUTRIENTS[k].label.toLowerCase()} ${fmt(res[k], NUTRIENTS[k].dec)}${NUTRIENTS[k].unit}`);
+  track("formula_composed", { species: species.name, formula: formula().label });
   $("#produitSelect").value = "Aliment sur mesure";
   $("#details").value =
 `Espèce : ${species.name}
@@ -288,7 +422,8 @@ Téléphone : ${d.tel}
 Ville : ${d.ville || "-"}
 Produit : ${d.produit}
 
-${d.details}`;
+${d.details}${campaign() ? `\n\n(Source : ${campaign()})` : ""}`;
+  track("generate_lead", { channel, product: d.produit });
 
   if (channel === "whatsapp") {
     window.open(`https://wa.me/${C.company.whatsapp}?text=${encodeURIComponent(body)}`, "_blank", "noopener");
@@ -303,7 +438,8 @@ ${d.details}`;
 // Divers
 // ---------------------------------------------------------
 $("#year").textContent = new Date().getFullYear();
-$("#waFloat").href = `https://wa.me/${C.company.whatsapp}`;
+$("#waFloat").href = waLink(`Bonjour ${C.company.name}, `);
+document.querySelectorAll("#waFloat, #ctaWa").forEach(a => a.addEventListener("click", () => track("whatsapp_click", { from: a.id })));
 $("#waFloat").target = "_blank";
 $("#waFloat").rel = "noopener";
 $("#exitPreview").addEventListener("click", () => {

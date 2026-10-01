@@ -19,6 +19,7 @@ body.admin { background: var(--tint); font-size: 1rem; }
 .admin-main { min-width: 0; }
 .admin-main h2 { margin-bottom: 6px; }
 .intro { color: var(--muted); margin-bottom: 18px; max-width: 62em; }
+.group { font-size: 1.15rem; color: var(--forest); margin: 28px 0 12px; }
 .a-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; margin-bottom: 18px; }
 .a-card > header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; }
 .a-card h3 { font-size: 1.08rem; color: var(--forest); }
