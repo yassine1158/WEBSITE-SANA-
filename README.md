@@ -21,6 +21,20 @@ Pour publier, créez une fois un jeton GitHub : *GitHub → Settings → Develop
 
 La page d'administration est publique, mais rien ne peut être publié sans ce jeton.
 
+## Marketing
+Onglet **Marketing** de l'administration :
+- **Bandeau promotionnel** en haut du site (message + lien), activable à tout moment.
+- **Bandeau d'appel WhatsApp** (titre, texte, bouton).
+- **Réseaux sociaux** : Facebook, Instagram, TikTok, YouTube (icônes affichées seulement si renseignées).
+- **Mesure d'audience** : Google Analytics 4 et Pixel Meta. Événements envoyés : `whatsapp_click`, `generate_lead` (*Lead* côté Meta), `formula_composed`.
+- **Référencement** : titre et description Google, adresse du site.
+- **Liens de campagne** : générateur de liens `?utm_source=…&utm_campaign=…`. La campagne d'origine est ajoutée automatiquement aux messages WhatsApp et e-mail reçus.
+
+Onglet **Avis & FAQ** : avis clients (section masquée tant qu'il n'y en a pas) et questions fréquentes.
+
+Fichiers fixes pour Google et les réseaux : `robots.txt`, `sitemap.xml`, `assets/img/og-image.png` (image de partage).
+Si vous passez sur votre propre nom de domaine, remplacez `https://yassine1158.github.io/WEBSITE-SANA-/` dans `index.html` (balises `og:` et `canonical`), `robots.txt` et `sitemap.xml`.
+
 ## Mise en ligne (GitHub Pages)
 *Settings → Pages* → branche `main`, dossier `/ (root)`. L'administration publie sur la branche `main` (modifiable dans l'onglet Publication).
 

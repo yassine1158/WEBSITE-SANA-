@@ -18,8 +18,47 @@ window.SANA_CONTENT = {
     "paragraphs": [
       "SANA maîtrise toute la chaîne : nous fabriquons nos aliments, élevons nos volailles avec ces mêmes aliments et collectons nos œufs chaque jour.",
       "Notre différence est la formulation à la demande. Éleveur professionnel, ferme familiale ou revendeur : vous nous indiquez la composition voulue, ou nous la construisons avec vous selon l'espèce, l'âge des animaux et votre objectif."
+    ],
+    "features": [
+      { "icon": "flask",  "title": "Dosage précis",     "text": "Chaque matière première pesée selon votre formule, au dixième de pourcent." },
+      { "icon": "shield", "title": "Qualité suivie",    "text": "Matières premières sélectionnées et traçabilité de chaque lot fabriqué." },
+      { "icon": "truck",  "title": "Livraison",         "text": "Livraison à la ferme ou retrait sur notre site, à la date convenue." },
+      { "icon": "chat",   "title": "Conseil technique", "text": "Nous vous aidons à choisir et ajuster la formule adaptée à votre élevage." }
     ]
   },
+  "steps": [
+    { "title": "Votre demande", "text": "Vous choisissez vos produits ou composez votre aliment en ligne." },
+    { "title": "Validation",    "text": "Nous vérifions la formule et vous envoyons un devis sous 24 h." },
+    { "title": "Fabrication",   "text": "Votre aliment est dosé et fabriqué selon la composition validée." },
+    { "title": "Livraison",     "text": "Retrait sur place ou livraison directe à votre ferme." }
+  ],
+  "marketing": {
+    "promo": {
+      "visible": false,
+      "text": "Exemple : -5 % sur votre première commande d'aliment sur mesure.",
+      "linkText": "En profiter",
+      "link": "#composition"
+    },
+    "cta": {
+      "title": "Un aliment sur mesure pour votre élevage ?",
+      "text": "Envoyez-nous votre besoin sur WhatsApp : nous vous proposons une formule et un devis sous 24 h.",
+      "button": "Écrire sur WhatsApp"
+    },
+    "social": { "facebook": "", "instagram": "", "tiktok": "", "youtube": "" },
+    "analytics": { "ga4": "", "metaPixel": "" },
+    "seo": {
+      "title": "SANA — Aliments pour animaux sur mesure, poulets et œufs",
+      "description": "SANA, Société Africaine de Nutrition Animale : aliments composés sur mesure pour volailles, bovins, ovins, porcins, lapins et poissons. Poussins, poulets d'élevage et d'abattage, œufs frais.",
+      "siteUrl": "https://yassine1158.github.io/WEBSITE-SANA-/"
+    }
+  },
+  "testimonials": [],
+  "faq": [
+    { "q": "Puis-je fournir ma propre formule ?", "a": "Oui. Indiquez la composition voulue dans le configurateur ou dans votre message ; notre technicien la vérifie avant fabrication." },
+    { "q": "Quelle est la quantité minimum ?", "a": "La commande minimum d'aliment est de 25 kg. Il n'y a pas de maximum : nous livrons aussi en vrac." },
+    { "q": "Livrez-vous à la ferme ?", "a": "Oui, nous livrons directement à votre ferme. Vous pouvez aussi retirer votre commande sur notre site." },
+    { "q": "Comment recevoir un devis ?", "a": "Remplissez le formulaire de commande ou écrivez-nous sur WhatsApp. Nous répondons sous 24 h." }
+  ],
   "chickens": {
     "title": "Nos poulets, selon votre besoin",
     "intro": "Du poussin d'un jour au poulet prêt pour l'abattage, choisissez l'offre qui correspond à votre activité.",

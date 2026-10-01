@@ -13,6 +13,7 @@ const NUTRIENTS = {
   mg: "Matières grasses (%)", cb: "Cellulose brute (%)", ca: "Calcium (%)", p: "Phosphore (%)",
 };
 const ICONS = { chick: "Poussin", chicken: "Poule", drumstick: "Cuisse", cow: "Vache", sheep: "Mouton", pig: "Porc", rabbit: "Lapin", fish: "Poisson" };
+const FEATURE_ICONS = { flask: "Fiole", shield: "Bouclier", truck: "Camion", chat: "Message", sack: "Sac", egg: "Œuf", chicken: "Poule", cow: "Vache", clock: "Horloge", pin: "Lieu" };
 const CATS = { energy: "Énergie", protein: "Protéines", fiber: "Fibres", mineral: "Minéraux & additifs" };
 
 const $ = (s, el = document) => el.querySelector(s);
@@ -27,8 +28,17 @@ const store = {
   del(k) { try { localStorage.removeItem(k); } catch (e) {} },
 };
 
+// Complète un contenu ancien avec les champs ajoutés depuis
+function withDefaults(obj, def) {
+  for (const k in def) {
+    if (obj[k] === undefined) obj[k] = clone(def[k]);
+    else if (def[k] && typeof def[k] === "object" && !Array.isArray(def[k])) withDefaults(obj[k], def[k]);
+  }
+  return obj;
+}
+
 let published = clone(window.SANA_CONTENT);
-let data = (() => { try { return JSON.parse(store.get(DRAFT_KEY)) || clone(published); } catch (e) { return clone(published); } })();
+let data = (() => { try { const d = JSON.parse(store.get(DRAFT_KEY)); return d ? withDefaults(d, published) : clone(published); } catch (e) { return clone(published); } })();
 let tab = store.get(TAB_KEY) || "societe";
 let ghMemory = null; // jeton non mémorisé
 
@@ -65,6 +75,16 @@ const card = (title, body, tools = "") => `<section class="a-card"><header><h3>$
 const btn = (label, act, attrs = "", cls = "btn-ghost") => `<button type="button" class="btn ${cls} btn-sm" data-act="${act}" ${attrs}>${label}</button>`;
 const del = (act, attrs) => `<button type="button" class="btn btn-danger btn-sm" data-act="${act}" data-confirm="1" ${attrs}>Supprimer</button>`;
 
+// Liste d'éléments éditables (atouts, étapes, avis, questions)
+function list(path, title, fields, blank, addLabel) {
+  const arr = getP(path) || [];
+  return arr.map((it, i) => card(esc(title(it, i)), fields(`${path}.${i}`),
+    `${i > 0 ? btn("↑", "move-item", `data-list="${path}" data-i="${i}" data-d="-1" aria-label="Monter"`) : ""}
+     ${i < arr.length - 1 ? btn("↓", "move-item", `data-list="${path}" data-i="${i}" data-d="1" aria-label="Descendre"`) : ""}
+     ${del("del-item", `data-list="${path}" data-i="${i}"`)}`)).join("")
+    + btn(addLabel, "add-item", `data-list="${path}" data-blank="${esc(JSON.stringify(blank))}"`, "btn-primary");
+}
+
 // ---------------------------------------------------------
 // Onglets
 // ---------------------------------------------------------
@@ -90,7 +110,66 @@ const TABS = {
       ${F.area("Texte d'introduction", "hero.lead", { rows: 4 })}`)}
     ${card("La société", `
       ${F.text("Titre", "about.title")}
-      ${F.lines("Paragraphes", "about.paragraphs", { help: "Un paragraphe par ligne.", rows: 6 })}`)}`,
+      ${F.lines("Paragraphes", "about.paragraphs", { help: "Un paragraphe par ligne.", rows: 6 })}`)}
+    <h3 class="group">Atouts (section « La société »)</h3>
+    ${list("about.features", f => f.title || "Nouvel atout", b => `
+      <div class="grid-2">${F.text("Titre", b + ".title")}${F.select("Icône", b + ".icon", FEATURE_ICONS)}</div>
+      ${F.area("Texte", b + ".text", { rows: 2 })}`, { icon: "flask", title: "", text: "" }, "+ Ajouter un atout")}
+    <h3 class="group">Étapes de commande</h3>
+    ${list("steps", (st, i) => `Étape ${i + 1} — ${st.title || ""}`, b => `
+      ${F.text("Titre", b + ".title")}${F.area("Texte", b + ".text", { rows: 2 })}`, { title: "", text: "" }, "+ Ajouter une étape")}`,
+
+  marketing: () => {
+    const base = data.marketing.seo.siteUrl || "https://votre-site/";
+    return `
+    <h2>Marketing</h2>
+    <p class="intro">Promotions, réseaux sociaux, mesure d'audience et référencement Google.</p>
+    ${card("Bandeau promotionnel", `
+      ${F.bool("Afficher le bandeau en haut du site", "marketing.promo.visible")}
+      ${F.text("Message", "marketing.promo.text", { ph: "Ex. : livraison offerte dès 1 tonne" })}
+      <div class="grid-2">${F.text("Texte du lien (optionnel)", "marketing.promo.linkText")}${F.text("Lien", "marketing.promo.link", { help: "#composition, #poulets, #contact ou une adresse complète." })}</div>`)}
+    ${card("Bandeau d'appel WhatsApp", `
+      ${F.text("Titre", "marketing.cta.title")}
+      ${F.area("Texte", "marketing.cta.text", { rows: 2 })}
+      ${F.text("Bouton", "marketing.cta.button")}`)}
+    ${card("Réseaux sociaux", `
+      <p class="intro">Collez l'adresse complète de chaque page. Les icônes apparaissent seulement pour les réseaux renseignés.</p>
+      <div class="grid-2">
+        ${F.text("Facebook", "marketing.social.facebook", { ph: "https://facebook.com/…" })}
+        ${F.text("Instagram", "marketing.social.instagram", { ph: "https://instagram.com/…" })}
+        ${F.text("TikTok", "marketing.social.tiktok", { ph: "https://tiktok.com/@…" })}
+        ${F.text("YouTube", "marketing.social.youtube", { ph: "https://youtube.com/@…" })}
+      </div>`)}
+    ${card("Mesure d'audience", `
+      <p class="intro">Renseignez vos identifiants pour suivre les visites et les demandes de devis (événements : <em>whatsapp_click</em>, <em>generate_lead</em> / <em>Lead</em>, <em>formula_composed</em>).</p>
+      <div class="grid-2">
+        ${F.text("Google Analytics 4 (ID de mesure)", "marketing.analytics.ga4", { ph: "G-XXXXXXXXXX" })}
+        ${F.text("Pixel Meta (Facebook / Instagram)", "marketing.analytics.metaPixel", { ph: "123456789012345" })}
+      </div>`)}
+    ${card("Référencement Google", `
+      ${F.text("Titre de la page", "marketing.seo.title", { help: "Environ 60 caractères. C'est le titre affiché dans Google." })}
+      ${F.area("Description", "marketing.seo.description", { rows: 3, help: "Environ 155 caractères, affichée sous le titre dans Google." })}
+      ${F.text("Adresse du site", "marketing.seo.siteUrl", { ph: "https://www.sana.tn/" })}`)}
+    ${card("Créer un lien de campagne", `
+      <p class="intro">Utilisez ce lien dans vos publicités : chaque demande WhatsApp reçue indiquera la campagne d'origine.</p>
+      <div class="grid-2">
+        <label class="field"><span>Source</span><select id="utm-source"><option>facebook</option><option>instagram</option><option>tiktok</option><option>google</option><option>whatsapp</option><option>affiche</option></select></label>
+        <label class="field"><span>Nom de la campagne</span><input id="utm-campaign" placeholder="Ex. : aliment-bovins-octobre"></label>
+      </div>
+      <label class="field"><span>Lien à utiliser</span><input id="utm-out" readonly data-base="${esc(base)}"></label>
+      <div class="row">${btn("Copier le lien", "copy-utm", "", "btn-primary")}</div>`)}`;
+  },
+
+  avis: () => `
+    <h2>Avis &amp; questions fréquentes</h2>
+    <p class="intro">Ajoutez de vrais avis de vos clients (avec leur accord). La section Avis n'apparaît sur le site que s'il y a au moins un avis.</p>
+    <h3 class="group">Avis clients</h3>
+    ${list("testimonials", t => t.name || "Nouvel avis", b => `
+      <div class="grid-2">${F.text("Nom du client", b + ".name")}${F.text("Activité / ville", b + ".role", { ph: "Éleveur de bovins, Sfax" })}</div>
+      ${F.area("Avis", b + ".text", { rows: 3 })}`, { name: "", role: "", text: "" }, "+ Ajouter un avis")}
+    <h3 class="group">Questions fréquentes</h3>
+    ${list("faq", f => f.q || "Nouvelle question", b => `
+      ${F.text("Question", b + ".q")}${F.area("Réponse", b + ".a", { rows: 3 })}`, { q: "", a: "" }, "+ Ajouter une question")}`,
 
   poulets: () => `
     <h2>Poulets</h2>
@@ -211,8 +290,20 @@ function render() {
   document.querySelectorAll("#adminNav button").forEach(b => b.setAttribute("aria-current", b.dataset.tab === tab ? "page" : "false"));
   $("#panel").innerHTML = TABS[tab]();
   updateTotals();
+  updateUtm();
   updateStatus();
 }
+
+function updateUtm() {
+  const out = $("#utm-out");
+  if (!out) return;
+  const camp = slugPlain($("#utm-campaign").value) || "campagne";
+  const u = new URL(data.marketing.seo.siteUrl || out.dataset.base, location.href);
+  u.searchParams.set("utm_source", $("#utm-source").value);
+  u.searchParams.set("utm_campaign", camp);
+  out.value = u.href;
+}
+const slugPlain = s => String(s).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
 function formulaTotal(si, fi) {
   const f = data.species[si].formulas[fi];
@@ -270,6 +361,7 @@ function validate() {
 // ---------------------------------------------------------
 function onEdit(e) {
   const el = e.target;
+  if (el.id === "utm-campaign" || el.id === "utm-source") return updateUtm();
   if (el.dataset.act === "toggle-ing" || el.dataset.act === "toggle-nut") return onToggle(el);
   const path = el.dataset.path;
   if (!path) return;
@@ -328,6 +420,17 @@ const ACTIONS = {
       s.ingredients = s.ingredients.filter(id => id !== ing.id);
       s.formulas.forEach(f => delete f.mix[ing.id]);
     });
+  },
+  "add-item": b => (getP(b.dataset.list) || (setP(b.dataset.list, []), getP(b.dataset.list))).push(JSON.parse(b.dataset.blank)),
+  "del-item": b => getP(b.dataset.list).splice(+b.dataset.i, 1),
+  "move-item": b => {
+    const a = getP(b.dataset.list), i = +b.dataset.i, j = i + +b.dataset.d;
+    [a[i], a[j]] = [a[j], a[i]];
+  },
+  "copy-utm": () => {
+    const out = $("#utm-out");
+    navigator.clipboard?.writeText(out.value).then(() => toast("Lien copié.", "success"), () => { out.select(); toast("Sélectionné : copiez avec Ctrl+C."); });
+    return false;
   },
   discard: () => { data = clone(published); store.del(PREVIEW_KEY); toast("Modifications annulées."); },
   "save-gh": () => { readGhForm(); toast("Connexion enregistrée.", "success"); return false; },
