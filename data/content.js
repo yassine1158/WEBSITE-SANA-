@@ -84,7 +84,7 @@ window.SANA_CONTENT = {
     },
     "seo": {
       "title": "SANA — Aliments pour animaux sur mesure, poulets et œufs",
-      "description": "SANA, Société Africaine de Nutrition Animale : aliments composés sur mesure pour volailles, bovins, ovins, porcins, lapins et poissons. Poussins, poulets d'élevage et d'abattage, œufs frais.",
+      "description": "SANA, Société Afriqaine de Nutrition Animale : aliments composés sur mesure pour volailles, bovins, ovins, porcins, lapins et poissons. Poussins, poulets d'élevage et d'abattage, œufs frais.",
       "siteUrl": "https://yassine1158.github.io/WEBSITE-SANA-/"
     }
   },
