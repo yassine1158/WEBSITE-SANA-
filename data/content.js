@@ -5,7 +5,7 @@ window.SANA_CONTENT = {
     "phone": "+225 00 000 000",
     "whatsapp": "22500000000",
     "email": "contact@sana.com",
-    "address": "YAKRO",
+    "address": "YAKRO.",
     "hours": "Lundi – samedi, 7 h 00 – 18 h 00"
   },
   "hero": {
