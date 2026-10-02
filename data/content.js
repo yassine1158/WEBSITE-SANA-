@@ -1,7 +1,7 @@
 window.SANA_CONTENT = {
   "company": {
     "name": "SANA",
-    "fullName": "Société Africaine de Nutrition Animale",
+    "fullName": "Société Afriqaine de Nutrition Animale",
     "phone": "+225 00 000 000",
     "whatsapp": "22500000000",
     "email": "contact@sana.com",
