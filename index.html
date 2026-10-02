@@ -9,7 +9,7 @@
   <!-- Partage (Facebook, WhatsApp…) : remplacez l'adresse si vous utilisez votre propre nom de domaine -->
   <link rel="canonical" href="https://yassine1158.github.io/WEBSITE-SANA-/">
   <meta property="og:type" content="website">
-  <meta property="og:locale" content="fr_TN">
+  <meta property="og:locale" content="fr_CI">
   <meta property="og:site_name" content="SANA">
   <meta property="og:title" content="SANA — Aliments pour animaux sur mesure, poulets et œufs">
   <meta property="og:description" content="Aliments composés selon votre formule pour tous vos animaux. Poussins, poulets et œufs frais.">
@@ -305,13 +305,13 @@
     <form class="panel order-form" id="orderForm" novalidate>
       <div class="field-row">
         <label class="field"><span>Nom complet *</span><input id="f-nom" name="nom" required placeholder="Votre nom"></label>
-        <label class="field"><span>Téléphone *</span><input id="f-tel" name="tel" type="tel" required placeholder="+216 …"></label>
+        <label class="field"><span>Téléphone *</span><input id="f-tel" name="tel" type="tel" required placeholder="+225 …"></label>
       </div>
       <div class="field-row">
         <label class="field"><span>Produit *</span>
           <select name="produit" id="produitSelect" required></select>
         </label>
-        <label class="field"><span>Ville / région</span><input id="f-ville" name="ville" placeholder="Ex. : Sfax"></label>
+        <label class="field"><span>Ville / région</span><input id="f-ville" name="ville" placeholder="Ex. : Yamoussoukro"></label>
       </div>
       <label class="field"><span>Détails de la commande *</span>
         <textarea name="details" id="details" rows="7" required placeholder="Quantités, composition souhaitée, date de livraison…"></textarea>
@@ -356,7 +356,13 @@
 <a href="#contact" class="wa-float" id="waFloat" aria-label="Nous écrire sur WhatsApp"><svg><use href="#i-wa"/></svg></a>
 
 <script type="application/ld+json" id="ldjson"></script>
-<script src="data/content.js"></script>
-<script src="assets/js/main.js"></script>
+<script>
+  // Charge toujours la dernière version publiée depuis l'administration (évite l'ancienne version en cache)
+  (function () {
+    var v = Math.floor(Date.now() / 60000);
+    function load(src, next) { var s = document.createElement("script"); s.src = src + "?v=" + v; if (next) s.onload = next; document.body.appendChild(s); }
+    load("data/content.js", function () { load("assets/js/main.js"); });
+  })();
+</script>
 </body>
 </html>
