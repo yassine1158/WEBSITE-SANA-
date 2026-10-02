@@ -334,10 +334,25 @@ function updateStatus() {
   s.className = "status " + (dirty ? "dirty" : "ok");
 }
 
+// Version en ligne au moment où le brouillon a commencé : sert à prévenir si elle a changé depuis
+const BASE_KEY = "sana-draft-base";
 function save() {
-  if (isDirty()) store.set(DRAFT_KEY, JSON.stringify(data));
-  else store.del(DRAFT_KEY);
+  if (isDirty()) {
+    store.set(DRAFT_KEY, JSON.stringify(data));
+    if (!store.get(BASE_KEY)) store.set(BASE_KEY, JSON.stringify(published));
+  } else {
+    store.del(DRAFT_KEY);
+    store.del(BASE_KEY);
+  }
   updateStatus();
+}
+
+function warnStaleDraft() {
+  if (!store.get(DRAFT_KEY) || !isDirty()) return;
+  const now = JSON.stringify(published);
+  if (store.get(BASE_KEY) === now) return;
+  store.set(BASE_KEY, now);
+  toast("Attention : la version en ligne a changé depuis votre brouillon. Si vous publiez, votre brouillon la remplacera. Vérifiez vos modifications, ou annulez-les dans « Publication » pour repartir de la version en ligne.", "error");
 }
 
 let toastTimer;
@@ -440,7 +455,7 @@ const ACTIONS = {
     navigator.clipboard?.writeText(out.value).then(() => toast("Lien copié.", "success"), () => { out.select(); toast("Sélectionné : copiez avec Ctrl+C."); });
     return false;
   },
-  discard: () => { data = clone(published); store.del(PREVIEW_KEY); toast("Modifications annulées."); },
+  discard: () => { data = clone(published); store.del(PREVIEW_KEY); store.del(BASE_KEY); toast("Modifications annulées."); },
   "save-gh": () => { readGhForm().then(() => { render(); toast("Connexion enregistrée.", "success"); }); return false; },
   "change-pw": () => {
     const a = $("#pw-new").value, b = $("#pw-confirm").value;
@@ -577,6 +592,7 @@ async function publish() {
     if (!put.ok) throw put;
     published = clone(data);
     store.del(DRAFT_KEY);
+    store.del(BASE_KEY);
     store.del(PREVIEW_KEY);
     render();
     toast("Publié. Le site sera à jour d'ici une à deux minutes : actualisez ensuite la page du site.", "success");
@@ -657,6 +673,7 @@ function unlock(pass, token) {
   ghMemory = token || "";
   document.body.classList.remove("locked");
   render();
+  warnStaleDraft();
   bumpIdle();
 }
 

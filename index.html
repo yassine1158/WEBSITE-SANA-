@@ -59,6 +59,8 @@
   </defs>
 </svg>
 
+<div class="loader" id="loader" aria-hidden="true"><img src="assets/img/emblem-sana.svg" alt=""></div>
+
 <div class="preview-bar" id="previewBar" hidden>
   Aperçu du brouillon — ces changements ne sont visibles que sur cet appareil.
   <button type="button" id="exitPreview">Quitter l'aperçu</button>
@@ -70,6 +72,7 @@
 
 <!-- ===== HEADER ===== -->
 <header class="header" id="top">
+  <div class="scroll-progress" id="scrollProgress"></div>
   <div class="container nav">
     <a href="#top" class="brand" aria-label="SANA — accueil">
       <img src="assets/img/logo-sana.svg" alt="SANA — Société Africaine de Nutrition Animale" width="95" height="62">
@@ -90,6 +93,7 @@
 <main>
 <!-- ===== HERO ===== -->
 <section class="hero">
+  <canvas class="hero-fx" id="heroFx" aria-hidden="true"></canvas>
   <img class="hero-emblem" src="assets/img/emblem-sana.svg" alt="" aria-hidden="true">
   <div class="container hero-grid">
     <div class="hero-text">
@@ -353,6 +357,7 @@
   </div>
 </footer>
 
+<button type="button" class="to-top" id="toTop" aria-label="Revenir en haut de la page"><svg class="ico"><use href="#i-arrow"/></svg></button>
 <a href="#contact" class="wa-float" id="waFloat" aria-label="Nous écrire sur WhatsApp"><svg><use href="#i-wa"/></svg></a>
 
 <script type="application/ld+json" id="ldjson"></script>
@@ -361,7 +366,7 @@
   (function () {
     var v = Math.floor(Date.now() / 60000);
     function load(src, next) { var s = document.createElement("script"); s.src = src + "?v=" + v; if (next) s.onload = next; document.body.appendChild(s); }
-    load("data/content.js", function () { load("assets/js/main.js"); });
+    load("data/content.js", function () { load("assets/js/main.js", function () { load("assets/js/effects.js"); }); });
   })();
 </script>
 </body>
