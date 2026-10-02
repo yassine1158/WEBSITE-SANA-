@@ -3,7 +3,7 @@ window.SANA_CONTENT = {
     "name": "SANA",
     "fullName": "Société Afriqaine de Nutrition Animale",
     "phone": "+225 0700322706",
-    "whatsapp": "22500000000",
+    "whatsapp": "2250700322706",
     "email": "contact@sana.com",
     "address": "Yamoussoukro, Côte d'Ivoire",
     "hours": "Lundi – samedi, 7 h 00 – 18 h 00"
