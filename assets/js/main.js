@@ -81,7 +81,7 @@ $("#ldjson").textContent = JSON.stringify({
   image: new URL("assets/img/og-image.png", M.seo.siteUrl || location.href).href,
   telephone: C.company.phone,
   email: C.company.email,
-  address: { "@type": "PostalAddress", streetAddress: C.company.address, addressCountry: "TN" },
+  address: { "@type": "PostalAddress", streetAddress: C.company.address, addressLocality: "Yamoussoukro", addressCountry: "CI" },
   openingHours: C.company.hours,
   sameAs: Object.values(M.social).filter(Boolean),
 });

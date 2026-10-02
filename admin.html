@@ -62,7 +62,13 @@
 
 <input type="file" id="importFile" accept=".js,.json,application/json,text/javascript" hidden>
 
-<script src="data/content.js"></script>
-<script src="assets/js/admin.js"></script>
+<script>
+  // Part toujours de la dernière version publiée
+  (function () {
+    var v = Math.floor(Date.now() / 60000);
+    function load(src, next) { var s = document.createElement("script"); s.src = src + "?v=" + v; if (next) s.onload = next; document.body.appendChild(s); }
+    load("data/content.js", function () { load("assets/js/admin.js"); });
+  })();
+</script>
 </body>
 </html>

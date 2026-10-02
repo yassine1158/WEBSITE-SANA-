@@ -97,8 +97,8 @@ const TABS = {
       ${F.text("Nom court", "company.name")}
       ${F.text("Nom complet", "company.fullName")}</div>`)}
     ${card("Coordonnées", `<div class="grid-2">
-      ${F.text("Téléphone affiché", "company.phone", { ph: "+216 00 000 000" })}
-      ${F.text("Numéro WhatsApp", "company.whatsapp", { help: "Format international sans + ni espaces, ex. : 21698123456.", ph: "216…" })}
+      ${F.text("Téléphone affiché", "company.phone", { ph: "+225 07 00 00 00 00" })}
+      ${F.text("Numéro WhatsApp", "company.whatsapp", { help: "Format international sans + ni espaces, ex. : 2250700000000.", ph: "225…" })}
       ${F.text("E-mail", "company.email")}
       ${F.text("Horaires", "company.hours")}</div>
       ${F.text("Adresse", "company.address")}`)}`,
@@ -150,7 +150,7 @@ const TABS = {
     ${card("Référencement Google", `
       ${F.text("Titre de la page", "marketing.seo.title", { help: "Environ 60 caractères. C'est le titre affiché dans Google." })}
       ${F.area("Description", "marketing.seo.description", { rows: 3, help: "Environ 155 caractères, affichée sous le titre dans Google." })}
-      ${F.text("Adresse du site", "marketing.seo.siteUrl", { ph: "https://www.sana.tn/" })}`)}
+      ${F.text("Adresse du site", "marketing.seo.siteUrl", { ph: "https://www.sana.ci/" })}`)}
     ${card("Créer un lien de campagne", `
       <p class="intro">Utilisez ce lien dans vos publicités : chaque demande WhatsApp reçue indiquera la campagne d'origine.</p>
       <div class="grid-2">
@@ -166,7 +166,7 @@ const TABS = {
     <p class="intro">Ajoutez de vrais avis de vos clients (avec leur accord). La section Avis n'apparaît sur le site que s'il y a au moins un avis.</p>
     <h3 class="group">Avis clients</h3>
     ${list("testimonials", t => t.name || "Nouvel avis", b => `
-      <div class="grid-2">${F.text("Nom du client", b + ".name")}${F.text("Activité / ville", b + ".role", { ph: "Éleveur de bovins, Sfax" })}</div>
+      <div class="grid-2">${F.text("Nom du client", b + ".name")}${F.text("Activité / ville", b + ".role", { ph: "Éleveur de volailles, Yamoussoukro" })}</div>
       ${F.area("Avis", b + ".text", { rows: 3 })}`, { name: "", role: "", text: "" }, "+ Ajouter un avis")}
     <h3 class="group">Questions fréquentes</h3>
     ${list("faq", f => f.q || "Nouvelle question", b => `
@@ -181,7 +181,7 @@ const TABS = {
       <div class="grid-2">
         ${F.text("Nom de l'offre", `chickens.offers.${i}.title`)}
         ${F.text("Usage (étiquette)", `chickens.offers.${i}.usage`, { ph: "Pour l'abattage" })}
-        ${F.text("Prix (optionnel)", `chickens.offers.${i}.price`, { ph: "Ex. : à partir de 2,500 DT / pièce" })}
+        ${F.text("Prix (optionnel)", `chickens.offers.${i}.price`, { ph: "Ex. : à partir de 3 000 FCFA / pièce" })}
         ${F.select("Icône", `chickens.offers.${i}.icon`, { chick: "Poussin", chicken: "Poule", drumstick: "Cuisse" })}
       </div>
       ${F.area("Description", `chickens.offers.${i}.desc`, { rows: 2 })}
@@ -195,7 +195,7 @@ const TABS = {
     <h2>Œufs</h2>
     ${card("Carte Œufs", `
       ${F.bool("Afficher sur le site", "eggs.visible")}
-      <div class="grid-2">${F.text("Titre", "eggs.title")}${F.text("Prix (optionnel)", "eggs.price", { ph: "Ex. : 12 DT le plateau" })}</div>
+      <div class="grid-2">${F.text("Titre", "eggs.title")}${F.text("Prix (optionnel)", "eggs.price", { ph: "Ex. : 2 500 FCFA le plateau" })}</div>
       ${F.area("Description", "eggs.desc", { rows: 2 })}
       ${F.lines("Points forts", "eggs.items")}`)}`,
 
@@ -579,7 +579,7 @@ async function publish() {
     store.del(DRAFT_KEY);
     store.del(PREVIEW_KEY);
     render();
-    toast("Publié. Le site sera à jour d'ici une à deux minutes.", "success");
+    toast("Publié. Le site sera à jour d'ici une à deux minutes : actualisez ensuite la page du site.", "success");
   } catch (err) {
     const code = err && err.status;
     const why = code === 401 ? "le jeton est invalide ou expiré."
