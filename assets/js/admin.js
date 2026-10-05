@@ -14,6 +14,7 @@ const NUTRIENTS = {
 };
 const ICONS = { chick: "Poussin", chicken: "Poule", drumstick: "Cuisse", cow: "Vache", sheep: "Mouton", pig: "Porc", rabbit: "Lapin", fish: "Poisson" };
 const FEATURE_ICONS = { flask: "Fiole", shield: "Bouclier", truck: "Camion", chat: "Message", sack: "Sac", egg: "Œuf", chicken: "Poule", cow: "Vache", clock: "Horloge", pin: "Lieu" };
+const STATUS = { available: "Disponible maintenant", soon: "Bientôt (bouton « Être prévenu »)" };
 const CATS = { energy: "Énergie", protein: "Protéines", fiber: "Fibres", mineral: "Minéraux & additifs" };
 
 const $ = (s, el = document) => el.querySelector(s);
@@ -188,6 +189,7 @@ const TABS = {
     ${card("Section", `${F.text("Titre", "chickens.title")}${F.area("Introduction", "chickens.intro", { rows: 2 })}`)}
     ${data.chickens.offers.map((o, i) => card(esc(o.title || "Nouvelle offre"), `
       ${F.bool("Afficher sur le site", `chickens.offers.${i}.visible`)}
+      ${F.select("État", `chickens.offers.${i}.status`, STATUS)}
       <div class="grid-2">
         ${F.text("Nom de l'offre", `chickens.offers.${i}.title`)}
         ${F.text("Usage (étiquette)", `chickens.offers.${i}.usage`, { ph: "Pour l'abattage" })}
@@ -203,8 +205,15 @@ const TABS = {
 
   oeufs: () => `
     <h2>Œufs</h2>
-    ${card("Carte Œufs", `
+    ${card("Œufs à couver (produit phare, en haut du site)", `
+      ${F.bool("Afficher sur le site", "hatching.visible")}
+      <div class="grid-2">${F.select("État", "hatching.status", STATUS)}${F.text("Étiquette", "hatching.usage", { ph: "Disponible maintenant" })}</div>
+      <div class="grid-2">${F.text("Titre", "hatching.title")}${F.text("Prix (optionnel)", "hatching.price", { ph: "Ex. : 3 000 FCFA le plateau" })}</div>
+      ${F.area("Description", "hatching.desc", { rows: 2 })}
+      ${F.lines("Points forts", "hatching.items")}`)}
+    ${card("Œufs de consommation", `
       ${F.bool("Afficher sur le site", "eggs.visible")}
+      ${F.select("État", "eggs.status", STATUS)}
       <div class="grid-2">${F.text("Titre", "eggs.title")}${F.text("Prix (optionnel)", "eggs.price", { ph: "Ex. : 2 500 FCFA le plateau" })}</div>
       ${F.area("Description", "eggs.desc", { rows: 2 })}
       ${F.lines("Points forts", "eggs.items")}`)}`,
@@ -212,6 +221,7 @@ const TABS = {
   aliments: () => `
     <h2>Aliments</h2>
     ${card("Carte Aliments", `
+      ${F.select("État", "feed.status", STATUS)}
       <div class="grid-2">${F.text("Titre", "feed.title")}${F.num("Commande minimum (kg)", "feed.minKg")}</div>
       ${F.area("Description", "feed.desc", { rows: 2 })}
       ${F.lines("Points forts", "feed.items", { help: "Un élément par ligne. La liste des espèces est ajoutée automatiquement." })}
@@ -371,7 +381,7 @@ function onEdit(e) {
 // Actions
 // ---------------------------------------------------------
 const ACTIONS = {
-  "add-offer": () => data.chickens.offers.push({ id: slug("offre"), icon: "chicken", title: "Nouvelle offre", usage: "", desc: "", items: [], price: "", visible: true }),
+  "add-offer": () => data.chickens.offers.push({ id: slug("offre"), icon: "chicken", title: "Nouvelle offre", usage: "", desc: "", items: [], price: "", status: "soon", visible: true }),
   "del-offer": b => data.chickens.offers.splice(+b.dataset.i, 1),
   "move-offer": b => {
     const i = +b.dataset.i, j = i + +b.dataset.d, a = data.chickens.offers;
