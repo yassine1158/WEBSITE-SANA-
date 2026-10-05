@@ -465,3 +465,19 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--g
 @media (max-width: 380px) {
   .hv-chip { font-size: .74rem; padding: 5px 8px 5px 7px; transform: translate(-50%, -50%) rotate(var(--a)) translate(min(31vw, 116px)) rotate(calc(-1 * var(--a))); }
 }
+
+/* ===== Demande d'aliment ===== */
+.opt { font-style: normal; font-weight: 400; color: var(--muted); }
+.request-card { display: flex; flex-direction: column; gap: 18px; }
+.req-head { display: flex; align-items: center; gap: 14px; padding-bottom: 16px; border-bottom: 1px dashed var(--line); }
+.req-ico { width: 52px; height: 52px; flex: none; border-radius: 14px; background: var(--orange-soft); color: var(--orange-dark); display: grid; place-items: center; }
+.req-head strong { display: block; font: 700 1.25rem var(--f-display); color: var(--forest); }
+.spec-label { display: block; font-size: .78rem; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); font-weight: 600; }
+.req-list { display: grid; gap: 10px; }
+.req-list div { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 12px; font-size: .97rem; }
+.req-list dt { color: var(--muted); }
+.req-list dd { font-weight: 600; color: var(--ink); }
+.req-promise { list-style: none; display: grid; gap: 8px; background: var(--tint); border-radius: 12px; padding: 14px 16px; font-size: .92rem; }
+.req-promise li { padding-left: 24px; position: relative; }
+.req-promise li::before { content: ""; position: absolute; left: 2px; top: .45em; width: 11px; height: 6px; border-left: 2px solid var(--leaf); border-bottom: 2px solid var(--leaf); transform: rotate(-45deg); }
+.req-msg { min-height: 1.2em; color: var(--danger); font-weight: 600; font-size: .92rem; margin: -6px 0 -8px; }

@@ -99,3 +99,7 @@ body.locked .admin-bar, body.locked .admin-layout { display: none; }
 .token-state.missing { color: var(--warn); }
 .adv { margin: 4px 0 14px; }
 .adv summary { cursor: pointer; font: 600 .9rem var(--f-display); color: var(--muted); margin-bottom: 10px; }
+
+.stages { display: grid; gap: 8px; margin-bottom: 12px; }
+.stage-row { display: flex; gap: 8px; align-items: center; }
+.stage-row input { flex: 1; min-width: 0; }
