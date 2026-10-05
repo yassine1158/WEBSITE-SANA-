@@ -1,6 +1,6 @@
 # SANA — Site vitrine
 
-Site vitrine de **SANA — Société Africaine de Nutrition Animale** : aliments composés pour tous les animaux (volailles, bovins, ovins & caprins, porcins, lapins, poissons), **poulets** (poussins, élevage, abattage) et **œufs frais**.
+Site vitrine de **SANA — Société Afriqaine de Nutrition Animale** : aliments composés pour tous les animaux (volailles, bovins, ovins & caprins, porcins, lapins, poissons), **poulets** (poussins, élevage, abattage) et **œufs frais**.
 
 ## Contenu du site
 - **La société** : présentation.
