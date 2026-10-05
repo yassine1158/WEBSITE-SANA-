@@ -40,8 +40,6 @@ document.querySelectorAll("[data-c]").forEach(el => { el.textContent = get(C, el
 $("#aboutText").innerHTML = C.about.paragraphs.map(p => `<p>${esc(p)}</p>`).join("");
 $("#telLink").href = `tel:${C.company.phone.replace(/[^\d+]/g, "")}`;
 $("#mailLink").href = `mailto:${C.company.email}`;
-$("#factSpecies").textContent = C.species.length;
-$("#factMin").textContent = `${C.feed.minKg} kg`;
 $("#qty").min = C.feed.minKg;
 $("#footTel").href = $("#telLink").href;
 $("#footMail").href = $("#mailLink").href;
@@ -167,10 +165,14 @@ $("#ctaWa").href = waLink(`Bonjour ${C.company.name}, je souhaite un devis.`);
 // ---------------------------------------------------------
 const MEDIA = { chick: "media-amber", chicken: "media-green", drumstick: "media-orange" };
 
-function card({ icon, media, title, usage, desc, items, price, tag, btn, main }) {
+const isSoon = x => x && x.status === "soon";
+// Bouton « Être prévenu » : message WhatsApp pré-rempli pour un produit pas encore lancé
+const notifyBtn = name => `<a href="${waLink(`Bonjour ${C.company.name}, prévenez-moi quand ce produit sera disponible : ${name}.`)}" target="_blank" rel="noopener" class="btn btn-ghost" data-notify="${esc(name)}">Être prévenu</a>`;
+
+function card({ icon, media, title, usage, desc, items, price, tag, btn, main, soon }) {
   return `
-    <article class="product${main ? " product-main" : ""}">
-      <div class="product-media ${media}"><svg><use href="#i-${esc(icon)}"/></svg>${tag ? `<span class="tag">${esc(tag)}</span>` : ""}</div>
+    <article class="product${main ? " product-main" : ""}${soon ? " is-soon" : ""}">
+      <div class="product-media ${media}"><svg><use href="#i-${esc(icon)}"/></svg>${soon ? `<span class="tag tag-soon">Bientôt</span>` : tag ? `<span class="tag">${esc(tag)}</span>` : ""}</div>
       <div class="product-body">
         ${usage ? `<span class="usage">${esc(usage)}</span>` : ""}
         <h3>${esc(title)}</h3>
@@ -182,28 +184,54 @@ function card({ icon, media, title, usage, desc, items, price, tag, btn, main })
     </article>`;
 }
 
+// Produit phare disponible : œufs à couver
+const H = C.hatching;
+if (H && H.visible !== false) {
+  $("#hatchingCard").innerHTML = `
+    <article class="feature-product">
+      <div class="fp-media"><svg><use href="#i-egg"/></svg>${isSoon(H) ? `<span class="tag tag-soon">Bientôt</span>` : `<span class="tag tag-live">Disponible</span>`}</div>
+      <div class="fp-body">
+        ${H.usage ? `<span class="usage">${esc(H.usage)}</span>` : ""}
+        <h3>${esc(H.title)}</h3>
+        <p>${esc(H.desc)}</p>
+        <ul class="checklist">${(H.items || []).filter(Boolean).map(i => `<li>${esc(i)}</li>`).join("")}</ul>
+        ${H.price ? `<p class="price">${esc(H.price)}</p>` : ""}
+        <div class="fp-actions">
+          ${isSoon(H) ? notifyBtn(H.title) : `<a href="${waLink(`Bonjour ${C.company.name}, je souhaite commander des œufs à couver.`)}" target="_blank" rel="noopener" class="btn btn-accent btn-lg" data-wa-order="1"><svg class="ico"><use href="#i-wa"/></svg> Commander sur WhatsApp</a>
+          <a href="#contact" class="btn btn-outline" data-product="${esc(H.title)}">Formulaire de commande</a>`}
+        </div>
+      </div>
+    </article>`;
+} else {
+  $("#disponible").hidden = true;
+}
+
 const offers = C.chickens.offers.filter(o => o.visible !== false);
 $("#chickenOffers").innerHTML = offers.map(o => card({
   icon: o.icon, media: MEDIA[o.icon] || "media-green", title: o.title, usage: o.usage, desc: o.desc,
-  items: o.items, price: o.price,
-  btn: `<a href="#contact" class="btn btn-outline" data-product="${esc("Poulets — " + o.title)}">Commander</a>`,
+  items: o.items, price: o.price, soon: isSoon(o),
+  btn: isSoon(o) ? notifyBtn(o.title) : `<a href="#contact" class="btn btn-outline" data-product="${esc("Poulets — " + o.title)}">Commander</a>`,
 })).join("");
 
 let other = "";
 if (C.eggs.visible !== false) other += card({
-  icon: "egg", media: "media-amber", title: C.eggs.title, desc: C.eggs.desc, items: C.eggs.items, price: C.eggs.price,
-  btn: `<a href="#contact" class="btn btn-outline" data-product="Œufs">Demander un devis</a>`,
+  icon: "egg", media: "media-amber", title: C.eggs.title, desc: C.eggs.desc, items: C.eggs.items, price: C.eggs.price, soon: isSoon(C.eggs),
+  btn: isSoon(C.eggs) ? notifyBtn(C.eggs.title) : `<a href="#contact" class="btn btn-outline" data-product="Œufs">Demander un devis</a>`,
 });
 other += card({
-  icon: "sack", media: "media-orange", title: C.feed.title, desc: C.feed.desc, tag: "Sur mesure", main: true,
+  icon: "sack", media: "media-orange", title: C.feed.title, desc: C.feed.desc, tag: "Sur mesure", main: !isSoon(C.feed), soon: isSoon(C.feed),
   items: [C.species.map(s => s.name).join(", "), ...C.feed.items],
-  btn: `<a href="#composition" class="btn btn-primary">Demander mon aliment</a>`,
+  btn: isSoon(C.feed) ? `<a href="#composition" class="btn btn-ghost">Être prévenu au lancement</a>` : `<a href="#composition" class="btn btn-primary">Demander mon aliment</a>`,
 });
 $("#otherProducts").innerHTML = other;
 
-// Liste des produits du formulaire de commande
-$("#produitSelect").innerHTML = ["— Choisir —", ...offers.map(o => "Poulets — " + o.title),
-  ...(C.eggs.visible !== false ? ["Œufs"] : []), "Aliment sur mesure", "Plusieurs produits"]
+// Liste des produits du formulaire de commande (produits disponibles d'abord)
+const lbl = (name, soon) => soon ? `${name} (bientôt)` : name;
+$("#produitSelect").innerHTML = ["— Choisir —",
+  ...(H && H.visible !== false ? [lbl(H.title, isSoon(H))] : []),
+  ...offers.map(o => lbl("Poulets — " + o.title, isSoon(o))),
+  ...(C.eggs.visible !== false ? [lbl("Œufs", isSoon(C.eggs))] : []),
+  lbl("Aliment sur mesure", isSoon(C.feed)), "Plusieurs produits"]
   .map((p, i) => `<option${i === 0 ? ' value=""' : ""}>${esc(p)}</option>`).join("");
 
 document.addEventListener("click", e => {
@@ -295,9 +323,9 @@ $("#sendRequest").addEventListener("click", () => {
     return;
   }
   track("feed_request", { species: r.species, stage: r.stage });
-  $("#produitSelect").value = "Aliment sur mesure";
+  $("#produitSelect").value = lbl("Aliment sur mesure", isSoon(C.feed));
   $("#details").value =
-`Demande d'aliment sur mesure
+`${isSoon(C.feed) ? "Pré-inscription : prévenez-moi au lancement de l'aliment sur mesure" : "Demande d'aliment sur mesure"}
 Espèce : ${r.species}
 Aliment : ${r.stage}
 Présentation : ${r.form}
@@ -307,6 +335,14 @@ Quantité : ${r.qty} kg (${r.freq.toLowerCase()})${r.heads ? `\nNombre d'animaux
 });
 
 selectSpecies(C.species[0].id);
+
+// Aliment pas encore lancé : on recueille les demandes pour prévenir les clients
+if (isSoon(C.feed)) {
+  $("#feedSoon").hidden = false;
+  $("#sendRequest").textContent = "Être prévenu au lancement";
+  document.querySelector(".req-promise").innerHTML = "<li>Les aliments SANA arrivent bientôt</li><li>Laissez votre demande : nous vous contactons au lancement</li><li>Nos formules restent confidentielles</li>";
+  document.querySelector(".strip-label").textContent = "Bientôt : aliments pour";
+}
 
 // ---------------------------------------------------------
 // Formulaire de commande (WhatsApp / e-mail)
