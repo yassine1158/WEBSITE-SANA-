@@ -250,6 +250,8 @@ $("#speciesTabs").innerHTML = C.species.map((s, i) => `
   <button type="button" role="tab" class="species-tab" data-sp="${esc(s.id)}" aria-selected="${i === 0}">
     <svg class="ico-lg"><use href="#i-${esc(s.icon)}"/></svg><span>${esc(s.name)}</span>
   </button>`).join("");
+$("#heroChips").innerHTML = C.species.map((s, i) => `
+  <span class="hv-chip" style="--k:${i};--n:${C.species.length}"><svg class="ico-lg"><use href="#i-${esc(s.icon)}"/></svg>${esc(s.name)}</span>`).join("");
 $("#speciesStrip").innerHTML = C.species.map(s => `
   <a href="#composition" class="strip-item" data-sp="${esc(s.id)}"><svg class="ico-lg"><use href="#i-${esc(s.icon)}"/></svg><span>${esc(s.name)}</span></a>`).join("");
 $("#speciesStrip").addEventListener("click", e => {
