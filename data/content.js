@@ -11,7 +11,7 @@ window.SANA_CONTENT = {
   "hero": {
     "title": "L'aliment de tous vos animaux,",
     "highlight": "composé selon votre formule.",
-    "lead": "SANA fabrique des aliments pour volailles, bovins, ovins, porcins, lapins et poissons, et vend des poulets et des œufs frais. Vous fixez la composition et les quantités ; nous dosons, fabriquons et livrons."
+    "lead": "SANA fabrique des aliments pour volailles, bovins, ovins, porcins, lapins et poissons, et vend des poulets et des œufs frais. Dites-nous l'espèce, le stade et la quantité : nous formulons, fabriquons et livrons."
   },
   "about": {
     "title": "Une production complète, de l'aliment à l'animal",
@@ -45,11 +45,11 @@ window.SANA_CONTENT = {
   "steps": [
     {
       "title": "Votre demande",
-      "text": "Vous choisissez vos produits ou composez votre aliment en ligne."
+      "text": "Vous choisissez vos produits ou demandez votre aliment en ligne."
     },
     {
       "title": "Validation",
-      "text": "Nous vérifions la formule et vous envoyons un devis sous 24 h."
+      "text": "Notre technicien établit la formule et vous envoie un devis sous 24 h."
     },
     {
       "title": "Fabrication",
@@ -92,7 +92,7 @@ window.SANA_CONTENT = {
   "faq": [
     {
       "q": "Puis-je fournir ma propre formule ?",
-      "a": "Oui. Indiquez la composition voulue dans le configurateur ou dans votre message ; notre technicien la vérifie avant fabrication."
+      "a": "Oui. Décrivez la composition voulue dans votre message ; notre technicien la vérifie avant fabrication. Sinon, nous établissons la formule pour vous."
     },
     {
       "q": "Quelle est la quantité minimum ?",
@@ -185,311 +185,31 @@ window.SANA_CONTENT = {
     ],
     "minKg": 25
   },
-  "ingredients": [
-    {
-      "id": "mais",
-      "name": "Maïs",
-      "info": "Source d'énergie",
-      "cat": "energy",
-      "cp": 8.5,
-      "em": 3350,
-      "ufl": 1.2,
-      "mg": 3.8,
-      "cb": 2.2,
-      "ca": 0.02,
-      "p": 0.08,
-      "max": 75
-    },
-    {
-      "id": "orge",
-      "name": "Orge",
-      "info": "Céréale énergétique",
-      "cat": "energy",
-      "cp": 11,
-      "em": 2650,
-      "ufl": 1.05,
-      "mg": 2,
-      "cb": 5,
-      "ca": 0.05,
-      "p": 0.12,
-      "max": 70
-    },
-    {
-      "id": "son",
-      "name": "Son de blé",
-      "info": "Fibres",
-      "cat": "fiber",
-      "cp": 15.5,
-      "em": 1300,
-      "ufl": 0.85,
-      "mg": 4,
-      "cb": 10,
-      "ca": 0.12,
-      "p": 0.3,
-      "max": 30
-    },
-    {
-      "id": "soja",
-      "name": "Tourteau de soja 44",
-      "info": "Source de protéines",
-      "cat": "protein",
-      "cp": 44,
-      "em": 2250,
-      "ufl": 1.18,
-      "mg": 1.5,
-      "cb": 6,
-      "ca": 0.3,
-      "p": 0.2,
-      "max": 45
-    },
-    {
-      "id": "tournesol",
-      "name": "Tourteau de tournesol",
-      "info": "Protéines et fibres",
-      "cat": "protein",
-      "cp": 30,
-      "em": 1700,
-      "ufl": 0.75,
-      "mg": 2,
-      "cb": 22,
-      "ca": 0.4,
-      "p": 0.3,
-      "max": 30
-    },
-    {
-      "id": "poisson",
-      "name": "Farine de poisson",
-      "info": "Protéines animales",
-      "cat": "protein",
-      "cp": 62,
-      "em": 2900,
-      "ufl": 1.1,
-      "mg": 9,
-      "cb": 0.5,
-      "ca": 4.5,
-      "p": 2.8,
-      "max": 60
-    },
-    {
-      "id": "luzerne",
-      "name": "Luzerne déshydratée",
-      "info": "Fibres et protéines",
-      "cat": "fiber",
-      "cp": 17,
-      "em": 1200,
-      "ufl": 0.65,
-      "mg": 2.5,
-      "cb": 25,
-      "ca": 1.5,
-      "p": 0.22,
-      "max": 50
-    },
-    {
-      "id": "pulpe",
-      "name": "Pulpe de betterave",
-      "info": "Fibres digestibles",
-      "cat": "fiber",
-      "cp": 9,
-      "em": 1000,
-      "ufl": 1,
-      "mg": 0.5,
-      "cb": 18,
-      "ca": 0.7,
-      "p": 0.08,
-      "max": 30
-    },
-    {
-      "id": "huile",
-      "name": "Huile végétale",
-      "info": "Énergie concentrée",
-      "cat": "energy",
-      "cp": 0,
-      "em": 8800,
-      "ufl": 2.5,
-      "mg": 99,
-      "cb": 0,
-      "ca": 0,
-      "p": 0,
-      "max": 12
-    },
-    {
-      "id": "calcaire",
-      "name": "Carbonate de calcium",
-      "info": "Calcium",
-      "cat": "mineral",
-      "cp": 0,
-      "em": 0,
-      "ufl": 0,
-      "mg": 0,
-      "cb": 0,
-      "ca": 38,
-      "p": 0,
-      "max": 12
-    },
-    {
-      "id": "phos",
-      "name": "Phosphate bicalcique",
-      "info": "Phosphore et calcium",
-      "cat": "mineral",
-      "cp": 0,
-      "em": 0,
-      "ufl": 0,
-      "mg": 0,
-      "cb": 0,
-      "ca": 23,
-      "p": 18,
-      "max": 3
-    },
-    {
-      "id": "cmv",
-      "name": "CMV (prémix)",
-      "info": "Vitamines et minéraux",
-      "cat": "mineral",
-      "cp": 0,
-      "em": 0,
-      "ufl": 0,
-      "mg": 0,
-      "cb": 0,
-      "ca": 0,
-      "p": 0,
-      "max": 3
-    },
-    {
-      "id": "sel",
-      "name": "Sel",
-      "info": "Sodium",
-      "cat": "mineral",
-      "cp": 0,
-      "em": 0,
-      "ufl": 0,
-      "mg": 0,
-      "cb": 0,
-      "ca": 0,
-      "p": 0,
-      "max": 1.5
-    }
-  ],
   "species": [
     {
       "id": "volailles",
       "name": "Volailles",
       "icon": "chicken",
-      "nutrients": [
-        "cp",
-        "em",
-        "ca",
-        "p",
-        "cb"
-      ],
-      "ingredients": [
-        "mais",
-        "soja",
-        "son",
-        "orge",
-        "huile",
-        "calcaire",
-        "phos",
-        "cmv",
-        "sel"
-      ],
-      "formulas": [
+      "stages": [
         {
           "id": "demarrage",
-          "label": "Poulet de chair — Démarrage (0–10 j)",
-          "mix": {
-            "mais": 55,
-            "soja": 38,
-            "huile": 2.5,
-            "calcaire": 1.2,
-            "phos": 1.8,
-            "cmv": 1,
-            "sel": 0.5
-          },
-          "target": {
-            "cp": 22,
-            "em": 2950,
-            "ca": 1,
-            "p": 0.45
-          }
+          "label": "Poulet de chair — Démarrage (0–10 j)"
         },
         {
           "id": "croissance",
-          "label": "Poulet de chair — Croissance (11–24 j)",
-          "mix": {
-            "mais": 60,
-            "soja": 33,
-            "huile": 3,
-            "calcaire": 1.2,
-            "phos": 1.3,
-            "cmv": 1,
-            "sel": 0.5
-          },
-          "target": {
-            "cp": 20,
-            "em": 3050,
-            "ca": 0.9,
-            "p": 0.4
-          }
+          "label": "Poulet de chair — Croissance (11–24 j)"
         },
         {
           "id": "finition",
-          "label": "Poulet de chair — Finition (25 j et +)",
-          "mix": {
-            "mais": 64.7,
-            "soja": 28,
-            "huile": 3.5,
-            "calcaire": 1.2,
-            "phos": 1.1,
-            "cmv": 1,
-            "sel": 0.5
-          },
-          "target": {
-            "cp": 18,
-            "em": 3150,
-            "ca": 0.85,
-            "p": 0.35
-          }
+          "label": "Poulet de chair — Finition (25 j et +)"
         },
         {
           "id": "pondeuse",
-          "label": "Poules pondeuses — Ponte",
-          "mix": {
-            "mais": 58,
-            "soja": 24,
-            "son": 5,
-            "huile": 1,
-            "calcaire": 9,
-            "phos": 1.5,
-            "cmv": 1,
-            "sel": 0.5
-          },
-          "target": {
-            "cp": 16.5,
-            "em": 2700,
-            "ca": 3.8,
-            "p": 0.38
-          }
+          "label": "Poules pondeuses — Ponte"
         },
         {
           "id": "fermier",
-          "label": "Poulet fermier",
-          "mix": {
-            "mais": 55,
-            "soja": 22,
-            "son": 10,
-            "orge": 8,
-            "huile": 1.5,
-            "calcaire": 1.3,
-            "phos": 1,
-            "cmv": 0.7,
-            "sel": 0.5
-          },
-          "target": {
-            "cp": 17,
-            "em": 2850,
-            "ca": 0.9,
-            "p": 0.35
-          }
+          "label": "Poulet fermier"
         }
       ]
     },
@@ -497,69 +217,14 @@ window.SANA_CONTENT = {
       "id": "bovins",
       "name": "Bovins",
       "icon": "cow",
-      "nutrients": [
-        "cp",
-        "ufl",
-        "cb",
-        "ca",
-        "p"
-      ],
-      "ingredients": [
-        "orge",
-        "mais",
-        "son",
-        "soja",
-        "tournesol",
-        "pulpe",
-        "luzerne",
-        "calcaire",
-        "phos",
-        "cmv",
-        "sel"
-      ],
-      "formulas": [
+      "stages": [
         {
           "id": "laitiere",
-          "label": "Vaches laitières — Concentré de production",
-          "mix": {
-            "orge": 33,
-            "mais": 20,
-            "son": 15,
-            "tournesol": 10,
-            "soja": 14,
-            "pulpe": 4,
-            "calcaire": 1.5,
-            "phos": 1,
-            "cmv": 1,
-            "sel": 0.5
-          },
-          "target": {
-            "cp": 17,
-            "ufl": 1,
-            "ca": 0.9,
-            "p": 0.35
-          }
+          "label": "Vaches laitières — Concentré de production"
         },
         {
           "id": "engraissement",
-          "label": "Taurillons — Engraissement",
-          "mix": {
-            "orge": 45,
-            "mais": 25,
-            "son": 15,
-            "soja": 8,
-            "tournesol": 3,
-            "calcaire": 1.5,
-            "phos": 0.5,
-            "cmv": 1,
-            "sel": 1
-          },
-          "target": {
-            "cp": 14,
-            "ufl": 1.05,
-            "ca": 0.7,
-            "p": 0.3
-          }
+          "label": "Taurillons — Engraissement"
         }
       ]
     },
@@ -567,69 +232,14 @@ window.SANA_CONTENT = {
       "id": "ovins",
       "name": "Ovins & caprins",
       "icon": "sheep",
-      "nutrients": [
-        "cp",
-        "ufl",
-        "cb",
-        "ca",
-        "p"
-      ],
-      "ingredients": [
-        "orge",
-        "mais",
-        "son",
-        "soja",
-        "tournesol",
-        "luzerne",
-        "pulpe",
-        "calcaire",
-        "phos",
-        "cmv",
-        "sel"
-      ],
-      "formulas": [
+      "stages": [
         {
           "id": "agneaux",
-          "label": "Agneaux — Engraissement",
-          "mix": {
-            "orge": 50,
-            "mais": 15,
-            "son": 15,
-            "soja": 10,
-            "luzerne": 6,
-            "calcaire": 1.5,
-            "phos": 0.5,
-            "cmv": 1,
-            "sel": 1
-          },
-          "target": {
-            "cp": 15,
-            "ufl": 1,
-            "ca": 0.8,
-            "p": 0.3
-          }
+          "label": "Agneaux — Engraissement"
         },
         {
           "id": "brebis",
-          "label": "Brebis et chèvres — Lactation",
-          "mix": {
-            "orge": 40,
-            "son": 20,
-            "mais": 10,
-            "soja": 12,
-            "tournesol": 8,
-            "luzerne": 6,
-            "calcaire": 1.5,
-            "phos": 0.5,
-            "cmv": 1,
-            "sel": 1
-          },
-          "target": {
-            "cp": 17,
-            "ufl": 0.95,
-            "ca": 0.9,
-            "p": 0.3
-          }
+          "label": "Brebis et chèvres — Lactation"
         }
       ]
     },
@@ -637,86 +247,18 @@ window.SANA_CONTENT = {
       "id": "porcins",
       "name": "Porcins",
       "icon": "pig",
-      "nutrients": [
-        "cp",
-        "mg",
-        "cb",
-        "ca",
-        "p"
-      ],
-      "ingredients": [
-        "mais",
-        "orge",
-        "son",
-        "soja",
-        "poisson",
-        "pulpe",
-        "huile",
-        "calcaire",
-        "phos",
-        "cmv",
-        "sel"
-      ],
-      "formulas": [
+      "stages": [
         {
           "id": "porcelets",
-          "label": "Porcelets — Premier âge",
-          "mix": {
-            "mais": 50,
-            "orge": 15,
-            "soja": 26,
-            "poisson": 3,
-            "huile": 2,
-            "calcaire": 1,
-            "phos": 1.2,
-            "cmv": 1.3,
-            "sel": 0.5
-          },
-          "target": {
-            "cp": 19,
-            "ca": 0.8,
-            "p": 0.4
-          }
+          "label": "Porcelets — Premier âge"
         },
         {
           "id": "porc-croissance",
-          "label": "Porcs — Croissance et finition",
-          "mix": {
-            "mais": 45,
-            "orge": 25,
-            "son": 8,
-            "soja": 18,
-            "calcaire": 1.2,
-            "phos": 0.8,
-            "cmv": 1.5,
-            "sel": 0.5
-          },
-          "target": {
-            "cp": 16,
-            "ca": 0.7,
-            "p": 0.3
-          }
+          "label": "Porcs — Croissance et finition"
         },
         {
           "id": "truies",
-          "label": "Truies gestantes",
-          "mix": {
-            "orge": 40,
-            "mais": 20,
-            "son": 20,
-            "soja": 10,
-            "pulpe": 6,
-            "calcaire": 1.5,
-            "phos": 1,
-            "cmv": 1,
-            "sel": 0.5
-          },
-          "target": {
-            "cp": 14,
-            "cb": 6,
-            "ca": 0.9,
-            "p": 0.35
-          }
+          "label": "Truies gestantes"
         }
       ]
     },
@@ -724,44 +266,10 @@ window.SANA_CONTENT = {
       "id": "lapins",
       "name": "Lapins",
       "icon": "rabbit",
-      "nutrients": [
-        "cp",
-        "cb",
-        "ca",
-        "p"
-      ],
-      "ingredients": [
-        "luzerne",
-        "orge",
-        "son",
-        "tournesol",
-        "soja",
-        "mais",
-        "calcaire",
-        "phos",
-        "cmv",
-        "sel"
-      ],
-      "formulas": [
+      "stages": [
         {
           "id": "lapin-engr",
-          "label": "Lapins — Engraissement",
-          "mix": {
-            "luzerne": 30,
-            "orge": 25,
-            "son": 20,
-            "tournesol": 10,
-            "soja": 6,
-            "mais": 6.5,
-            "calcaire": 1,
-            "cmv": 1,
-            "sel": 0.5
-          },
-          "target": {
-            "cp": 17,
-            "cb": 14,
-            "ca": 1
-          }
+          "label": "Lapins — Engraissement"
         }
       ]
     },
@@ -769,43 +277,10 @@ window.SANA_CONTENT = {
       "id": "poissons",
       "name": "Poissons",
       "icon": "fish",
-      "nutrients": [
-        "cp",
-        "mg",
-        "em",
-        "ca",
-        "p"
-      ],
-      "ingredients": [
-        "poisson",
-        "soja",
-        "mais",
-        "son",
-        "orge",
-        "huile",
-        "phos",
-        "cmv",
-        "sel"
-      ],
-      "formulas": [
+      "stages": [
         {
           "id": "grossissement",
-          "label": "Poissons d'élevage — Grossissement",
-          "mix": {
-            "poisson": 30,
-            "soja": 30,
-            "mais": 19,
-            "son": 10,
-            "huile": 8,
-            "phos": 1,
-            "cmv": 1.5,
-            "sel": 0.5
-          },
-          "target": {
-            "cp": 35,
-            "mg": 12,
-            "p": 1.1
-          }
+          "label": "Poissons d'élevage — Grossissement"
         }
       ]
     }
