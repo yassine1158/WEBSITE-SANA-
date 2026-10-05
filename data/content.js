@@ -10,7 +10,7 @@ window.SANA_CONTENT = {
   },
   "hero": {
     "title": "L'aliment de tous vos animaux,",
-    "highlight": "composé selon votre formule.",
+    "highlight": "formulé par nos experts.",
     "lead": "SANA fabrique des aliments pour volailles, bovins, ovins, porcins, lapins et poissons, et vend des poulets et des œufs frais. Dites-nous l'espèce, le stade et la quantité : nous formulons, fabriquons et livrons."
   },
   "about": {
@@ -23,7 +23,7 @@ window.SANA_CONTENT = {
       {
         "icon": "flask",
         "title": "Dosage précis",
-        "text": "Chaque matière première pesée selon votre formule, au dixième de pourcent."
+        "text": "Chaque matière première pesée avec précision selon nos formules."
       },
       {
         "icon": "shield",
@@ -171,7 +171,7 @@ window.SANA_CONTENT = {
   },
   "feed": {
     "title": "Aliments pour tous les animaux",
-    "desc": "Fabriqués selon votre composition ou nos formules de référence.",
+    "desc": "Formulés par notre technicien selon l'espèce, le stade et vos objectifs.",
     "items": [
       "Farine, miettes ou granulés",
       "Sacs de 25 ou 50 kg, ou vrac",
