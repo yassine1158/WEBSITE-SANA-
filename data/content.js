@@ -11,7 +11,20 @@ window.SANA_CONTENT = {
   "hero": {
     "title": "L'aliment de tous vos animaux,",
     "highlight": "formulé par nos experts.",
-    "lead": "SANA fabrique des aliments pour volailles, bovins, ovins, porcins, lapins et poissons, et vend des poulets et des œufs frais. Dites-nous l'espèce, le stade et la quantité : nous formulons, fabriquons et livrons."
+    "lead": "Les œufs à couver SANA sont disponibles dès maintenant. Aliments pour tous les animaux, poussins, poulets et œufs frais arrivent bientôt."
+  },
+  "hatching": {
+    "title": "Œufs à couver",
+    "usage": "Disponible maintenant",
+    "desc": "Œufs fécondés pour vos incubateurs et vos poules couveuses.",
+    "items": [
+      "Œufs fécondés pour incubateur ou poule couveuse",
+      "Commande sur WhatsApp",
+      "Retrait ou livraison à convenir"
+    ],
+    "price": "",
+    "status": "available",
+    "visible": true
   },
   "about": {
     "title": "Une production complète, de l'aliment à l'animal",
@@ -62,15 +75,15 @@ window.SANA_CONTENT = {
   ],
   "marketing": {
     "promo": {
-      "visible": false,
-      "text": "Exemple : -5 % sur votre première commande d'aliment sur mesure.",
-      "linkText": "En profiter",
-      "link": "#composition"
+      "visible": true,
+      "text": "Disponible maintenant : œufs à couver.",
+      "linkText": "Commander",
+      "link": "#disponible"
     },
     "cta": {
-      "title": "Un aliment sur mesure pour votre élevage ?",
-      "text": "Envoyez-nous votre besoin sur WhatsApp : nous vous proposons une formule et un devis sous 24 h.",
-      "button": "Écrire sur WhatsApp"
+      "title": "Des œufs à couver pour votre élevage ?",
+      "text": "Écrivez-nous sur WhatsApp : disponibilité, quantité et livraison, nous vous répondons rapidement.",
+      "button": "Commander sur WhatsApp"
     },
     "social": {
       "facebook": "",
@@ -123,7 +136,8 @@ window.SANA_CONTENT = {
           "Conseils de démarrage offerts"
         ],
         "price": "",
-        "visible": true
+        "visible": true,
+        "status": "soon"
       },
       {
         "id": "elevage",
@@ -138,7 +152,8 @@ window.SANA_CONTENT = {
           "Suivi sanitaire fourni"
         ],
         "price": "",
-        "visible": true
+        "visible": true,
+        "status": "soon"
       },
       {
         "id": "abattage",
@@ -153,7 +168,8 @@ window.SANA_CONTENT = {
           "Restaurants et revendeurs"
         ],
         "price": "",
-        "visible": false
+        "visible": false,
+        "status": "soon"
       }
     ]
   },
@@ -163,11 +179,11 @@ window.SANA_CONTENT = {
     "items": [
       "Plateaux de 30 œufs",
       "Calibres M, L et XL",
-      "Vente en gros et au détail",
-      "Œufs à couver sur demande"
+      "Vente en gros et au détail"
     ],
     "price": "",
-    "visible": true
+    "visible": true,
+    "status": "soon"
   },
   "feed": {
     "title": "Aliments pour tous les animaux",
@@ -183,7 +199,8 @@ window.SANA_CONTENT = {
       "Granulés",
       "Bouchons"
     ],
-    "minKg": 25
+    "minKg": 25,
+    "status": "soon"
   },
   "species": [
     {
