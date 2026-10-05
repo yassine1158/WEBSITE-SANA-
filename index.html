@@ -84,7 +84,7 @@
       <a href="#apropos">La société</a>
       <a href="#poulets">Poulets</a>
       <a href="#produits">Œufs &amp; aliments</a>
-      <a href="#composition">Formule sur mesure</a>
+      <a href="#composition">Aliment sur mesure</a>
       <a href="#contact" class="btn btn-accent btn-sm">Demander un devis</a>
     </nav>
   </div>
@@ -101,7 +101,7 @@
       <h1><span data-c="hero.title">L'aliment de tous vos animaux,</span> <em data-c="hero.highlight">composé selon votre formule.</em></h1>
       <p class="lead" data-c="hero.lead">SANA fabrique des aliments pour volailles, bovins, ovins, porcins, lapins et poissons, et vend des poulets et des œufs frais.</p>
       <div class="hero-cta">
-        <a href="#composition" class="btn btn-accent">Composer mon aliment <svg class="ico"><use href="#i-arrow"/></svg></a>
+        <a href="#composition" class="btn btn-accent">Demander mon aliment <svg class="ico"><use href="#i-arrow"/></svg></a>
         <a href="#poulets" class="btn btn-line">Nos poulets</a>
       </div>
       <dl class="hero-facts">
@@ -168,9 +168,9 @@
 <section class="section section-tint" id="composition">
   <div class="container">
     <div class="section-head">
-      <span class="eyebrow">Formule sur mesure</span>
-      <h2>Vous choisissez la composition, nous fabriquons</h2>
-      <p>Choisissez l'espèce et une formule de référence, puis ajustez chaque matière première. Les valeurs nutritionnelles se recalculent à chaque changement.</p>
+      <span class="eyebrow">Aliment sur mesure</span>
+      <h2>Un aliment adapté à votre élevage</h2>
+      <p>Dites-nous quels animaux vous nourrissez, à quel stade et en quelle quantité. Notre technicien établit la formule adaptée et vous envoie un devis sous 24 h.</p>
     </div>
 
     <div class="species-tabs" id="speciesTabs" role="tablist" aria-label="Espèce"><!-- généré en JS --></div>
@@ -179,51 +179,52 @@
       <div class="panel composer-left">
         <div class="field-row">
           <label class="field">
-            <span>Formule de référence</span>
-            <select id="preset"></select>
+            <span>Type d'aliment / stade</span>
+            <select id="stage"></select>
           </label>
           <label class="field">
             <span>Présentation</span>
             <select id="form"></select>
           </label>
         </div>
-
-        <div class="legend" aria-hidden="true">
-          <span><i class="dot dot-energy"></i>Énergie</span>
-          <span><i class="dot dot-protein"></i>Protéines</span>
-          <span><i class="dot dot-fiber"></i>Fibres</span>
-          <span><i class="dot dot-mineral"></i>Minéraux &amp; additifs</span>
+        <div class="field-row">
+          <label class="field">
+            <span>Quantité souhaitée</span>
+            <div class="qty"><input type="number" id="qty" min="25" step="25"><span>kg</span></div>
+          </label>
+          <label class="field">
+            <span>Fréquence</span>
+            <select id="freq">
+              <option>Une seule fois</option>
+              <option>Chaque semaine</option>
+              <option>Toutes les deux semaines</option>
+              <option>Chaque mois</option>
+            </select>
+          </label>
         </div>
-
-        <div class="ingredients" id="ingredients"><!-- généré en JS --></div>
-
-        <div class="composer-actions">
-          <button class="btn btn-ghost" id="resetBtn" type="button">Revenir à la formule de référence</button>
-          <button class="btn btn-ghost" id="normalizeBtn" type="button">Ramener le total à 100 %</button>
-        </div>
+        <label class="field">
+          <span>Nombre d'animaux <em class="opt">(facultatif)</em></span>
+          <input id="heads" placeholder="Ex. : 2 000 poulets, 40 vaches…">
+        </label>
+        <label class="field">
+          <span>Besoins particuliers <em class="opt">(facultatif)</em></span>
+          <textarea id="needs" rows="3" placeholder="Objectif (croissance, ponte, lait…), âge des animaux, matières premières que vous avez déjà…"></textarea>
+        </label>
       </div>
 
-      <aside class="panel composer-right">
-        <div class="total-box" id="totalBox">
-          <span>Total de la formule</span>
-          <strong id="totalVal">100 %</strong>
-          <div class="bar"><div class="bar-fill" id="totalBar"></div></div>
-          <small id="totalMsg">Formule complète</small>
+      <aside class="panel composer-right request-card">
+        <div class="req-head">
+          <span class="req-ico"><svg class="ico-lg"><use id="reqIcon" href="#i-chicken"/></svg></span>
+          <div><span class="spec-label">Votre demande</span><strong id="reqTitle"></strong></div>
         </div>
-
-        <h3>Valeurs estimées</h3>
-        <div class="nutri" id="nutri"><!-- généré en JS --></div>
-        <p class="note">Estimation à partir de tables standards des matières premières. Notre technicien valide la formule finale avant fabrication.</p>
-
-        <label class="field">
-          <span>Quantité souhaitée</span>
-          <div class="qty">
-            <input type="number" id="qty" min="25" step="25" value="500">
-            <span>kg</span>
-          </div>
-        </label>
-
-        <button class="btn btn-accent btn-block" id="useFormula" type="button">Commander cette formule</button>
+        <dl class="req-list" id="reqList"></dl>
+        <ul class="req-promise">
+          <li>Formule établie par notre technicien selon vos animaux</li>
+          <li>Devis envoyé sous 24 h</li>
+          <li>Nos formules restent confidentielles</li>
+        </ul>
+        <p class="req-msg" id="reqMsg" role="status"></p>
+        <button class="btn btn-accent btn-block" id="sendRequest" type="button">Demander mon devis</button>
       </aside>
     </div>
   </div>
@@ -303,7 +304,7 @@
         <label class="field"><span>Ville / région</span><input id="f-ville" name="ville" placeholder="Ex. : Yamoussoukro"></label>
       </div>
       <label class="field"><span>Détails de la commande *</span>
-        <textarea name="details" id="details" rows="7" required placeholder="Quantités, composition souhaitée, date de livraison…"></textarea>
+        <textarea name="details" id="details" rows="7" required placeholder="Quantités, type d'aliment, date de livraison…"></textarea>
       </label>
       <div class="form-actions">
         <button class="btn btn-primary" type="submit" data-channel="whatsapp"><svg class="ico"><use href="#i-wa"/></svg> Envoyer sur WhatsApp</button>
@@ -328,7 +329,7 @@
       <a href="#apropos">La société</a>
       <a href="#poulets">Poulets</a>
       <a href="#produits">Œufs &amp; aliments</a>
-      <a href="#composition">Formule sur mesure</a>
+      <a href="#composition">Aliment sur mesure</a>
       <a href="#faq">Questions fréquentes</a>
     </nav>
     <div class="footer-col">

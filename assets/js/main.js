@@ -27,23 +27,11 @@ function loadContent() {
 }
 const C = loadContent();
 
-// Nutriments calculés (clé -> libellé, unité, décimales, tolérance d'écart)
-const NUTRIENTS = {
-  cp:  { label: "Protéines brutes", unit: " %",       dec: 1, tol: 1 },
-  em:  { label: "Énergie (EM)",     unit: " kcal/kg", dec: 0, tol: 100 },
-  ufl: { label: "Énergie (UFL)",    unit: " UFL/kg",  dec: 2, tol: 0.05 },
-  mg:  { label: "Matières grasses", unit: " %",       dec: 1, tol: 1.5 },
-  cb:  { label: "Cellulose brute",  unit: " %",       dec: 1, tol: 1.5 },
-  ca:  { label: "Calcium",          unit: " %",       dec: 2, tol: 0.2 },
-  p:   { label: "Phosphore",        unit: " %",       dec: 2, tol: 0.1 },
-};
-
 const $ = (s, el = document) => el.querySelector(s);
 const round = (n, d = 1) => Math.round(n * 10 ** d) / 10 ** d;
 const fmt = (n, d = 1) => round(n, d).toLocaleString("fr-FR", { maximumFractionDigits: d });
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const get = (obj, path) => path.split(".").reduce((o, k) => (o == null ? o : o[k]), obj);
-const ING = Object.fromEntries(C.ingredients.map(i => [i.id, i]));
 
 // ---------------------------------------------------------
 // Textes simples
@@ -209,7 +197,7 @@ if (C.eggs.visible !== false) other += card({
 other += card({
   icon: "sack", media: "media-orange", title: C.feed.title, desc: C.feed.desc, tag: "Sur mesure", main: true,
   items: [C.species.map(s => s.name).join(", "), ...C.feed.items],
-  btn: `<a href="#composition" class="btn btn-primary">Composer ma formule</a>`,
+  btn: `<a href="#composition" class="btn btn-primary">Demander mon aliment</a>`,
 });
 $("#otherProducts").innerHTML = other;
 
@@ -237,14 +225,14 @@ links.addEventListener("click", e => {
 });
 
 // ---------------------------------------------------------
-// Composition sur mesure
+// Demande d'aliment sur mesure (aucune formule n'est affichée : SANA l'établit)
 // ---------------------------------------------------------
-const state = {};
 let species = C.species[0];
-const presetSel = $("#preset");
-const ingBox = $("#ingredients");
+const stageSel = $("#stage");
+const stagesOf = s => s.stages || s.formulas || [];
 
 $("#form").innerHTML = C.feed.forms.map(f => `<option${f === "Granulés" ? " selected" : ""}>${esc(f)}</option>`).join("");
+$("#qty").value = Math.max(C.feed.minKg, 500);
 
 $("#speciesTabs").innerHTML = C.species.map((s, i) => `
   <button type="button" role="tab" class="species-tab" data-sp="${esc(s.id)}" aria-selected="${i === 0}">
@@ -266,127 +254,54 @@ $("#speciesTabs").addEventListener("click", e => {
 function selectSpecies(id) {
   species = C.species.find(s => s.id === id) || C.species[0];
   document.querySelectorAll(".species-tab").forEach(b => b.setAttribute("aria-selected", b.dataset.sp === species.id));
-  presetSel.innerHTML = species.formulas.map(f => `<option value="${esc(f.id)}">${esc(f.label)}</option>`).join("");
-  const def = species.formulas.find(f => f.id === "croissance");
-  if (def) presetSel.value = def.id;
-  renderIngredients();
-  loadPreset();
+  $("#reqIcon").setAttribute("href", `#i-${species.icon}`);
+  stageSel.innerHTML = stagesOf(species).map(f => `<option>${esc(f.label)}</option>`).join("")
+    + `<option value="">Autre / à définir avec vous</option>`;
+  updateSummary();
 }
 
-function formula() { return species.formulas.find(f => f.id === presetSel.value) || species.formulas[0]; }
-function ingList() { return species.ingredients.map(id => ING[id]).filter(Boolean); }
-
-function renderIngredients() {
-  ingBox.innerHTML = ingList().map(i => `
-    <div class="ing" data-id="${esc(i.id)}" data-cat="${esc(i.cat)}">
-      <div class="ing-name"><i class="dot dot-${esc(i.cat)}"></i><span>${esc(i.name)}<small>${esc(i.info)}</small></span></div>
-      <input type="range" min="0" max="${i.max}" step="0.1" aria-label="${esc(i.name)}">
-      <div class="ing-num"><input type="number" min="0" max="100" step="0.1" aria-label="${esc(i.name)} en %"><span>%</span></div>
-    </div>`).join("");
-
-  ingBox.querySelectorAll(".ing").forEach(row => {
-    const id = row.dataset.id;
-    const range = $("input[type=range]", row);
-    const num = $("input[type=number]", row);
-    range.addEventListener("input", () => { state[id] = +range.value; num.value = range.value; paint(range); update(); });
-    num.addEventListener("input", () => {
-      const v = Math.max(0, Math.min(100, parseFloat(num.value) || 0));
-      state[id] = v; range.value = v; paint(range); update();
-    });
-  });
+function request() {
+  return {
+    species: species.name,
+    stage: stageSel.value || "À définir avec SANA",
+    form: $("#form").value,
+    qty: Math.max(0, parseInt($("#qty").value, 10) || 0),
+    freq: $("#freq").value,
+    heads: $("#heads").value.trim(),
+    notes: $("#needs").value.trim(),
+  };
 }
 
-// remplissage coloré de la piste du curseur
-function paint(range) {
-  range.style.setProperty("--p", `${Math.min(100, (range.value / range.max) * 100)}%`);
+function updateSummary() {
+  const r = request();
+  $("#reqTitle").textContent = r.species;
+  $("#reqList").innerHTML = [
+    ["Aliment", r.stage],
+    ["Présentation", r.form],
+    ["Quantité", r.qty ? `${r.qty.toLocaleString("fr-FR")} kg` : "—"],
+    ["Fréquence", r.freq],
+    ...(r.heads ? [["Animaux", r.heads]] : []),
+  ].map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("");
+  const low = r.qty && r.qty < C.feed.minKg;
+  $("#reqMsg").textContent = low ? `La commande minimum est de ${C.feed.minKg} kg.` : "";
 }
+["#stage", "#form", "#qty", "#freq", "#heads", "#needs"].forEach(id => $(id).addEventListener("input", updateSummary));
 
-function loadPreset() {
-  Object.keys(state).forEach(k => delete state[k]);
-  ingList().forEach(i => { state[i.id] = +(formula().mix[i.id] || 0); });
-  syncInputs();
-  update();
-}
-
-function syncInputs() {
-  ingBox.querySelectorAll(".ing").forEach(row => {
-    const v = state[row.dataset.id] || 0;
-    const range = $("input[type=range]", row);
-    range.value = v;
-    paint(range);
-    $("input[type=number]", row).value = round(v, 1);
-  });
-}
-
-const total = () => Object.values(state).reduce((s, v) => s + v, 0);
-
-function computeNutrients() {
-  const t = total() || 1;
-  const res = Object.fromEntries(Object.keys(NUTRIENTS).map(k => [k, 0]));
-  Object.entries(state).forEach(([id, v]) => {
-    Object.keys(res).forEach(k => { res[k] += (v / t) * (+ING[id][k] || 0); });
-  });
-  return res;
-}
-
-function update() {
-  const t = round(total(), 1);
-  const ok = Math.abs(t - 100) < 0.05;
-  $("#totalVal").textContent = `${fmt(t)} %`;
-  $("#totalBar").style.width = `${Math.min(t, 100)}%`;
-  $("#totalBox").classList.toggle("bad", !ok);
-  $("#totalMsg").textContent = ok ? "Formule complète"
-    : t < 100 ? `Il manque ${fmt(100 - t)} %` : `Dépassement de ${fmt(t - 100)} %`;
-
-  const res = computeNutrients();
-  const target = formula().target || {};
-  $("#nutri").innerHTML = species.nutrients.map(k => {
-    const n = NUTRIENTS[k];
-    const v = res[k];
-    const tg = target[k];
-    let cls = "", tgTxt = "";
-    if (tg !== undefined && tg !== null && tg !== "") {
-      cls = Math.abs(v - tg) <= n.tol ? "ok" : "warn";
-      tgTxt = `<span class="target">Recommandé : ${fmt(tg, n.dec)}${n.unit} · ${cls === "ok" ? "conforme" : "à ajuster"}</span>`;
-    }
-    return `<div class="nutri-item"><span>${n.label}</span><span class="val ${cls}">${fmt(v, n.dec)}${n.unit}</span>${tgTxt}</div>`;
-  }).join("");
-}
-
-$("#resetBtn").addEventListener("click", loadPreset);
-presetSel.addEventListener("change", loadPreset);
-$("#normalizeBtn").addEventListener("click", () => {
-  const t = total();
-  if (!t) return;
-  Object.keys(state).forEach(id => { state[id] = round(state[id] * 100 / t, 1); });
-  // corrige l'arrondi sur l'ingrédient principal
-  const main = Object.keys(state).reduce((a, b) => (state[a] >= state[b] ? a : b));
-  state[main] = round(state[main] + 100 - total(), 1);
-  syncInputs(); update();
-});
-
-$("#useFormula").addEventListener("click", () => {
-  const t = round(total(), 1);
-  if (Math.abs(t - 100) >= 0.05) {
-    $("#totalMsg").textContent = `Le total doit faire 100 % avant de commander (actuellement ${fmt(t)} %).`;
+$("#sendRequest").addEventListener("click", () => {
+  const r = request();
+  if (!r.qty || r.qty < C.feed.minKg) {
+    $("#reqMsg").textContent = `Indiquez une quantité d'au moins ${C.feed.minKg} kg.`;
+    $("#qty").focus();
     return;
   }
-  const res = computeNutrients();
-  const qty = parseInt($("#qty").value, 10) || 0;
-  const lines = Object.entries(state).filter(([, v]) => v > 0)
-    .map(([id, v]) => `- ${ING[id].name} : ${fmt(v)} %`);
-  const vals = species.nutrients.map(k => `${NUTRIENTS[k].label.toLowerCase()} ${fmt(res[k], NUTRIENTS[k].dec)}${NUTRIENTS[k].unit}`);
-  track("formula_composed", { species: species.name, formula: formula().label });
+  track("feed_request", { species: r.species, stage: r.stage });
   $("#produitSelect").value = "Aliment sur mesure";
   $("#details").value =
-`Espèce : ${species.name}
-Formule : ${formula().label} (${$("#form").value})
-Quantité : ${qty} kg
-
-Composition :
-${lines.join("\n")}
-
-Valeurs estimées : ${vals.join(", ")}.`;
+`Demande d'aliment sur mesure
+Espèce : ${r.species}
+Aliment : ${r.stage}
+Présentation : ${r.form}
+Quantité : ${r.qty} kg (${r.freq.toLowerCase()})${r.heads ? `\nNombre d'animaux : ${r.heads}` : ""}${r.notes ? `\n\nBesoins particuliers : ${r.notes}` : ""}`;
   $("#contact").scrollIntoView({ behavior: "smooth" });
   setTimeout(() => $("#f-nom").focus({ preventScroll: true }), 600);
 });

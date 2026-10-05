@@ -37,8 +37,18 @@ function withDefaults(obj, def) {
   return obj;
 }
 
-let published = clone(window.SANA_CONTENT);
-let data = (() => { try { const d = JSON.parse(store.get(DRAFT_KEY)); return d ? withDefaults(d, published) : clone(published); } catch (e) { return clone(published); } })();
+// Les formules sont confidentielles : aucun pourcentage ni valeur nutritionnelle n'est conservé ou publié
+function sanitize(d) {
+  delete d.ingredients;
+  (d.species || []).forEach(sp => {
+    sp.stages = (sp.stages || sp.formulas || []).map(st => ({ id: st.id || "", label: st.label || "" }));
+    delete sp.formulas; delete sp.ingredients; delete sp.nutrients;
+  });
+  return d;
+}
+
+let published = sanitize(clone(window.SANA_CONTENT));
+let data = (() => { try { const d = JSON.parse(store.get(DRAFT_KEY)); return d ? sanitize(withDefaults(d, published)) : clone(published); } catch (e) { return clone(published); } })();
 let tab = store.get(TAB_KEY) || "societe";
 let ghMemory = null; // jeton déchiffré, gardé en mémoire tant que l'admin est déverrouillée
 let vaultPass = null;
@@ -142,7 +152,7 @@ const TABS = {
         ${F.text("YouTube", "marketing.social.youtube", { ph: "https://youtube.com/@…" })}
       </div>`)}
     ${card("Mesure d'audience", `
-      <p class="intro">Renseignez vos identifiants pour suivre les visites et les demandes de devis (événements : <em>whatsapp_click</em>, <em>generate_lead</em> / <em>Lead</em>, <em>formula_composed</em>).</p>
+      <p class="intro">Renseignez vos identifiants pour suivre les visites et les demandes de devis (événements : <em>whatsapp_click</em>, <em>generate_lead</em> / <em>Lead</em>, <em>feed_request</em>).</p>
       <div class="grid-2">
         ${F.text("Google Analytics 4 (ID de mesure)", "marketing.analytics.ga4", { ph: "G-XXXXXXXXXX" })}
         ${F.text("Pixel Meta (Facebook / Instagram)", "marketing.analytics.metaPixel", { ph: "123456789012345" })}
@@ -208,53 +218,24 @@ const TABS = {
       ${F.lines("Présentations proposées", "feed.forms", { help: "Une par ligne : Farine, Granulés…" })}`)}`,
 
   especes: () => `
-    <h2>Espèces &amp; formules</h2>
-    <p class="intro">Chaque espèce a ses matières premières, ses valeurs affichées et ses formules de référence. Le total de chaque formule doit faire 100 %.</p>
-    ${data.species.map((s, si) => card(esc(s.name || "Nouvelle espèce"), `
+    <h2>Espèces &amp; stades</h2>
+    <p class="intro">Les espèces et les types d'aliment que le client peut choisir dans « Aliment sur mesure ». Aucune formule n'est enregistrée ni affichée sur le site : vous envoyez la formule au client avec votre devis.</p>
+    ${data.species.map((sp, si) => card(esc(sp.name || "Nouvelle espèce"), `
       <div class="grid-2">${F.text("Nom", `species.${si}.name`)}${F.select("Icône", `species.${si}.icon`, ICONS)}</div>
-      <fieldset class="chips"><legend>Matières premières utilisables</legend>
-        ${data.ingredients.map(ing => `<label class="chip"><input type="checkbox" data-act="toggle-ing" data-sp="${si}" data-ing="${ing.id}" ${s.ingredients.includes(ing.id) ? "checked" : ""}><span>${esc(ing.name)}</span></label>`).join("")}
-      </fieldset>
-      <fieldset class="chips"><legend>Valeurs nutritionnelles affichées</legend>
-        ${Object.entries(NUTRIENTS).map(([k, l]) => `<label class="chip"><input type="checkbox" data-act="toggle-nut" data-sp="${si}" data-nut="${k}" ${s.nutrients.includes(k) ? "checked" : ""}><span>${l}</span></label>`).join("")}
-      </fieldset>
-      <div class="formulas">
-        ${s.formulas.map((f, fi) => `
-          <div class="formula">
-            <div class="formula-head">
-              ${F.text("Nom de la formule", `species.${si}.formulas.${fi}.label`, { cls: "grow" })}
-              <span class="ftotal" data-total="${si}.${fi}"></span>
-              ${btn("Dupliquer", "dup-formula", `data-sp="${si}" data-f="${fi}"`)}
-              ${del("del-formula", `data-sp="${si}" data-f="${fi}"`)}
-            </div>
-            <p class="sub">Composition (%)</p>
-            <div class="mix">${s.ingredients.map(id => {
-              const ing = data.ingredients.find(x => x.id === id);
-              return ing ? F.num(esc(ing.name), `species.${si}.formulas.${fi}.mix.${id}`, { optional: true }) : "";
-            }).join("")}</div>
-            <p class="sub">Valeurs recommandées (laisser vide si aucune)</p>
-            <div class="mix">${s.nutrients.map(k => F.num(NUTRIENTS[k], `species.${si}.formulas.${fi}.target.${k}`, { optional: true })).join("")}</div>
-          </div>`).join("")}
+      <p class="sub">Types d'aliment / stades proposés</p>
+      <div class="stages">${(sp.stages || []).map((st, i, arr) => `
+        <div class="stage-row">
+          <input data-path="species.${si}.stages.${i}.label" value="${esc(st.label)}" aria-label="Stade ${i + 1}" placeholder="Ex. : Poules pondeuses — Ponte">
+          ${i > 0 ? btn("↑", "move-item", `data-list="species.${si}.stages" data-i="${i}" data-d="-1" aria-label="Monter"`) : ""}
+          ${i < arr.length - 1 ? btn("↓", "move-item", `data-list="species.${si}.stages" data-i="${i}" data-d="1" aria-label="Descendre"`) : ""}
+          ${del("del-item", `data-list="species.${si}.stages" data-i="${i}"`)}
+        </div>`).join("")}
       </div>
-      ${btn("+ Ajouter une formule", "add-formula", `data-sp="${si}"`)}`,
-      `${del("del-species", `data-sp="${si}"`)}`)).join("")}
+      ${btn("+ Ajouter un stade", "add-item", `data-list="species.${si}.stages" data-blank="${esc(JSON.stringify({ id: "", label: "" }))}"`)}`,
+      `${si > 0 ? btn("↑", "move-item", `data-list="species" data-i="${si}" data-d="-1" aria-label="Monter"`) : ""}
+       ${si < data.species.length - 1 ? btn("↓", "move-item", `data-list="species" data-i="${si}" data-d="1" aria-label="Descendre"`) : ""}
+       ${del("del-species", `data-sp="${si}"`)}`)).join("")}
     ${btn("+ Ajouter une espèce", "add-species", "", "btn-primary")}`,
-
-  matieres: () => `
-    <h2>Matières premières</h2>
-    <p class="intro">Valeurs nutritionnelles par kg d'aliment brut. Elles servent au calcul automatique sur le site. « Max » est la limite du curseur (%).</p>
-    <div class="table-wrap"><table class="ing-table">
-      <thead><tr><th>Nom</th><th>Rôle</th><th>Catégorie</th>${Object.keys(NUTRIENTS).map(k => `<th title="${NUTRIENTS[k]}">${k.toUpperCase()}</th>`).join("")}<th>Max</th><th></th></tr></thead>
-      <tbody>${data.ingredients.map((ing, i) => `<tr>
-        <td><input data-path="ingredients.${i}.name" value="${esc(ing.name)}" aria-label="Nom"></td>
-        <td><input data-path="ingredients.${i}.info" value="${esc(ing.info)}" aria-label="Rôle"></td>
-        <td><select data-path="ingredients.${i}.cat" aria-label="Catégorie">${Object.entries(CATS).map(([v, t]) => `<option value="${v}" ${ing.cat === v ? "selected" : ""}>${t}</option>`).join("")}</select></td>
-        ${Object.keys(NUTRIENTS).map(k => `<td><input type="number" step="any" class="n" data-path="ingredients.${i}.${k}" data-type="number" value="${ing[k] ?? 0}" aria-label="${NUTRIENTS[k]}"></td>`).join("")}
-        <td><input type="number" step="any" class="n" data-path="ingredients.${i}.max" data-type="number" value="${ing.max}" aria-label="Maximum"></td>
-        <td>${del("del-ing", `data-i="${i}"`)}</td></tr>`).join("")}</tbody>
-    </table></div>
-    <p class="legend-n">${Object.entries(NUTRIENTS).map(([k, l]) => `<b>${k.toUpperCase()}</b> ${l}`).join(" · ")}</p>
-    ${btn("+ Ajouter une matière première", "add-ing", "", "btn-primary")}`,
 
   publication: () => {
     const gh = ghSettings();
@@ -313,18 +294,7 @@ function updateUtm() {
 }
 const slugPlain = s => String(s).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
-function formulaTotal(si, fi) {
-  const f = data.species[si].formulas[fi];
-  return round(data.species[si].ingredients.reduce((s, id) => s + (+f.mix[id] || 0), 0), 2);
-}
-function updateTotals() {
-  document.querySelectorAll("[data-total]").forEach(el => {
-    const [si, fi] = el.dataset.total.split(".").map(Number);
-    const t = formulaTotal(si, fi);
-    el.textContent = `Total : ${t.toLocaleString("fr-FR")} %`;
-    el.classList.toggle("bad", Math.abs(t - 100) >= 0.05);
-  });
-}
+function updateTotals() {}
 
 const isDirty = () => JSON.stringify(data) !== JSON.stringify(published);
 function updateStatus() {
@@ -367,15 +337,11 @@ function toast(text, type = "info") {
 
 function validate() {
   const out = [];
-  data.species.forEach((s, si) => {
-    if (!s.formulas.length) out.push(`${s.name} : ajoutez au moins une formule.`);
-    s.formulas.forEach((f, fi) => {
-      const t = formulaTotal(si, fi);
-      if (Math.abs(t - 100) >= 0.05) out.push(`${s.name} — « ${f.label} » : le total fait ${t.toLocaleString("fr-FR")} % au lieu de 100 %.`);
-    });
-  });
   if (!data.species.length) out.push("Ajoutez au moins une espèce.");
-  data.ingredients.forEach(i => { if (!i.name.trim()) out.push("Une matière première n'a pas de nom."); });
+  data.species.forEach(sp => {
+    if (!sp.name.trim()) out.push("Une espèce n'a pas de nom.");
+    if (!(sp.stages || []).some(st => st.label.trim())) out.push(`${sp.name || "Une espèce"} : ajoutez au moins un type d'aliment.`);
+  });
   return out;
 }
 
@@ -385,7 +351,6 @@ function validate() {
 function onEdit(e) {
   const el = e.target;
   if (el.id === "utm-campaign" || el.id === "utm-source") return updateUtm();
-  if (el.dataset.act === "toggle-ing" || el.dataset.act === "toggle-nut") return onToggle(el);
   const path = el.dataset.path;
   if (!path) return;
   let v;
@@ -402,21 +367,6 @@ function onEdit(e) {
   if (el.dataset.rerender && e.type === "change") render();
 }
 
-function onToggle(el) {
-  const s = data.species[+el.dataset.sp];
-  const list = el.dataset.act === "toggle-ing" ? s.ingredients : s.nutrients;
-  const key = el.dataset.ing || el.dataset.nut;
-  const order = el.dataset.act === "toggle-ing" ? data.ingredients.map(i => i.id) : Object.keys(NUTRIENTS);
-  if (el.checked && !list.includes(key)) list.push(key);
-  if (!el.checked) {
-    list.splice(list.indexOf(key), 1);
-    if (el.dataset.ing) s.formulas.forEach(f => delete f.mix[key]);
-  }
-  list.sort((a, b) => order.indexOf(a) - order.indexOf(b));
-  save();
-  render();
-}
-
 // ---------------------------------------------------------
 // Actions
 // ---------------------------------------------------------
@@ -427,23 +377,8 @@ const ACTIONS = {
     const i = +b.dataset.i, j = i + +b.dataset.d, a = data.chickens.offers;
     [a[i], a[j]] = [a[j], a[i]];
   },
-  "add-species": () => data.species.push({ id: slug("espece"), name: "Nouvelle espèce", icon: "cow", nutrients: ["cp", "ufl", "cb", "ca", "p"], ingredients: ["orge", "mais", "son", "soja"].filter(id => data.ingredients.some(i => i.id === id)), formulas: [{ id: slug("formule"), label: "Nouvelle formule", mix: {}, target: {} }] }),
+  "add-species": () => data.species.push({ id: slug("espece"), name: "Nouvelle espèce", icon: "cow", stages: [{ id: "", label: "" }] }),
   "del-species": b => data.species.splice(+b.dataset.sp, 1),
-  "add-formula": b => data.species[+b.dataset.sp].formulas.push({ id: slug("formule"), label: "Nouvelle formule", mix: {}, target: {} }),
-  "dup-formula": b => {
-    const fs = data.species[+b.dataset.sp].formulas, f = clone(fs[+b.dataset.f]);
-    f.id = slug(f.label); f.label += " (copie)";
-    fs.splice(+b.dataset.f + 1, 0, f);
-  },
-  "del-formula": b => data.species[+b.dataset.sp].formulas.splice(+b.dataset.f, 1),
-  "add-ing": () => data.ingredients.push({ id: slug("matiere"), name: "Nouvelle matière", info: "", cat: "energy", cp: 0, em: 0, ufl: 0, mg: 0, cb: 0, ca: 0, p: 0, max: 20 }),
-  "del-ing": b => {
-    const [ing] = data.ingredients.splice(+b.dataset.i, 1);
-    data.species.forEach(s => {
-      s.ingredients = s.ingredients.filter(id => id !== ing.id);
-      s.formulas.forEach(f => delete f.mix[ing.id]);
-    });
-  },
   "add-item": b => (getP(b.dataset.list) || (setP(b.dataset.list, []), getP(b.dataset.list))).push(JSON.parse(b.dataset.blank)),
   "del-item": b => getP(b.dataset.list).splice(+b.dataset.i, 1),
   "move-item": b => {
@@ -517,8 +452,8 @@ $("#importFile").addEventListener("change", async e => {
   try {
     const txt = (await file.text()).trim().replace(/^window\.SANA_CONTENT\s*=\s*/, "").replace(/;\s*$/, "");
     const obj = JSON.parse(txt);
-    if (!obj.company || !Array.isArray(obj.species) || !Array.isArray(obj.ingredients)) throw new Error("format");
-    data = obj;
+    if (!obj.company || !Array.isArray(obj.species)) throw new Error("format");
+    data = sanitize(withDefaults(obj, published));
     save(); render();
     toast("Copie importée. Vérifiez puis publiez.", "success");
   } catch (err) {
@@ -552,7 +487,7 @@ async function readGhForm() {
   return ghSettings();
 }
 
-const serialize = () => `window.SANA_CONTENT = ${JSON.stringify(data, null, 2)};\n`;
+const serialize = () => `window.SANA_CONTENT = ${JSON.stringify(sanitize(data), null, 2)};\n`;
 function b64(str) {
   const bytes = new TextEncoder().encode(str);
   let bin = "";

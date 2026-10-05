@@ -6,12 +6,12 @@ Site vitrine de **SANA — Société Africaine de Nutrition Animale** : aliments
 - **La société** : présentation.
 - **Poulets** : offres selon l'usage — poussins d'un jour, poulets pour l'élevage, poulets pour l'abattage.
 - **Œufs & aliments**.
-- **Formule sur mesure** : le client choisit l'espèce et une formule de référence, ajuste chaque matière première et voit en temps réel le total (100 %) et les valeurs estimées (protéines, énergie EM ou UFL, matières grasses, cellulose, calcium, phosphore).
-- **Commande** : formulaire envoyé sur **WhatsApp** ou par **e-mail**, pré-rempli avec la formule.
+- **Aliment sur mesure** : le client choisit l'espèce, le type d'aliment (stade), la présentation, la quantité et la fréquence, puis envoie sa demande. **Aucune formule n'est affichée ni enregistrée sur le site** : SANA établit la formule et l'envoie avec le devis.
+- **Commande** : formulaire envoyé sur **WhatsApp** ou par **e-mail**, pré-rempli avec la demande d'aliment.
 
 ## Administration (`admin.html`)
 Tout le contenu est dans `data/content.js`. La page `admin.html` (lien « Administration » en bas du site) permet de tout modifier sans toucher au code :
-coordonnées, textes d'accueil, offres de poulets (ajout, masquage, ordre, prix), œufs, aliments, espèces et formules, matières premières et leurs valeurs nutritionnelles.
+coordonnées, textes d'accueil, offres de poulets (ajout, masquage, ordre, prix), œufs, aliments, espèces et types d'aliment (stades).
 
 1. Les modifications sont enregistrées automatiquement **sur votre appareil** (brouillon).
 2. **Aperçu du site** : affiche le site avec le brouillon (visible uniquement sur votre appareil).
@@ -36,7 +36,7 @@ Onglet **Marketing** de l'administration :
 - **Bandeau promotionnel** en haut du site (message + lien), activable à tout moment.
 - **Bandeau d'appel WhatsApp** (titre, texte, bouton).
 - **Réseaux sociaux** : Facebook, Instagram, TikTok, YouTube (icônes affichées seulement si renseignées).
-- **Mesure d'audience** : Google Analytics 4 et Pixel Meta. Événements envoyés : `whatsapp_click`, `generate_lead` (*Lead* côté Meta), `formula_composed`.
+- **Mesure d'audience** : Google Analytics 4 et Pixel Meta. Événements envoyés : `whatsapp_click`, `generate_lead` (*Lead* côté Meta), `feed_request`.
 - **Référencement** : titre et description Google, adresse du site.
 - **Liens de campagne** : générateur de liens `?utm_source=…&utm_campaign=…`. La campagne d'origine est ajoutée automatiquement aux messages WhatsApp et e-mail reçus.
 
