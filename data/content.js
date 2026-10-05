@@ -153,7 +153,7 @@ window.SANA_CONTENT = {
           "Restaurants et revendeurs"
         ],
         "price": "",
-        "visible": true
+        "visible": false
       }
     ]
   },

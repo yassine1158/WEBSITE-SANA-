@@ -99,14 +99,14 @@
   });
 
   // ---------- Fiche formule : inclinaison 3D au survol ----------
-  const spec = document.querySelector(".spec");
+  const spec = document.querySelector(".hero-visual");
   const hero = document.querySelector(".hero");
   if (spec && hero && finePointer) {
     hero.addEventListener("pointermove", e => {
       const r = spec.getBoundingClientRect();
       const x = (e.clientX - (r.left + r.width / 2)) / window.innerWidth;
       const y = (e.clientY - (r.top + r.height / 2)) / window.innerHeight;
-      spec.style.transform = `perspective(1000px) rotateY(${x * 10}deg) rotateX(${-y * 10}deg) translateY(-4px)`;
+      spec.style.transform = `perspective(1000px) rotateY(${x * 12}deg) rotateX(${-y * 12}deg)`;
     });
     hero.addEventListener("pointerleave", () => { spec.style.transform = ""; });
   }
