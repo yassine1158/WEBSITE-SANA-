@@ -50,6 +50,7 @@
     <button type="button" data-tab="especes">Espèces &amp; stades</button>
     <button type="button" data-tab="marketing">Marketing</button>
     <button type="button" data-tab="avis">Avis &amp; FAQ</button>
+    <button type="button" data-tab="ia">Studio IA ✦</button>
     <button type="button" data-tab="publication">Publication</button>
   </nav>
 
@@ -66,7 +67,7 @@
   (function () {
     var v = Math.floor(Date.now() / 60000);
     function load(src, next) { var s = document.createElement("script"); s.src = src + "?v=" + v; if (next) s.onload = next; document.body.appendChild(s); }
-    load("data/content.js", function () { load("assets/js/admin.js"); });
+    load("data/content.js", function () { load("assets/js/admin.js", function () { load("assets/js/admin-ai.js"); }); });
   })();
 </script>
 </body>
