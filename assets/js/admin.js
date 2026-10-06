@@ -52,7 +52,10 @@ let published = sanitize(clone(window.SANA_CONTENT));
 let data = (() => { try { const d = JSON.parse(store.get(DRAFT_KEY)); return d ? sanitize(withDefaults(d, published)) : clone(published); } catch (e) { return clone(published); } })();
 let tab = store.get(TAB_KEY) || "societe";
 let ghMemory = null; // jeton déchiffré, gardé en mémoire tant que l'admin est déverrouillée
+let secrets = {};    // autres clés chiffrées (IA, Facebook), en mémoire tant que l'admin est déverrouillée
 let vaultPass = null;
+const allSecrets = () => ({ ...secrets, token: ghMemory || "" });
+const AFTER_RENDER = [];
 
 // ---------------------------------------------------------
 // Accès aux valeurs par chemin ("chickens.offers.0.title")
@@ -291,6 +294,7 @@ function render() {
   updateTotals();
   updateUtm();
   updateStatus();
+  AFTER_RENDER.forEach(f => f());
 }
 
 function updateUtm() {
@@ -406,7 +410,7 @@ const ACTIONS = {
     const a = $("#pw-new").value, b = $("#pw-confirm").value;
     if (a.length < 8) { toast("Le mot de passe doit contenir au moins 8 caractères.", "error"); return false; }
     if (a !== b) { toast("Les deux mots de passe ne sont pas identiques.", "error"); return false; }
-    sealVault(a, { token: ghMemory || "" }).then(() => { vaultPass = a; render(); toast("Mot de passe changé.", "success"); });
+    sealVault(a, allSecrets()).then(() => { vaultPass = a; render(); toast("Mot de passe changé.", "success"); });
     return false;
   },
   export: () => {
@@ -492,7 +496,7 @@ async function readGhForm() {
   const token = $("#gh-token").value.trim();
   if (token && token !== ghMemory) {
     ghMemory = token;
-    await sealVault(vaultPass, { token });
+    await sealVault(vaultPass, allSecrets());
   }
   return ghSettings();
 }
@@ -595,6 +599,7 @@ function dropLegacyToken() {
 
 function showLock() {
   ghMemory = null;
+  secrets = {};
   vaultPass = null;
   document.body.classList.add("locked");
   const setup = !hasVault();
@@ -613,9 +618,11 @@ function showLock() {
   setTimeout(() => $("#lk-pass")?.focus(), 50);
 }
 
-function unlock(pass, token) {
+function unlock(pass, secret) {
   vaultPass = pass;
-  ghMemory = token || "";
+  secrets = { ...secret };
+  delete secrets.token;
+  ghMemory = secret.token || "";
   document.body.classList.remove("locked");
   render();
   warnStaleDraft();
@@ -636,11 +643,11 @@ $("#lockForm").addEventListener("submit", async e => {
       const token = $("#lk-token").value.trim();
       await sealVault(pass, { token });
       dropLegacyToken();
-      unlock(pass, token);
+      unlock(pass, { token });
     } else {
       msg.textContent = "Vérification…";
       const secret = await openVault(pass);
-      unlock(pass, secret.token);
+      unlock(pass, secret);
     }
   } catch (err) {
     msg.textContent = "Mot de passe incorrect.";
