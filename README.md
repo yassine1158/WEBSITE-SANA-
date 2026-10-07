@@ -47,7 +47,7 @@ Si vous passez sur votre propre nom de domaine, remplacez `https://yassine1158.g
 
 ## DOLPHin, studio IA (onglet « DOLPHin ✦ » de l'administration)
 
-- L'onglet intègre le composant `<dolphin-studio>` du dépôt [yassine1158/dolphin](https://github.com/yassine1158/dolphin) (privé). Le fichier `assets/vendor/dolphin.js` est une copie de son `dist/dolphin.js`. Pour mettre DOLPHin à jour, recopiez ce fichier.
+- L'onglet intègre le composant `<dolphin-studio>` (v0.3.0) du dépôt [yassine1158/dolphin](https://github.com/yassine1158/dolphin) (privé). Le fichier `assets/vendor/dolphin.js` est une copie de son `dist/dolphin.js` : pour mettre DOLPHin à jour, recopiez ce fichier. DOLPHin lit `index.html` pour proposer des idées de publications.
 - La marque est construite à partir du contenu du site (`sanaBrand()` dans `assets/js/admin-ai.js`) : chaque produit est « disponible » ou « bientôt » selon son état dans l'admin. Les prix, quantités et formules ne sont jamais mentionnés.
 - **Claude** (clé API de console.anthropic.com, paiement à l'usage, environ 25 FCFA par publication avec Claude Opus 5.5) écrit les publications. L'affiche 1080 × 1350 est dessinée aux couleurs SANA. **Facebook** (ID et jeton de la page, permission `pages_manage_posts`) publie ou programme, de 10 minutes à 30 jours à l'avance.
 - Les clés restent dans le coffre chiffré de l'administration, avec le même mot de passe que le jeton GitHub : il n'y a pas de seconde phrase secrète.
