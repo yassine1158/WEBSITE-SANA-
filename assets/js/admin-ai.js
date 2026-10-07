@@ -80,7 +80,7 @@ function migrateOldPosts() {
 
 TABS.ia = () => `
   <h2 class="ai-title"><img src="assets/img/dolphin-mark.svg" alt="" width="40" height="40"><span>DOLPH<b>in</b></span><span class="help">· studio IA</span></h2>
-  <p class="intro">DOLPHin écrit vos publications Facebook et Instagram à partir du contenu du site (produits disponibles ou « bientôt »), dessine l'affiche aux couleurs SANA, puis la publie ou la programme sur votre page. Rien n'est publié sans votre clic. Les prix, quantités et formules ne sont jamais mentionnés.</p>
+  <p class="intro">DOLPHin lit votre site pour proposer des idées de publications, écrit les textes à partir du contenu (produits disponibles ou « bientôt »), dessine l'affiche aux couleurs SANA, puis la publie ou la programme sur votre page. Rien n'est publié sans votre clic. Les prix, quantités et formules ne sont jamais mentionnés.</p>
   <div id="dolphinHost"><p class="intro">Chargement de DOLPHin…</p></div>`;
 
 async function mountDolphin() {
@@ -106,6 +106,7 @@ async function mountDolphin() {
     dolphinEl.config = {
       mode: "direct",
       brand,
+      siteUrl: "index.html", // page publique lue pour proposer des idées de publications
       model: "claude-opus-5-5",
       secrets: { claudeKey: secrets.claudeKey || "", metaPageId: secrets.fbPage || "", metaToken: secrets.fbToken || "" },
       // DOLPHin signale les nouvelles clés : elles rejoignent le coffre de l'admin
