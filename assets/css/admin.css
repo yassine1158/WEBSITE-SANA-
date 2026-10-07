@@ -104,7 +104,7 @@ body.locked .admin-bar, body.locked .admin-layout { display: none; }
 .stage-row { display: flex; gap: 8px; align-items: center; }
 .stage-row input { flex: 1; min-width: 0; }
 
-/* ===== Studio IA ===== */
+/* ===== DOLPHin (studio IA) ===== */
 .ai-post { display: grid; grid-template-columns: minmax(220px, 340px) minmax(0, 1fr); gap: 22px; align-items: start; }
 .ai-visual canvas { display: block; width: 100%; height: auto; aspect-ratio: 1080 / 1350; border-radius: 12px; box-shadow: var(--shadow); background: var(--tint); }
 .ai-fields { min-width: 0; }
@@ -117,3 +117,7 @@ body.locked .admin-bar, body.locked .admin-layout { display: none; }
   .ai-post { grid-template-columns: 1fr; }
   .ai-visual { max-width: 360px; }
 }
+.ai-title { display: flex; align-items: center; gap: 12px; }
+.ai-title img { width: 40px; height: 40px; }
+.ai-title b { color: var(--orange); }
+.ai-title .help { font: 600 .95rem var(--f-body); }
