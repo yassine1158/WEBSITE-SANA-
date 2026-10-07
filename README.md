@@ -51,6 +51,7 @@ Si vous passez sur votre propre nom de domaine, remplacez `https://yassine1158.g
 - L'affiche 1080 × 1350 est dessinée dans le navigateur aux couleurs SANA (3 thèmes) ; tout reste modifiable avant publication.
 - **Facebook** : avec l'ID et le jeton de la page (permission `pages_manage_posts`), chaque affiche est publiée ou programmée (de 10 minutes à 30 jours) via l'API Graph. Sans connexion Facebook, on peut télécharger l'affiche et copier le texte.
 - Les clés sont chiffrées avec le mot de passe de l'administration, comme le jeton GitHub. La bibliothèque `@anthropic-ai/sdk` est incluse dans `assets/vendor/anthropic-sdk.js` et chargée seulement à la première génération.
+- La version autonome de DOLPHin, intégrable à n'importe quel site, est développée dans un dépôt séparé : [yassine1158/dolphin](https://github.com/yassine1158/dolphin) (privé).
 
 ## Mise en ligne (GitHub Pages)
 *Settings → Pages* → branche `main`, dossier `/ (root)`. L'administration publie sur la branche `main` (modifiable dans l'onglet Publication).
