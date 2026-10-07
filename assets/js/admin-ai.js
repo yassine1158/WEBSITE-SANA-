@@ -1,5 +1,5 @@
 /* =========================================================
-   SANA — Studio IA (administration)
+   SANA — DOLPHin, studio IA (administration)
    Claude écrit les publications, l'admin dessine l'affiche aux couleurs SANA,
    puis la publie ou la programme sur la page Facebook.
    Les clés (Claude, Facebook) sont chiffrées avec le mot de passe de l'admin.
@@ -59,7 +59,7 @@ TABS.ia = () => {
   const perPost = (3000 * m.in + 1500 * m.out) / 1e6;
   const opt = (o, v) => Object.entries(o).map(([k, t]) => `<option value="${k}" ${k === v ? "selected" : ""}>${esc(typeof t === "string" ? t : t.label)}</option>`).join("");
   return `
-    <h2>Studio IA</h2>
+    <h2 class="ai-title"><img src="assets/img/dolphin-mark.svg" alt="" width="40" height="40"><span>DOLPH<b>in</b></span><span class="help">· studio IA</span></h2>
     <p class="intro">L'IA écrit vos publications Facebook et Instagram, l'affiche est dessinée automatiquement aux couleurs SANA, puis vous publiez ou programmez sur votre page Facebook. Rien n'est publié sans votre clic.</p>
 
     ${card("1. Connexions", `

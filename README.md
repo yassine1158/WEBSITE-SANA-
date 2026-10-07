@@ -45,7 +45,7 @@ Onglet **Avis & FAQ** : avis clients (section masquée tant qu'il n'y en a pas) 
 Fichiers fixes pour Google et les réseaux : `robots.txt`, `sitemap.xml`, `assets/img/og-image.png` (image de partage).
 Si vous passez sur votre propre nom de domaine, remplacez `https://yassine1158.github.io/WEBSITE-SANA-/` dans `index.html` (balises `og:` et `canonical`), `robots.txt` et `sitemap.xml`.
 
-## Studio IA (onglet « Studio IA ✦ » de l'administration)
+## DOLPHin, studio IA (onglet « DOLPHin ✦ » de l'administration)
 
 - **Claude** (clé API de console.anthropic.com, paiement à l'usage, ≈ 25 FCFA par publication avec Claude Opus 5.5) écrit les publications : étiquette, titre, sous-titre, points, texte et hashtags. Les règles de l'entreprise sont imposées : ne vendre que ce qui est disponible, aucun prix, quantité ou formule.
 - L'affiche 1080 × 1350 est dessinée dans le navigateur aux couleurs SANA (3 thèmes) ; tout reste modifiable avant publication.
