@@ -104,19 +104,7 @@ body.locked .admin-bar, body.locked .admin-layout { display: none; }
 .stage-row { display: flex; gap: 8px; align-items: center; }
 .stage-row input { flex: 1; min-width: 0; }
 
-/* ===== DOLPHin (studio IA) ===== */
-.ai-post { display: grid; grid-template-columns: minmax(220px, 340px) minmax(0, 1fr); gap: 22px; align-items: start; }
-.ai-visual canvas { display: block; width: 100%; height: auto; aspect-ratio: 1080 / 1350; border-radius: 12px; box-shadow: var(--shadow); background: var(--tint); }
-.ai-fields { min-width: 0; }
-.ai-state { margin: 26px 0 0; }
-.ai-err { color: var(--danger); font-weight: 600; }
-.ai-bulk { margin-bottom: 16px; }
-.ai-steps { margin: 0 0 12px 20px; display: grid; gap: 6px; font-size: .92rem; color: var(--muted); }
-.btn[disabled] { opacity: .55; cursor: wait; }
-@media (max-width: 860px) {
-  .ai-post { grid-template-columns: 1fr; }
-  .ai-visual { max-width: 360px; }
-}
+/* ===== DOLPHin (studio IA) : le composant a ses propres styles (Shadow DOM) ===== */
 .ai-title { display: flex; align-items: center; gap: 12px; }
 .ai-title img { width: 40px; height: 40px; }
 .ai-title b { color: var(--orange); }

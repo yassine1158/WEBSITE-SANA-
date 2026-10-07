@@ -47,11 +47,10 @@ Si vous passez sur votre propre nom de domaine, remplacez `https://yassine1158.g
 
 ## DOLPHin, studio IA (onglet « DOLPHin ✦ » de l'administration)
 
-- **Claude** (clé API de console.anthropic.com, paiement à l'usage, ≈ 25 FCFA par publication avec Claude Opus 5.5) écrit les publications : étiquette, titre, sous-titre, points, texte et hashtags. Les règles de l'entreprise sont imposées : ne vendre que ce qui est disponible, aucun prix, quantité ou formule.
-- L'affiche 1080 × 1350 est dessinée dans le navigateur aux couleurs SANA (3 thèmes) ; tout reste modifiable avant publication.
-- **Facebook** : avec l'ID et le jeton de la page (permission `pages_manage_posts`), chaque affiche est publiée ou programmée (de 10 minutes à 30 jours) via l'API Graph. Sans connexion Facebook, on peut télécharger l'affiche et copier le texte.
-- Les clés sont chiffrées avec le mot de passe de l'administration, comme le jeton GitHub. La bibliothèque `@anthropic-ai/sdk` est incluse dans `assets/vendor/anthropic-sdk.js` et chargée seulement à la première génération.
-- La version autonome de DOLPHin, intégrable à n'importe quel site, est développée dans un dépôt séparé : [yassine1158/dolphin](https://github.com/yassine1158/dolphin) (privé).
+- L'onglet intègre le composant `<dolphin-studio>` du dépôt [yassine1158/dolphin](https://github.com/yassine1158/dolphin) (privé). Le fichier `assets/vendor/dolphin.js` est une copie de son `dist/dolphin.js`. Pour mettre DOLPHin à jour, recopiez ce fichier.
+- La marque est construite à partir du contenu du site (`sanaBrand()` dans `assets/js/admin-ai.js`) : chaque produit est « disponible » ou « bientôt » selon son état dans l'admin. Les prix, quantités et formules ne sont jamais mentionnés.
+- **Claude** (clé API de console.anthropic.com, paiement à l'usage, environ 25 FCFA par publication avec Claude Opus 5.5) écrit les publications. L'affiche 1080 × 1350 est dessinée aux couleurs SANA. **Facebook** (ID et jeton de la page, permission `pages_manage_posts`) publie ou programme, de 10 minutes à 30 jours à l'avance.
+- Les clés restent dans le coffre chiffré de l'administration, avec le même mot de passe que le jeton GitHub : il n'y a pas de seconde phrase secrète.
 
 ## Mise en ligne (GitHub Pages)
 *Settings → Pages* → branche `main`, dossier `/ (root)`. L'administration publie sur la branche `main` (modifiable dans l'onglet Publication).
