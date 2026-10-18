@@ -43,7 +43,7 @@ Onglet **Marketing** de l'administration :
 Onglet **Avis & FAQ** : avis clients (section masquée tant qu'il n'y en a pas) et questions fréquentes.
 
 Fichiers fixes pour Google et les réseaux : `robots.txt`, `sitemap.xml`, `assets/img/og-image.png` (image de partage).
-Si vous passez sur votre propre nom de domaine, remplacez `https://yassine1158.github.io/WEBSITE-SANA-/` dans `index.html` (balises `og:` et `canonical`), `robots.txt` et `sitemap.xml`.
+Le site est publié sur le domaine **https://sana-sa.ci/** (GitHub Pages, branche `main`). Cette adresse figure dans `index.html` (balises `og:` et `canonical`), `robots.txt`, `sitemap.xml` et `data/content.js` (`marketing.seo.siteUrl`). Pour changer de domaine, remplacez-la partout, puis mettez à jour Settings → Pages → Custom domain et la zone DNS.
 
 ## DOLPHin, studio IA (onglet « DOLPHin ✦ » de l'administration)
 
