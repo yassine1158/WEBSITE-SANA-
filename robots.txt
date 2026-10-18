@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /admin.html
 
-Sitemap: https://yassine1158.github.io/WEBSITE-SANA-/sitemap.xml
+Sitemap: https://sana-sa.ci/sitemap.xml
