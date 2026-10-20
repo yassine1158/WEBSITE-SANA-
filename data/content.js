@@ -3,15 +3,28 @@ window.SANA_CONTENT = {
     "name": "SANA",
     "fullName": "Société Afriqaine de Nutrition Animale",
     "phone": "+2250715500000",
-    "whatsapp": "0715500000",
+    "whatsapp": "2250715500000",
     "email": "contact@sana.com",
     "address": "Yamoussoukro, Côte d'Ivoire",
     "hours": "Lundi – samedi, 7 h 00 – 18 h 00"
   },
   "hero": {
     "title": "L'aliment de tous vos animaux,",
-    "highlight": "composé selon votre formule.",
-    "lead": "SANA fabrique des aliments pour volailles, bovins, ovins, porcins, lapins et poissons, et vend des poulets et des œufs frais. Vous fixez la composition et les quantités ; nous dosons, fabriquons et livrons."
+    "highlight": "formulé par nos experts.",
+    "lead": "Les œufs à couver SANA sont disponibles dès maintenant. Aliments pour tous les animaux, poussins, poulets et œufs frais arrivent bientôt."
+  },
+  "hatching": {
+    "title": "Œufs à couver",
+    "usage": "Disponible maintenant",
+    "desc": "Œufs fécondés pour vos incubateurs et vos poules couveuses.",
+    "items": [
+      "Œufs fécondés pour incubateur ou poule couveuse",
+      "Commande sur WhatsApp",
+      "Retrait ou livraison à convenir"
+    ],
+    "price": "",
+    "status": "available",
+    "visible": true
   },
   "about": {
     "title": "Une production complète, de l'aliment à l'animal",
@@ -23,7 +36,7 @@ window.SANA_CONTENT = {
       {
         "icon": "flask",
         "title": "Dosage précis",
-        "text": "Chaque matière première pesée selon votre formule, au dixième de pourcent."
+        "text": "Chaque matière première pesée avec précision selon nos formules."
       },
       {
         "icon": "shield",
@@ -45,11 +58,11 @@ window.SANA_CONTENT = {
   "steps": [
     {
       "title": "Votre demande",
-      "text": "Vous choisissez vos produits ou composez votre aliment en ligne."
+      "text": "Vous choisissez vos produits ou demandez votre aliment en ligne."
     },
     {
       "title": "Validation",
-      "text": "Nous vérifions la formule et vous envoyons un devis sous 24 h."
+      "text": "Notre technicien établit la formule et vous envoie un devis sous 24 h."
     },
     {
       "title": "Fabrication",
@@ -62,15 +75,15 @@ window.SANA_CONTENT = {
   ],
   "marketing": {
     "promo": {
-      "visible": false,
-      "text": "Exemple : -5 % sur votre première commande d'aliment sur mesure.",
-      "linkText": "En profiter",
-      "link": "#composition"
+      "visible": true,
+      "text": "Disponible maintenant : œufs à couver.",
+      "linkText": "Commander",
+      "link": "#disponible"
     },
     "cta": {
-      "title": "Un aliment sur mesure pour votre élevage ?",
-      "text": "Envoyez-nous votre besoin sur WhatsApp : nous vous proposons une formule et un devis sous 24 h.",
-      "button": "Écrire sur WhatsApp"
+      "title": "Des œufs à couver pour votre élevage ?",
+      "text": "Écrivez-nous sur WhatsApp : disponibilité, quantité et livraison, nous vous répondons rapidement.",
+      "button": "Commander sur WhatsApp"
     },
     "social": {
       "facebook": "",
@@ -85,14 +98,14 @@ window.SANA_CONTENT = {
     "seo": {
       "title": "SANA — Aliments pour animaux sur mesure, poulets et œufs",
       "description": "SANA, Société Afriqaine de Nutrition Animale : aliments composés sur mesure pour volailles, bovins, ovins, porcins, lapins et poissons. Poussins, poulets d'élevage et d'abattage, œufs frais.",
-      "siteUrl": "https://yassine1158.github.io/WEBSITE-SANA-/"
+      "siteUrl": "https://sana-sa.ci/"
     }
   },
   "testimonials": [],
   "faq": [
     {
       "q": "Puis-je fournir ma propre formule ?",
-      "a": "Oui. Indiquez la composition voulue dans le configurateur ou dans votre message ; notre technicien la vérifie avant fabrication."
+      "a": "Oui. Décrivez la composition voulue dans votre message ; notre technicien la vérifie avant fabrication. Sinon, nous établissons la formule pour vous."
     },
     {
       "q": "Quelle est la quantité minimum ?",
@@ -123,7 +136,8 @@ window.SANA_CONTENT = {
           "Conseils de démarrage offerts"
         ],
         "price": "",
-        "visible": true
+        "visible": true,
+        "status": "soon"
       },
       {
         "id": "elevage",
@@ -138,7 +152,8 @@ window.SANA_CONTENT = {
           "Suivi sanitaire fourni"
         ],
         "price": "",
-        "visible": true
+        "visible": true,
+        "status": "soon"
       },
       {
         "id": "abattage",
@@ -153,7 +168,8 @@ window.SANA_CONTENT = {
           "Restaurants et revendeurs"
         ],
         "price": "",
-        "visible": true
+        "visible": false,
+        "status": "soon"
       }
     ]
   },
@@ -163,8 +179,7 @@ window.SANA_CONTENT = {
     "items": [
       "Plateaux de 30 œufs",
       "Calibres M, L et XL",
-      "Vente en gros et au détail",
-      "Œufs à couver sur demande"
+      "Vente en gros et au détail"
     ],
     "price": "",
     "visible": true,
@@ -172,7 +187,7 @@ window.SANA_CONTENT = {
   },
   "feed": {
     "title": "Aliments pour tous les animaux",
-    "desc": "Fabriqués selon votre composition ou nos formules de référence.",
+    "desc": "Formulés par notre technicien selon l'espèce, le stade et vos objectifs.",
     "items": [
       "Farine, miettes ou granulés",
       "Sacs de 25 ou 50 kg, ou vrac",
@@ -286,18 +301,5 @@ window.SANA_CONTENT = {
         }
       ]
     }
-  ],
-  "hatching": {
-    "title": "Œufs à couver",
-    "usage": "Disponible maintenant",
-    "desc": "Œufs fécondés pour vos incubateurs et vos poules couveuses.",
-    "items": [
-      "Œufs fécondés pour incubateur ou poule couveuse",
-      "Commande sur WhatsApp",
-      "Retrait ou livraison à convenir"
-    ],
-    "price": "",
-    "status": "available",
-    "visible": true
-  }
+  ]
 };
