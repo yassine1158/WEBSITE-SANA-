@@ -152,11 +152,18 @@ $("#faqList").innerHTML = faq.map((f, i) => `
     <p>${esc(f.a)}</p>
   </details>`).join("");
 
+// Numéro WhatsApp au format international (wa.me) : chiffres seuls, indicatif 225 ajouté aux numéros ivoiriens à 10 chiffres
+function waNumber() {
+  let d = String(C.company.whatsapp || C.company.phone || "").replace(/\D/g, "");
+  if (d.startsWith("00")) d = d.slice(2);
+  return d.length === 10 ? "225" + d : d;
+}
+
 // Liens WhatsApp directs (bandeau d'appel, bouton flottant)
 function waLink(text) {
   const src = campaign();
   const body = text + (src ? `\n\n(Source : ${src})` : "");
-  return `https://wa.me/${C.company.whatsapp}?text=${encodeURIComponent(body)}`;
+  return `https://wa.me/${waNumber()}?text=${encodeURIComponent(body)}`;
 }
 $("#ctaWa").href = waLink(`Bonjour ${C.company.name}, je souhaite un devis.`);
 
@@ -379,7 +386,7 @@ ${d.details}${campaign() ? `\n\n(Source : ${campaign()})` : ""}`;
   track("generate_lead", { channel, product: d.produit });
 
   if (channel === "whatsapp") {
-    window.open(`https://wa.me/${C.company.whatsapp}?text=${encodeURIComponent(body)}`, "_blank", "noopener");
+    window.open(`https://wa.me/${waNumber()}?text=${encodeURIComponent(body)}`, "_blank", "noopener");
   } else {
     location.href = `mailto:${C.company.email}?subject=${encodeURIComponent("Commande — " + d.produit)}&body=${encodeURIComponent(body)}`;
   }

@@ -22,7 +22,7 @@ const loadDolphin = () => dolphinLoading ??= new Promise((resolve, reject) => {
   document.head.appendChild(s);
 });
 
-const waPretty = p => { const d = String(p || "").replace(/\D/g, ""); return d.startsWith("225") ? "+225 " + d.slice(3).replace(/(\d{2})(?=\d)/g, "$1 ") : p; };
+const waPretty = p => { let d = String(p || "").replace(/\D/g, ""); if (d.startsWith("00")) d = d.slice(2); if (d.length === 10) d = "225" + d; return d.startsWith("225") ? "+225 " + d.slice(3).replace(/(\d{2})(?=\d)/g, "$1 ") : p; };
 
 // La marque DOLPHin est déduite du contenu du site : produits, disponibilités, contact.
 function sanaBrand() {
