@@ -152,7 +152,8 @@ const TABS = {
       ${F.bool("Afficher l'assistant sur le site", "chatbot.visible")}
       <div class="grid-2">${F.text("Adresse de Wakil (commercial IA)", "chatbot.wakilUrl", { ph: "https://wakil-whatsapp….workers.dev", help: "Wakil répond avec l'IA. Vide : l'assistant guidé répond seul." })}${F.text("Identifiant SANA chez Wakil", "chatbot.wakilTenant", { ph: "sana" })}</div>
       ${F.text("Nom de l'assistant", "chatbot.name", { ph: "Assistant SANA" })}
-      ${F.area("Message d'accueil", "chatbot.greeting", { rows: 2 })}`)}
+      ${F.area("Message d'accueil", "chatbot.greeting", { rows: 2 })}
+      ${F.lines("Questions proposées au départ", "chatbot.suggestions", { help: "Une par ligne, 6 au plus : le visiteur clique dessus au lieu d'écrire." })}`)}
     ${card("Réseaux sociaux", `
       <p class="intro">Collez l'adresse complète de chaque page. Les icônes apparaissent seulement pour les réseaux renseignés.</p>
       <div class="grid-2">

@@ -213,6 +213,7 @@ function featureCard(x, icon, order, label) {
         <div class="fp-actions">
           ${isSoon(x) ? notifyBtn(x.title) : `<a href="${waLink(`Bonjour ${C.company.name}, je souhaite ${order} : ${x.title}.`)}" target="_blank" rel="noopener" class="btn btn-accent btn-lg" data-wa-order="1"><svg class="ico"><use href="#i-wa"/></svg> ${label} sur WhatsApp</a>
           <a href="#contact" class="btn btn-outline" data-product="${esc(x.title)}">Formulaire de commande</a>`}
+          ${C.chatbot && C.chatbot.visible !== false ? `<button type="button" class="btn btn-ghost" data-ask="${esc(x.title)}">Poser une question</button>` : ""}
         </div>
       </div>
     </article>`;
