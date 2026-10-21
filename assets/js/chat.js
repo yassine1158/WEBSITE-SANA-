@@ -15,6 +15,16 @@
 
   const W = String(B.wakilUrl || "").trim().replace(/\/+$/, "");
   const tenant = String(B.wakilTenant || "sana").trim();
+  // Bouton « Poser une question » des produits : la question part dans le chat ouvert
+  document.addEventListener("click", e => {
+    const b = e.target.closest("[data-ask]");
+    if (!b) return;
+    e.preventDefault();
+    track("chatbot_ask", { product: b.dataset.ask });
+    if (window.WakilChat) window.WakilChat.send(`Bonjour, je voudrais des informations sur : ${b.dataset.ask}.`);
+    else if (window.SanaGuided) window.SanaGuided.ask(b.dataset.ask);
+  });
+
   if (/^https:\/\/[^/]+$/.test(W)) {
     fetch(`${W}/chat/config?tenant=${encodeURIComponent(tenant)}`)
       .then(r => { if (!r.ok) throw new Error(r.status); loadWakil(); })
@@ -29,11 +39,13 @@
       title: B.name || "Assistant SANA",
       greeting: B.greeting || "",
       teaser: "Une question sur nos poussins ou nos œufs à couver ? Je vous réponds tout de suite.",
+      suggestions: (B.suggestions || []).map(q => String(q).replace(/\|/g, " ").trim()).filter(Boolean).join("|"),
     });
+    if (!s.dataset.suggestions) delete s.dataset.suggestions;
     if (!s.dataset.greeting) delete s.dataset.greeting;
     s.onerror = startGuided;
     document.body.appendChild(s);
-    track("chatbot_open", { engine: "wakil" });
+    track("chatbot_ready", { engine: "wakil" });
   }
 
   function startGuided() {
@@ -279,6 +291,15 @@
     if (state) input.focus({ preventScroll: true }); else launch.focus({ preventScroll: true });
   }
   launch.addEventListener("click", () => open(panel.hidden));
+  window.SanaGuided = {
+    ask(title) {
+      if (panel.hidden) open(true);
+      const x = [H, ...chicks].find(p => p && p.title === title);
+      userSay(title);
+      if (x) product(x, x === H ? (isSoon(H) ? null : "commander") : "réserver");
+      else menu();
+    },
+  };
   root.querySelector(".chat-close").addEventListener("click", () => open(false));
   document.addEventListener("keydown", e => { if (e.key === "Escape" && !panel.hidden) open(false); });
   log.addEventListener("click", e => {

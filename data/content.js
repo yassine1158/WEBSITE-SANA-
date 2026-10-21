@@ -78,6 +78,13 @@ window.SANA_CONTENT = {
     "name": "Assistant SANA",
     "wakilUrl": "https://wakil-whatsapp.yassinechaabane72.workers.dev",
     "wakilTenant": "sana",
+    "suggestions": [
+      "Réserver des poussins de chair",
+      "Commander des œufs à couver",
+      "Prix et acompte",
+      "Livraison et transport",
+      "Conseils pour démarrer mes poussins"
+    ],
     "greeting": "Bonjour 👋 Je suis l'assistant virtuel de SANA. Posez-moi vos questions sur nos poussins de chair et nos œufs à couver : je vous réponds tout de suite et je peux préparer votre réservation."
   },
   "marketing": {
