@@ -191,29 +191,34 @@ function card({ icon, media, title, usage, desc, items, price, tag, btn, main, s
     </article>`;
 }
 
-// Produit phare disponible : œufs à couver
-const H = C.hatching;
-if (H && H.visible !== false) {
-  $("#hatchingCard").innerHTML = `
+// Produits disponibles mis en avant : œufs à couver, puis les offres de poulets marquées « disponible » (ex. poussins)
+function featureCard(x, icon, order, label) {
+  return `
     <article class="feature-product">
-      <div class="fp-media"><svg><use href="#i-egg"/></svg>${isSoon(H) ? `<span class="tag tag-soon">Bientôt</span>` : `<span class="tag tag-live">Disponible</span>`}</div>
+      <div class="fp-media"><svg><use href="#i-${icon}"/></svg>${isSoon(x) ? `<span class="tag tag-soon">Bientôt</span>` : `<span class="tag tag-live">Disponible</span>`}</div>
       <div class="fp-body">
-        ${H.usage ? `<span class="usage">${esc(H.usage)}</span>` : ""}
-        <h3>${esc(H.title)}</h3>
-        <p>${esc(H.desc)}</p>
-        <ul class="checklist">${(H.items || []).filter(Boolean).map(i => `<li>${esc(i)}</li>`).join("")}</ul>
-        ${H.price ? `<p class="price">${esc(H.price)}</p>` : ""}
+        ${x.usage ? `<span class="usage">${esc(x.usage)}</span>` : ""}
+        <h3>${esc(x.title)}</h3>
+        <p>${esc(x.desc)}</p>
+        <ul class="checklist">${(x.items || []).filter(Boolean).map(i => `<li>${esc(i)}</li>`).join("")}</ul>
+        ${x.price ? `<p class="price">${esc(x.price)}</p>` : ""}
         <div class="fp-actions">
-          ${isSoon(H) ? notifyBtn(H.title) : `<a href="${waLink(`Bonjour ${C.company.name}, je souhaite commander des œufs à couver.`)}" target="_blank" rel="noopener" class="btn btn-accent btn-lg" data-wa-order="1"><svg class="ico"><use href="#i-wa"/></svg> Commander sur WhatsApp</a>
-          <a href="#contact" class="btn btn-outline" data-product="${esc(H.title)}">Formulaire de commande</a>`}
+          ${isSoon(x) ? notifyBtn(x.title) : `<a href="${waLink(`Bonjour ${C.company.name}, je souhaite ${order} : ${x.title}.`)}" target="_blank" rel="noopener" class="btn btn-accent btn-lg" data-wa-order="1"><svg class="ico"><use href="#i-wa"/></svg> ${label} sur WhatsApp</a>
+          <a href="#contact" class="btn btn-outline" data-product="${esc(x.title)}">Formulaire de commande</a>`}
         </div>
       </div>
     </article>`;
-} else {
-  $("#disponible").hidden = true;
 }
+const H = C.hatching;
+const featuredOffers = C.chickens.offers.filter(o => o.visible !== false && o.status === "available");
+const featured = [
+  ...(H && H.visible !== false ? [featureCard(H, "egg", "commander", "Commander")] : []),
+  ...featuredOffers.map(o => featureCard(o, o.icon || "chick", "réserver", "Réserver")),
+];
+if (featured.length) $("#hatchingCard").innerHTML = featured.join("");
+else $("#disponible").hidden = true;
 
-const offers = C.chickens.offers.filter(o => o.visible !== false);
+const offers = C.chickens.offers.filter(o => o.visible !== false && !featuredOffers.includes(o));
 // libellé de commande : « Poulets — … » sauf pour les poussins, déjà explicites
 const offerName = o => o.id === "poussins" ? o.title : "Poulets — " + o.title;
 $("#chickenOffers").innerHTML = offers.map(o => card({
@@ -238,6 +243,7 @@ $("#otherProducts").innerHTML = other;
 const lbl = (name, soon) => soon ? `${name} (bientôt)` : name;
 $("#produitSelect").innerHTML = ["— Choisir —",
   ...(H && H.visible !== false ? [lbl(H.title, isSoon(H))] : []),
+  ...featuredOffers.map(o => o.title),
   ...offers.map(o => lbl(offerName(o), isSoon(o))),
   ...(C.eggs.visible !== false ? [lbl("Œufs", isSoon(C.eggs))] : []),
   lbl("Aliment sur mesure", isSoon(C.feed)), "Plusieurs produits"]

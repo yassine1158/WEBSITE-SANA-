@@ -484,6 +484,7 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--g
 
 /* ===== Disponible maintenant / Bientôt ===== */
 .available { background: linear-gradient(180deg, var(--orange-soft), var(--surface)); }
+#hatchingCard { display: grid; gap: 24px; }
 .feature-product { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); background: var(--surface); border: 2px solid var(--orange); border-radius: 22px; overflow: hidden; box-shadow: 0 30px 60px -30px rgba(217,108,12,.45); max-width: 980px; margin-inline: auto; }
 .fp-media { position: relative; display: grid; place-items: center; min-height: 320px; background: var(--amber-soft); background-image: radial-gradient(rgba(11,63,47,.07) 1.2px, transparent 1.3px); background-size: 16px 16px; }
 .fp-media svg { width: 150px; height: 150px; fill: none; stroke: #c97a00; stroke-width: 1.3; stroke-linecap: round; stroke-linejoin: round; animation: breathe 5s ease-in-out infinite; }
