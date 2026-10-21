@@ -147,6 +147,11 @@ const TABS = {
       ${F.text("Titre", "marketing.cta.title")}
       ${F.area("Texte", "marketing.cta.text", { rows: 2 })}
       ${F.text("Bouton", "marketing.cta.button")}`)}
+    ${card("Assistant du site", `
+      <p class="intro">Le bouton « Une question ? » en bas à gauche du site. Il répond avec les produits, la FAQ et les contacts saisis ici, puis prépare la demande du visiteur pour WhatsApp.</p>
+      ${F.bool("Afficher l'assistant sur le site", "chatbot.visible")}
+      ${F.text("Nom de l'assistant", "chatbot.name", { ph: "Assistant SANA" })}
+      ${F.area("Message d'accueil", "chatbot.greeting", { rows: 2 })}`)}
     ${card("Réseaux sociaux", `
       <p class="intro">Collez l'adresse complète de chaque page. Les icônes apparaissent seulement pour les réseaux renseignés.</p>
       <div class="grid-2">

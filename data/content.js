@@ -73,6 +73,11 @@ window.SANA_CONTENT = {
       "text": "Retrait sur place ou livraison directe à votre ferme."
     }
   ],
+  "chatbot": {
+    "visible": true,
+    "name": "Assistant SANA",
+    "greeting": "Bonjour 👋 Je suis l'assistant de SANA. Je réponds tout de suite à vos questions et je prépare votre demande pour WhatsApp."
+  },
   "marketing": {
     "promo": {
       "visible": true,
