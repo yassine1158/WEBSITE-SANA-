@@ -148,8 +148,9 @@ const TABS = {
       ${F.area("Texte", "marketing.cta.text", { rows: 2 })}
       ${F.text("Bouton", "marketing.cta.button")}`)}
     ${card("Assistant du site", `
-      <p class="intro">Le bouton « Une question ? » en bas à gauche du site. Il répond avec les produits, la FAQ et les contacts saisis ici, puis prépare la demande du visiteur pour WhatsApp.</p>
+      <p class="intro">Le chat en bas à gauche du site. Avec l'adresse de Wakil, c'est le commercial IA qui répond (il lit les produits, la FAQ et les contacts saisis ici, et enregistre les commandes). Sans elle, ou si Wakil ne répond pas, l'assistant guidé prépare la demande du visiteur pour WhatsApp.</p>
       ${F.bool("Afficher l'assistant sur le site", "chatbot.visible")}
+      <div class="grid-2">${F.text("Adresse de Wakil (commercial IA)", "chatbot.wakilUrl", { ph: "https://wakil-whatsapp….workers.dev", help: "Wakil répond avec l'IA. Vide : l'assistant guidé répond seul." })}${F.text("Identifiant SANA chez Wakil", "chatbot.wakilTenant", { ph: "sana" })}</div>
       ${F.text("Nom de l'assistant", "chatbot.name", { ph: "Assistant SANA" })}
       ${F.area("Message d'accueil", "chatbot.greeting", { rows: 2 })}`)}
     ${card("Réseaux sociaux", `
