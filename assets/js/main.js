@@ -124,6 +124,14 @@ const SOCIAL = { facebook: "Facebook", instagram: "Instagram", tiktok: "TikTok",
 const socialsHtml = Object.entries(SOCIAL).filter(([k]) => M.social[k])
   .map(([k, label]) => `<a href="${esc(M.social[k])}" target="_blank" rel="noopener" aria-label="${label}" title="${label}"><svg><use href="#i-${k}"/></svg></a>`).join("");
 document.querySelectorAll("[data-socials]").forEach(el => { el.innerHTML = socialsHtml; el.hidden = !socialsHtml; });
+// Page Facebook : bouton flottant, bouton sous les produits disponibles, ligne dans les contacts
+if (M.social.facebook) {
+  document.querySelectorAll("[data-fb-link]").forEach(el => {
+    el.href = M.social.facebook;
+    el.addEventListener("click", () => track("facebook_click", { from: el.className || "contact" }));
+  });
+  document.querySelectorAll("[data-fb]").forEach(el => { el.hidden = false; });
+}
 
 // ---------------------------------------------------------
 // Sections éditables : atouts, étapes, avis, questions

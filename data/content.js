@@ -86,7 +86,7 @@ window.SANA_CONTENT = {
       "button": "Commander sur WhatsApp"
     },
     "social": {
-      "facebook": "",
+      "facebook": "https://www.facebook.com/profile.php?id=61595550723119",
       "instagram": "",
       "tiktok": "",
       "youtube": ""
