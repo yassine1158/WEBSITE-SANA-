@@ -214,10 +214,12 @@ if (H && H.visible !== false) {
 }
 
 const offers = C.chickens.offers.filter(o => o.visible !== false);
+// libellé de commande : « Poulets — … » sauf pour les poussins, déjà explicites
+const offerName = o => o.id === "poussins" ? o.title : "Poulets — " + o.title;
 $("#chickenOffers").innerHTML = offers.map(o => card({
   icon: o.icon, media: MEDIA[o.icon] || "media-green", title: o.title, usage: o.usage, desc: o.desc,
   items: o.items, price: o.price, soon: isSoon(o),
-  btn: isSoon(o) ? notifyBtn(o.title) : `<a href="#contact" class="btn btn-outline" data-product="${esc("Poulets — " + o.title)}">Commander</a>`,
+  btn: isSoon(o) ? notifyBtn(o.title) : `<a href="#contact" class="btn btn-outline" data-product="${esc(offerName(o))}">Commander</a>`,
 })).join("");
 
 let other = "";
@@ -236,7 +238,7 @@ $("#otherProducts").innerHTML = other;
 const lbl = (name, soon) => soon ? `${name} (bientôt)` : name;
 $("#produitSelect").innerHTML = ["— Choisir —",
   ...(H && H.visible !== false ? [lbl(H.title, isSoon(H))] : []),
-  ...offers.map(o => lbl("Poulets — " + o.title, isSoon(o))),
+  ...offers.map(o => lbl(offerName(o), isSoon(o))),
   ...(C.eggs.visible !== false ? [lbl("Œufs", isSoon(C.eggs))] : []),
   lbl("Aliment sur mesure", isSoon(C.feed)), "Plusieurs produits"]
   .map((p, i) => `<option${i === 0 ? ' value=""' : ""}>${esc(p)}</option>`).join("");
