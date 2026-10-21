@@ -11,7 +11,7 @@ window.SANA_CONTENT = {
   "hero": {
     "title": "L'aliment de tous vos animaux,",
     "highlight": "formulé par nos experts.",
-    "lead": "Les œufs à couver et les poussins d'un jour SANA sont disponibles dès maintenant. Aliments pour tous les animaux, poulets et œufs frais arrivent bientôt."
+    "lead": "Les œufs à couver SANA sont disponibles et les précommandes de poussins de chair sont ouvertes. Aliments pour tous les animaux, poulets et œufs frais arrivent bientôt."
   },
   "hatching": {
     "title": "Œufs à couver",
@@ -76,7 +76,7 @@ window.SANA_CONTENT = {
   "marketing": {
     "promo": {
       "visible": true,
-      "text": "Disponibles maintenant : œufs à couver et poussins d'un jour.",
+      "text": "Œufs à couver disponibles · Poussins de chair : précommandes ouvertes pour le 28 octobre.",
       "linkText": "Commander",
       "link": "#disponible"
     },
@@ -127,13 +127,13 @@ window.SANA_CONTENT = {
       {
         "id": "poussins",
         "icon": "chick",
-        "title": "Poussins d'un jour",
-        "usage": "Pour démarrer un élevage",
-        "desc": "Poussins d'un jour pour démarrer votre bande sans attendre l'éclosion.",
+        "title": "Poussins de chair",
+        "usage": "Précommandes ouvertes",
+        "desc": "Disponibles le mercredi 28 octobre 2026, à Abidjan, Bouaké, Yamoussoukro et Toumodi.",
         "items": [
-          "Réservation sur WhatsApp",
-          "Quantité et date d'enlèvement à convenir",
-          "Conseils de démarrage offerts"
+          "Poussins de qualité, bien vaccinés",
+          "Acompte de 50 % à la réservation",
+          "Transport à la charge du client"
         ],
         "price": "",
         "visible": true,
