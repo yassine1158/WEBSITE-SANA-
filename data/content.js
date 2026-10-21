@@ -76,7 +76,9 @@ window.SANA_CONTENT = {
   "chatbot": {
     "visible": true,
     "name": "Assistant SANA",
-    "greeting": "Bonjour 👋 Je suis l'assistant de SANA. Je réponds tout de suite à vos questions et je prépare votre demande pour WhatsApp."
+    "wakilUrl": "https://wakil-whatsapp.yassinechaabane72.workers.dev",
+    "wakilTenant": "sana",
+    "greeting": "Bonjour 👋 Je suis l'assistant virtuel de SANA. Posez-moi vos questions sur nos poussins de chair et nos œufs à couver : je vous réponds tout de suite et je peux préparer votre réservation."
   },
   "marketing": {
     "promo": {

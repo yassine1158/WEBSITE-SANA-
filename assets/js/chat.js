@@ -4,10 +4,40 @@
    pose les bonnes questions, puis prépare la demande pour WhatsApp.
    Aucune donnée n'est envoyée ailleurs : le visiteur envoie lui-même le message.
    Chargé après main.js (utilise C, M, waLink, track, esc).
+
+   Si l'adresse de Wakil est renseignée (administration, onglet Marketing), c'est
+   Wakil, le commercial IA, qui répond (catalogue lu dans ce même content.js).
+   Cet assistant guidé reste en secours quand Wakil ne répond pas.
    ========================================================= */
 (() => {
   const B = C.chatbot || {};
   if (B.visible === false) return;
+
+  const W = String(B.wakilUrl || "").trim().replace(/\/+$/, "");
+  const tenant = String(B.wakilTenant || "sana").trim();
+  if (/^https:\/\/[^/]+$/.test(W)) {
+    fetch(`${W}/chat/config?tenant=${encodeURIComponent(tenant)}`)
+      .then(r => { if (!r.ok) throw new Error(r.status); loadWakil(); })
+      .catch(startGuided);
+  } else startGuided();
+
+  function loadWakil() {
+    const s = document.createElement("script");
+    s.src = `${W}/wakil-chat.js`;
+    Object.assign(s.dataset, {
+      tenant, accent: "#f3811d", position: "left",
+      title: B.name || "Assistant SANA",
+      greeting: B.greeting || "",
+      teaser: "Une question sur nos poussins ou nos œufs à couver ? Je vous réponds tout de suite.",
+    });
+    if (!s.dataset.greeting) delete s.dataset.greeting;
+    s.onerror = startGuided;
+    document.body.appendChild(s);
+    track("chatbot_open", { engine: "wakil" });
+  }
+
+  function startGuided() {
+  if (document.querySelector(".chat")) return;
 
   const norm = s => String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/œ/g, "oe");
   const isSoon = x => x && x.status === "soon";
@@ -255,4 +285,5 @@
     const a = e.target.closest("[data-chat-lead]");
     if (a) track("generate_lead", { channel: "chatbot", product: a.dataset.chatLead });
   });
+  }
 })();
