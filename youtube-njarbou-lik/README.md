@@ -15,3 +15,8 @@ Voices are synthesized cartoon babble; dialogue is shown in speech bubbles.
 
 - `mokhtabar-sami/ep1.html` — episode 1 "علاش القمر ما يطيحش؟" (Newton's cannon, Moon orbit), 60s
 - Render: `PAGE=ep1.html NODE_PATH=$(npm root -g) node render.js 30`, audio: `python3 audio.py ep1.html`
+- `mokhtabar-sami/sami_bip_keyart.png` — 3D reference image of Sami and Bip (Nano Banana 2.1 via Weave); use it as the input image for image-to-video so the characters stay consistent
+
+### Next steps (free pipeline)
+- Video clips: Hugging Face ZeroGPU Spaces via `gradio_client` with `HF_TOKEN` (e.g. `Lightricks/ltx-video-distilled` `/image_to_video`, `zerogpu-aoti/wan2-2-fp8da-aoti-faster` `/generate_video`); free quota is a few clips per day
+- Publishing: Metricool connector, brand id 7591652 (YouTube + TikTok linked), daily at 20:00 Africa/Tunis
