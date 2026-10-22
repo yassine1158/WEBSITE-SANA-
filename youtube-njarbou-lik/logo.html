@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; }
+  html, body { width: 800px; height: 800px; overflow: hidden; }
+  body {
+    background: radial-gradient(circle at 50% 35%, #4a36b0 0%, #241a5e 60%, #120d33 100%);
+    font-family: 'Cairo', 'DejaVu Sans', sans-serif; color: #fff;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  svg { width: 330px; height: 330px; margin-top: -20px; }
+  .name { font-size: 108px; font-weight: 900; line-height: 1.1; margin-top: 10px; }
+  .name span { color: #ffd84a; }
+</style>
+</head>
+<body>
+  <svg viewBox="0 0 200 200">
+    <!-- flask -->
+    <path d="M78 20 h44 v8 h-6 v42 l46 82 a14 14 0 0 1 -12 21 h-100 a14 14 0 0 1 -12 -21 l46 -82 v-42 h-6 z"
+          fill="rgba(255,255,255,.12)" stroke="#fff" stroke-width="7" stroke-linejoin="round"/>
+    <!-- liquid -->
+    <path d="M62 112 h76 l26 46 a10 10 0 0 1 -9 15 h-110 a10 10 0 0 1 -9 -15 z" fill="#ffd84a"/>
+    <path d="M62 112 q19 -8 38 0 t38 0" fill="none" stroke="#fff3b0" stroke-width="5"/>
+    <!-- bubbles -->
+    <circle cx="88" cy="145" r="7" fill="#fff3b0"/>
+    <circle cx="112" cy="132" r="5" fill="#fff3b0"/>
+    <circle cx="104" cy="88" r="7" fill="none" stroke="#ffd84a" stroke-width="4"/>
+    <circle cx="94" cy="58" r="5" fill="none" stroke="#ffd84a" stroke-width="4"/>
+    <!-- question mark spark -->
+    <text x="150" y="58" font-size="54" font-weight="900" fill="#ff5470" font-family="Cairo, sans-serif">?</text>
+  </svg>
+  <div class="name">نجرّبو <span>ليك</span></div>
+</body>
+</html>
