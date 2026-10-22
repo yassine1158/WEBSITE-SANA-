@@ -16,7 +16,13 @@ Voices are synthesized cartoon babble; dialogue is shown in speech bubbles.
 - `mokhtabar-sami/ep1.html` — episode 1 "علاش القمر ما يطيحش؟" (Newton's cannon, Moon orbit), 60s
 - Render: `PAGE=ep1.html NODE_PATH=$(npm root -g) node render.js 30`, audio: `python3 audio.py ep1.html`
 - `mokhtabar-sami/sami_bip_keyart.png` — 3D reference image of Sami and Bip (Nano Banana 2.1 via Weave); use it as the input image for image-to-video so the characters stay consistent
+- `mokhtabar-sami/mokhtabar_sami_ep1_ai.mp4` — episode 1 with AI video clips of Sami and Bip instead of the SVG drawings (same script and timings), 60s
+  - `gen_clips.py` — animates the keyart into `clips/<name>.mp4` (Wan 2.2 i2v on the ZeroGPU Space `zerogpu-aoti/wan2-2-fp8da-aoti-faster`): `HF_TOKEN=... [DURATION=5] python3 gen_clips.py [names]`
+  - `clips/intro.mp4` (5s, Sami talks to Bip) and `clips/shock.mp4` (4s, Sami gasps) are the two clips in the episode
+  - `ep1_ai.html` — full-frame clip for dialogue, clip shrinks to a bottom panel while the lab screen explains; camera crops (`CAM`) and shot list (`SHOTS`) give close-ups, push-ins and loops from the two clips
+  - Extract frames, then render as usual: `for c in intro shock; do mkdir -p clips/$c; ffmpeg -i clips/$c.mp4 -vf scale=960:-1:flags=lanczos -q:v 2 clips/$c/%03d.jpg; done`, `PAGE=ep1_ai.html NODE_PATH=$(npm root -g) node render.js 30`, `python3 audio.py ep1_ai.html`
 
 ### Next steps (free pipeline)
-- Video clips: Hugging Face ZeroGPU Spaces via `gradio_client` with `HF_TOKEN` (e.g. `Lightricks/ltx-video-distilled` `/image_to_video`, `zerogpu-aoti/wan2-2-fp8da-aoti-faster` `/generate_video`); free quota is a few clips per day
+- Video clips: Hugging Face ZeroGPU Spaces with `HF_TOKEN` (`gen_clips.py`). The free quota is about 3.5 min of GPU a day, i.e. one 5s clip (105s) plus one 4s clip; it resets 24h after use. More clips for ep1 (`question`, `bip_talk`, `cheer` are already written in `CLIPS`) can be added on later days and wired into `SHOTS`
+- `gradio_client` gets its SSE stream cancelled behind the session proxy, and the Space has several replicas, so `gen_clips.py` uses the Gradio queue over plain HTTP pinned to one replica (`/--replicas/<id>/`)
 - Publishing: Metricool connector, brand id 7591652 (YouTube + TikTok linked), daily at 20:00 Africa/Tunis

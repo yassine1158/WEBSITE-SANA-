@@ -9,6 +9,7 @@ const fs = require('fs');
   const page = await browser.newPage({ viewport: { width: 1080, height: 1920 } });
   await page.goto('file://' + path.resolve(process.env.PAGE || 'short.html'));
   await page.evaluate(() => document.fonts.ready);
+  await page.evaluate(() => window.ready); // pages with image frames (ep1_ai.html) preload them
   await page.waitForTimeout(500);
   if (only) {
     for (const t of only.split(',')) {
