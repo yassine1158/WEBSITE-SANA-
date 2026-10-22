@@ -27,6 +27,8 @@ FX = {  # Sami: pitched up to a kid's voice; Bip: robot
 }
 SPOKEN = {'4.5 مليار': 'أربعة مليار ونص', 'قريب 1 كيلومتر': 'قريب كيلومتر'}
 SEEDS = (1, 2, 3)
+SPEED = float(os.environ.get('SPEED', 0.8))  # <1 gives F5 more time: at 1.0 it drops short words like 'بيب!'
+ROBOT = re.compile(r'^(بيب|بوب)+$')  # Bip's pure beeps stay synthesized beeps (audio.py)
 
 page = sys.argv[1]
 only = {int(x) for x in sys.argv[2:]}
@@ -71,8 +73,13 @@ for i, (t0, t1, who, txt) in enumerate(LINES):
     if only and i not in only:
         continue
     text, best = spoken(txt), None
+    if ROBOT.match(norm(text)):
+        if os.path.exists(f'{out_dir}/{i:02d}.wav'):
+            os.remove(f'{out_dir}/{i:02d}.wav')
+        print(f'{i:02d} {who:4s} beeps only, left to audio.py', flush=True)
+        continue
     for seed in SEEDS:
-        audio, sr, _ = tts.infer(ref_file=f'voices/ref_{who}.wav', ref_text=REF_TEXT, gen_text=text, nfe_step=32, seed=seed)
+        audio, sr, _ = tts.infer(ref_file=f'voices/ref_{who}.wav', ref_text=REF_TEXT, gen_text=text, nfe_step=32, seed=seed, speed=SPEED)
         a16 = np.interp(np.arange(0, len(audio), sr / 16000), np.arange(len(audio)), audio).astype(np.float32)
         heard = ' '.join(s.text for s in asr.transcribe(a16, language='ar', beam_size=3)[0])
         score = difflib.SequenceMatcher(None, norm(text), norm(heard)).ratio()

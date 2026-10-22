@@ -38,7 +38,9 @@ for i, (t0, t1, who, txt) in enumerate(LINES):
         if s0 + j < len(voice): voice[s0 + j] += v / 32768
 use_tts = any(voice)
 
-for t0, t1, who, txt in ([] if use_tts else LINES):
+for i, (t0, t1, who, txt) in enumerate(LINES):  # babble for lines without a voice file
+    if os.path.exists(f'{vdir}/{i:02d}.wav'):
+        continue
     td = min(t1 - t0 - 0.9, 0.3 + len(txt) * 0.05)
     t = t0
     while t < t0 + td - 0.05:
