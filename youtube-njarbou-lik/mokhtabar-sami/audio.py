@@ -1,5 +1,6 @@
-# Soundtrack for an episode: cartoon babble voices from the dialogue timings, space pad music, SFX
-import math, random, re, struct, sys, wave
+# Soundtrack for an episode: dialogue voices, space pad music, SFX.
+# Voices come from voices/<page>/NN.wav (voices.py) when present, else cartoon babble from the dialogue timings.
+import math, os, random, re, struct, sys, wave
 SR = 22050
 html = open(sys.argv[1], encoding='utf-8').read()
 LINES = [(float(a), float(b), w, txt) for a, b, w, txt in re.findall(r"\[([\d.]+), ([\d.]+), '(\w+)', '([^']*)'\]", html)]
@@ -23,7 +24,21 @@ def bip_syl(t0, f):
     dur = 0.06
     add(t0, dur, lambda x: 0.16 * env(x, dur, 0.003) * (1 if math.sin(2*math.pi*f*x) > 0 else -1))
 
-for t0, t1, who, txt in LINES:
+vdir = 'voices/' + os.path.splitext(os.path.basename(sys.argv[1]))[0]
+voice = [0.0] * len(buf)
+for i, (t0, t1, who, txt) in enumerate(LINES):
+    path = f'{vdir}/{i:02d}.wav'
+    if not os.path.exists(path):
+        continue
+    with wave.open(path) as w:
+        assert w.getframerate() == SR and w.getnchannels() == 1 and w.getsampwidth() == 2
+        pcm = struct.unpack(f'<{w.getnframes()}h', w.readframes(w.getnframes()))
+    s0 = int(t0 * SR)
+    for j, v in enumerate(pcm):
+        if s0 + j < len(voice): voice[s0 + j] += v / 32768
+use_tts = any(voice)
+
+for t0, t1, who, txt in ([] if use_tts else LINES):
     td = min(t1 - t0 - 0.9, 0.3 + len(txt) * 0.05)
     t = t0
     while t < t0 + td - 0.05:
@@ -47,6 +62,12 @@ for s in (24.5, 28.0, 31.5): sweep(s, 0.35, 900, 200, 0.3)   # cannon shots
 sweep(16.0, 0.5, 300, 700, 0.2)                    # surprise
 nz = [rnd.uniform(-1, 1) for _ in range(SR)]
 add(54.8, 5.0, lambda x: 0.18 * min(1, x / 0.5) * max(0, 1 - x / 5) * nz[int(x * SR) % SR] * (0.5 + 0.5 * math.sin(2*math.pi*7*x)))  # rocket rumble
+
+if use_tts:  # duck music/SFX to 45% under speech (50ms attack, 400ms release)
+    g, att, rel = 0.0, 1 / (0.05 * SR), 1 / (0.4 * SR)
+    for i, v in enumerate(voice):
+        g = min(1.0, g + att) if abs(v) > 0.02 else max(0.0, g - rel)
+        buf[i] = buf[i] * (1 - 0.55 * g) * 0.8 + v
 
 for i in range(SR):                                # fade out last second
     buf[-1 - i] *= i / SR

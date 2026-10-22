@@ -6,7 +6,7 @@
 - `render.js` — renders `short.html` to frames: `NODE_PATH=$(npm root -g) node render.js 30`
 - `audio.py` — synthesizes the soundtrack (`audio.wav`)
 
-Encode: `ffmpeg -framerate 30 -i frames/f%05d.jpg -i audio.wav -c:v libx264 -pix_fmt yuv420p -crf 20 -c:a aac -shortest out.mp4`
+Encode: `ffmpeg -framerate 30 -i frames/f%05d.jpg -i audio.wav -c:v libx264 -pix_fmt yuv420p -crf 20 -c:a aac -shortest out.mp4` (episodes with voices: add `-af loudnorm=I=-14:TP=-1.5 -ar 44100` for YouTube loudness)
 
 ## Mokhtabar Sami (مخبر سامي) — cartoon series
 
@@ -20,6 +20,7 @@ Voices are synthesized cartoon babble; dialogue is shown in speech bubbles.
   - `gen_clips.py` — animates the keyart into `clips/<name>.mp4` (Wan 2.2 i2v on the ZeroGPU Space `zerogpu-aoti/wan2-2-fp8da-aoti-faster`): `HF_TOKEN=... [DURATION=5] python3 gen_clips.py [names]`
   - `clips/intro.mp4` (5s, Sami talks to Bip) and `clips/shock.mp4` (4s, Sami gasps) are the two clips in the episode
   - `ep1_ai.html` — full-frame clip for dialogue, clip shrinks to a bottom panel while the lab screen explains; camera crops (`CAM`) and shot list (`SHOTS`) give close-ups, push-ins and loops from the two clips
+  - Voices: real Tunisian speech from Microsoft Edge neural TTS (free, `pip install edge-tts`): Sami = `ar-TN-ReemNeural` pitched up as a kid, Bip = `ar-TN-HediNeural` + robot filter. `python3 voices.py ep1_ai.html` writes `voices/ep1_ai/NN.wav` (fitted to each line's slot, loudness-normalized; it warns when a line needs >1.2x speed, then shorten the text). `audio.py` uses them when present (else the babble) and ducks the music under speech
   - Extract frames, then render as usual: `for c in intro shock; do mkdir -p clips/$c; ffmpeg -i clips/$c.mp4 -vf scale=960:-1:flags=lanczos -q:v 2 clips/$c/%03d.jpg; done`, `PAGE=ep1_ai.html NODE_PATH=$(npm root -g) node render.js 30`, `python3 audio.py ep1_ai.html`
 
 ### Next steps (free pipeline)
