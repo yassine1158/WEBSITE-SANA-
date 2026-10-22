@@ -55,7 +55,8 @@ async def references():
         path = f'voices/ref_{who}.wav'
         if not os.path.exists(path):
             await edge_tts.Communicate(REF_TEXT, voice).save(path + '.mp3')
-            subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', path + '.mp3', '-ar', '24000', '-ac', '1', path], check=True)
+            # trailing silence: without it F5 tends to swallow the first word of the generated line
+            subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', path + '.mp3', '-af', 'apad=pad_dur=0.6', '-ar', '24000', '-ac', '1', path], check=True)
             os.remove(path + '.mp3')
 asyncio.run(references())
 
