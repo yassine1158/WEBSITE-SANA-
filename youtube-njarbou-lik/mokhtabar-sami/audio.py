@@ -8,21 +8,22 @@ TOTAL = float(re.search(r"const TOTAL = ([\d.]+)", html).group(1))
 buf = [0.0] * int(TOTAL * SR)
 rnd = random.Random(42)
 
-def add(t0, dur, fn):
+def add(t0, dur, fn, out=None):
+    out = buf if out is None else out
     s0 = int(t0 * SR)
     for i in range(int(dur * SR)):
-        if 0 <= s0 + i < len(buf): buf[s0 + i] += fn(i / SR)
+        if 0 <= s0 + i < len(out): out[s0 + i] += fn(i / SR)
 
 def env(x, dur, a=0.01):
     return min(1, x / a) * max(0, 1 - x / dur)
 
-def sami_syl(t0, f):
+def sami_syl(t0, f, out=None, g=1):
     dur = 0.075 + rnd.random() * 0.03
-    add(t0, dur, lambda x: 0.32 * env(x, dur) * (math.sin(2*math.pi*f*x*(1+0.08*x/dur)) + 0.4*math.sin(4*math.pi*f*x) + 0.15*math.sin(6*math.pi*f*x)))
+    add(t0, dur, lambda x: g * 0.32 * env(x, dur) * (math.sin(2*math.pi*f*x*(1+0.08*x/dur)) + 0.4*math.sin(4*math.pi*f*x) + 0.15*math.sin(6*math.pi*f*x)), out)
 
-def bip_syl(t0, f):
+def bip_syl(t0, f, out=None, g=1):
     dur = 0.06
-    add(t0, dur, lambda x: 0.16 * env(x, dur, 0.003) * (1 if math.sin(2*math.pi*f*x) > 0 else -1))
+    add(t0, dur, lambda x: g * 0.16 * env(x, dur, 0.003) * (1 if math.sin(2*math.pi*f*x) > 0 else -1), out)
 
 vdir = 'voices/' + os.path.splitext(os.path.basename(sys.argv[1]))[0]
 voice = [0.0] * len(buf)
@@ -37,6 +38,8 @@ for i, (t0, t1, who, txt) in enumerate(LINES):
     for j, v in enumerate(pcm):
         if s0 + j < len(voice): voice[s0 + j] += v / 32768
 use_tts = any(voice)
+# with TTS, babble goes on the voice track at speech level (and ducks the music like speech)
+bab_out, bab_g = (voice, 2.5) if use_tts else (None, 1)
 
 for i, (t0, t1, who, txt) in enumerate(LINES):  # babble for lines without a voice file
     if os.path.exists(f'{vdir}/{i:02d}.wav'):
@@ -44,8 +47,8 @@ for i, (t0, t1, who, txt) in enumerate(LINES):  # babble for lines without a voi
     td = min(t1 - t0 - 0.9, 0.3 + len(txt) * 0.05)
     t = t0
     while t < t0 + td - 0.05:
-        if who == 'sami': sami_syl(t, rnd.choice([330, 370, 415, 440, 494, 523]) * (1.15 if '!' in txt or '؟' in txt else 1))
-        else: bip_syl(t, rnd.choice([880, 1047, 1175, 1319, 1568]))
+        if who == 'sami': sami_syl(t, rnd.choice([330, 370, 415, 440, 494, 523]) * (1.15 if '!' in txt or '؟' in txt else 1), bab_out, bab_g)
+        else: bip_syl(t, rnd.choice([880, 1047, 1175, 1319, 1568]), bab_out, bab_g)
         t += 0.09 + (0.07 if rnd.random() < 0.15 else 0)
 
 # space pad: Am F C G, 4s each
