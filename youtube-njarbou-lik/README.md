@@ -25,6 +25,9 @@ Dialogue is shown in speech bubbles; voices are recorded (`recording.py`), with 
   - `audio.py` mixes the voice files (babble for lines without one) and ducks the music under speech
   - Extract frames, then render as usual: `for c in intro shock; do mkdir -p clips/$c; ffmpeg -i clips/$c.mp4 -vf scale=960:-1:flags=lanczos -q:v 2 clips/$c/%03d.jpg; done`, `PAGE=ep1_ai.html NODE_PATH=$(npm root -g) node render.js 30`, `python3 audio.py ep1_ai.html`
 
+### Shorts: the first second
+- Short #1 analytics (day 1): 227 views, 85.7% average viewed, but only 20.1% stayed past the start. Its intro faded in from a blank frame. Every Short must show its hook on frame 0: no fade-in, a bold question, motion or a face, and a challenge to guess (`ep1_ai.html` opens on Sami's shocked face + the question + "خمّن قبل ما نقولك 👇", lightning at 0.4s)
+
 ### Next steps (free pipeline)
 - Video clips: Hugging Face ZeroGPU Spaces with `HF_TOKEN` (`gen_clips.py`). The free quota is about 3.5 min of GPU a day, i.e. one 5s clip (105s) plus one 4s clip; it resets 24h after use. More clips for ep1 (`question`, `bip_talk`, `cheer` are already written in `CLIPS`) can be added on later days and wired into `SHOTS`
 - `gradio_client` gets its SSE stream cancelled behind the session proxy, and the Space has several replicas, so `gen_clips.py` uses the Gradio queue over plain HTTP pinned to one replica (`/--replicas/<id>/`)
