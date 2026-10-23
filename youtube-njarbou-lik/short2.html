@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;800;900&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; }
+  body {
+    font-family: 'Cairo', 'DejaVu Sans', sans-serif;
+    background: radial-gradient(circle at 50% 30%, #3a2a8c 0%, #1b1446 55%, #0d0a24 100%);
+    color: #fff; position: relative;
+  }
+  .abs { position: absolute; }
+  #brand { top: 80px; left: 0; width: 100%; text-align: center; font-size: 46px; font-weight: 800; color: #ffd84a; letter-spacing: 1px; }
+  #counter { top: 150px; left: 0; width: 100%; text-align: center; font-size: 34px; font-weight: 600; color: #b9b2ff; }
+  #question { top: 220px; left: 90px; width: 900px; text-align: center; font-size: 66px; font-weight: 900; line-height: 1.35; }
+  #glass {
+    top: 600px; left: 360px; width: 360px; height: 380px;
+    border: 10px solid rgba(255,255,255,.85); border-top: none; border-radius: 0 0 50px 50px;
+    overflow: hidden;
+  }
+  #water {
+    position: absolute; left: 0; bottom: 0; width: 100%; height: 260px;
+    background: linear-gradient(180deg, rgba(90,190,255,.75), rgba(40,110,230,.9));
+  }
+  #water::before {
+    content: ''; position: absolute; top: -8px; left: 0; width: 100%; height: 16px;
+    background: rgba(200,235,255,.9); border-radius: 50%;
+  }
+  #item { font-size: 150px; line-height: 1; left: 465px; width: 150px; text-align: center; }
+  .opt {
+    left: 140px; width: 800px; height: 112px; border-radius: 30px;
+    background: rgba(255,255,255,.1); border: 4px solid rgba(255,255,255,.25);
+    font-size: 50px; font-weight: 800; display: flex; align-items: center; padding: 0 36px; gap: 26px;
+  }
+  .opt .l {
+    width: 70px; height: 70px; border-radius: 50%; background: #ffd84a; color: #1b1446;
+    display: flex; align-items: center; justify-content: center; font-size: 40px; flex: none;
+  }
+  #timer {
+    top: 1450px; left: 465px; width: 150px; height: 150px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-size: 78px; font-weight: 900;
+  }
+  #tnum { width: 118px; height: 118px; border-radius: 50%; background: #1b1446; display: flex; align-items: center; justify-content: center; }
+  #why {
+    top: 1430px; left: 110px; width: 860px; text-align: center; font-size: 44px; font-weight: 700; line-height: 1.5;
+    background: rgba(0,0,0,.35); border-radius: 30px; padding: 26px 30px;
+  }
+  .big { left: 60px; width: 960px; text-align: center; font-weight: 900; line-height: 1.4; }
+</style>
+</head>
+<body>
+  <div id="brand" class="abs">🧪 تنجم تجاوب الثلاثة صحيح؟</div>
+  <div id="counter" class="abs"></div>
+  <div id="question" class="abs"></div>
+  <div id="glass" class="abs"><div id="water"></div></div>
+  <div id="item" class="abs"></div>
+  <div id="o0" class="abs opt"><span class="l">أ</span><span class="t"></span></div>
+  <div id="o1" class="abs opt"><span class="l">ب</span><span class="t"></span></div>
+  <div id="o2" class="abs opt"><span class="l">ج</span><span class="t"></span></div>
+  <div id="timer" class="abs"><span id="tnum"></span></div>
+  <div id="why" class="abs"></div>
+  <div id="intro" class="abs big"></div>
+  <div id="outro" class="abs big"></div>
+<script>
+const QS = [
+  { q: 'دلاعة كاملة (8 كيلو!) في الماء… شنوّة يصيرلها؟', e: '🍉',
+    o: ['تغرق للقاع', 'تطفى فوق الماء', 'تقعد في النص'], a: 1, float: true,
+    why: 'الدلاعة فيها ماء وهواء… كثافتها أقل شوية من الماء، لذلك تطفى رغم الوزن! 🤯' },
+  { q: 'تفاحة في كاس ماء… تطفى ولّا تغرق؟', e: '🍎',
+    o: ['تطفى', 'تغرق', 'تقعد في النص'], a: 0, float: true,
+    why: 'التفاحة ربعها هواء 🍎… أخف من الماء، لذلك تطفى' },
+  { q: 'حبّة عنب صغيرة وخفيفة… تطفى ولّا تغرق؟', e: '🍇',
+    o: ['تطفى', 'تغرق', 'تقعد في النص'], a: 1, float: false,
+    why: 'العنب فيه برشا سكّر… أثقل من الماء بالنسبة لحجمو، لذلك يغرق! 😮' },
+];
+const INTRO = 0, QLEN = 7.5, OUTRO = 3;
+const COUNT0 = 0.8, COUNT = 3, REVEAL = COUNT0 + COUNT; // countdown start/length, answer shown at REVEAL
+const TOTAL = INTRO + QS.length * QLEN + OUTRO;
+const $ = id => document.getElementById(id);
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const ease = x => 1 - Math.pow(1 - clamp(x), 3);
+const GLASS_TOP = 600, GLASS_H = 380, WATER_H = 260, ITEM = 150;
+const SURFACE = GLASS_TOP + GLASS_H - WATER_H;
+
+function show(el, op, dy = 0, sc = 1) {
+  el.style.opacity = op;
+  el.style.transform = `translateY(${dy}px) scale(${sc})`;
+}
+
+function render(t) {
+  const ids = ['counter', 'question', 'glass', 'item', 'o0', 'o1', 'o2', 'timer', 'why', 'intro', 'outro'];
+  ids.forEach(id => show($(id), 0));
+
+  if (t < INTRO) {
+    const p = ease(t / 0.5); // only the scale pops in: frame 0 must already show the hook (Shorts swipe-away)
+    $('intro').style.top = '700px';
+    $('intro').innerHTML = '<div style="font-size:120px">🧪</div><div style="font-size:84px">3 تجارب…</div><div style="font-size:70px;color:#ffd84a">تنجم تعرف النتيجة؟</div>';
+    show($('intro'), 1, 0, 0.9 + 0.1 * p);
+    return;
+  }
+
+  const qt = t - INTRO;
+  const qi = Math.floor(qt / QLEN);
+  if (qi >= QS.length) {
+    const p = ease((qt - QS.length * QLEN) / 0.5);
+    $('outro').style.top = '640px';
+    $('outro').innerHTML = '<div style="font-size:110px">🤔</div><div style="font-size:80px">قدّاش جاوبت صحيح؟</div><div style="font-size:60px;color:#ffd84a;margin-top:30px">اكتب نتيجتك من 3 في الكومنتار 👇</div><div style="font-size:48px;color:#b9b2ff;margin-top:30px">أبّوني: تجربة جديدة كل نهار 🧪</div>';
+    show($('outro'), p, 40 * (1 - p));
+    return;
+  }
+
+  const q = QS[qi], lt = qt - qi * QLEN;
+  const fin = x => qi === 0 ? 1 : ease(x);
+  $('counter').textContent = `سؤال ${qi + 1} / ${QS.length}` + (qi === QS.length - 1 ? ' — الأصعب 😈' : '');
+  show($('counter'), 1);
+  $('question').textContent = q.q;
+  const qp = fin(lt / 0.5);
+  show($('question'), qp, -40 * (1 - qp));
+  show($('glass'), fin(lt / 0.5));
+
+  // item: hovers above glass, then drops in at the reveal
+  $('item').textContent = q.e;
+  let y;
+  const hover = GLASS_TOP - ITEM - 10 + Math.sin(lt * 3) * 12;
+  if (lt < REVEAL) {
+    y = hover;
+  } else {
+    const d = lt - REVEAL;
+    const bottom = GLASS_TOP + GLASS_H - ITEM - 20;
+    const surf = SURFACE - ITEM * 0.55;
+    if (q.float) {
+      // fall below the surface, then bob back up
+      const deep = surf + 110;
+      if (d < 0.4) y = hover + (deep - hover) * ease(d / 0.4);
+      else y = surf + (deep - surf) * Math.exp(-(d - 0.4) * 4) * Math.cos((d - 0.4) * 9);
+    } else {
+      if (d < 0.4) y = hover + (surf + 60 - hover) * ease(d / 0.4);
+      else y = surf + 60 + (bottom - surf - 60) * ease((d - 0.4) / 1.2);
+    }
+  }
+  $('item').style.top = y + 'px';
+  show($('item'), fin(lt / 0.5));
+
+  // options
+  q.o.forEach((txt, i) => {
+    const el = $('o' + i);
+    el.style.top = (1030 + i * 132) + 'px';
+    el.querySelector('.t').textContent = txt;
+    const p = fin((lt - 0.6 - i * 0.15) / 0.4);
+    let op = p, bg = 'rgba(255,255,255,.1)', bd = 'rgba(255,255,255,.25)', sc = 1;
+    if (lt >= REVEAL) {
+      const r = ease((lt - REVEAL) / 0.3);
+      if (i === q.a) { bg = '#22b45a'; bd = '#7dffb0'; sc = 1 + 0.05 * Math.sin(clamp((lt - REVEAL) / 0.4) * Math.PI); }
+      else op = 1 - 0.65 * r;
+    }
+    el.style.background = bg;
+    el.style.borderColor = bd;
+    el.querySelector('.t').textContent = txt + (lt >= REVEAL && i === q.a ? '  ✅' : '');
+    show(el, op, 30 * (1 - p), sc);
+  });
+
+  // countdown, then explanation
+  if (lt >= COUNT0 && lt < REVEAL) {
+    const left = Math.ceil(COUNT - (lt - COUNT0));
+    const frac = (lt - COUNT0) % 1;
+    const tm = $('timer');
+    $('tnum').textContent = left;
+    const deg = 360 * (1 - (lt - COUNT0) / COUNT);
+    const col = left <= 2 ? '#ff5470' : '#ffd84a';
+    tm.style.background = `conic-gradient(${col} ${deg}deg, rgba(255,255,255,.12) 0)`;
+    tm.style.color = col;
+    show(tm, 1, 0, 1 + 0.12 * (1 - ease(frac / 0.3)));
+  }
+  if (lt >= REVEAL + 0.5) {
+    $('why').textContent = q.why;
+    const p = ease((lt - REVEAL - 0.5) / 0.4);
+    show($('why'), p, 30 * (1 - p));
+  }
+}
+window.TOTAL = TOTAL;
+window.QS_TIMES = QS.map((_, i) => INTRO + i * QLEN);
+</script>
+</body>
+</html>

@@ -7,7 +7,7 @@ const fs = require('fs');
   const only = process.argv[3]; // optional: single time for a preview still
   const browser = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 1080, height: 1920 } });
-  await page.goto('file://' + path.resolve('short.html'));
+  await page.goto('file://' + path.resolve(process.env.PAGE || 'short.html'));
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(500);
   if (only) {

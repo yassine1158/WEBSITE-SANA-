@@ -2,9 +2,10 @@
 
 - `njarbou_lik_logo.png` — channel logo (800x800), rendered from `logo.html` with `shot.js`
 - `njarbou_lik_short1.mp4` — Short #1 (3-question experiments quiz, 31s)
+- `njarbou_lik_short2.mp4` — Short #2 (`short2.html`: watermelon / apple / grape, float or sink, 25.5s): question 1 is on screen at frame 0, challenge line, 3s countdown, "the hardest" on Q3, comment-your-score ending
 - `short.html` — the Short's animation, driven by `render(t)`
-- `render.js` — renders `short.html` to frames: `NODE_PATH=$(npm root -g) node render.js 30`
-- `audio.py` — synthesizes the soundtrack (`audio.wav`)
+- `render.js` — renders a Short page to frames: `[PAGE=short2.html] NODE_PATH=$(npm root -g) node render.js 30`
+- `audio.py` — synthesizes the soundtrack (`audio.wav`) from the page's timings: `python3 audio.py [short2.html]`
 
 Encode: `ffmpeg -framerate 30 -i frames/f%05d.jpg -i audio.wav -c:v libx264 -pix_fmt yuv420p -crf 20 -c:a aac -shortest out.mp4` (episodes with voices: add `-af loudnorm=I=-14:TP=-1.5 -ar 44100` for YouTube loudness)
 

@@ -1,7 +1,11 @@
 # Synthesizes the soundtrack: soft arpeggio bed + countdown ticks + reveal ding
-import math, struct, wave, sys
+import math, re, struct, wave, sys
 SR = 44100
-INTRO, QLEN, OUTRO, NQ = 1.5, 9, 2.5, 3
+page = open(sys.argv[1] if len(sys.argv) > 1 else 'short.html', encoding='utf-8').read()  # python3 audio.py [short2.html]
+INTRO, QLEN, OUTRO = map(float, re.search(r'const INTRO = ([\d.]+), QLEN = ([\d.]+), OUTRO = ([\d.]+)', page).groups())
+m = re.search(r'const COUNT0 = ([\d.]+), COUNT = (\d+)', page)
+COUNT0, COUNT = (float(m.group(1)), int(m.group(2))) if m else (1.5, 5)
+NQ = page.count('{ q:')
 TOTAL = INTRO + NQ * QLEN + OUTRO
 buf = [0.0] * int(TOTAL * SR)
 
@@ -23,10 +27,10 @@ while t < TOTAL - 0.5:
 
 for q in range(NQ):
     s = INTRO + q * QLEN
-    for j in range(5):
-        tone(s + 1.5 + j, 0.08, 1500 if j < 3 else 1900, 0.35, 40)
-    tone(s + 6.5, 0.9, 1046.5, 0.3, 4)
-    tone(s + 6.62, 0.9, 1568.0, 0.25, 4)
+    for j in range(COUNT):
+        tone(s + COUNT0 + j, 0.08, 1500 if j < COUNT - 2 else 1900, 0.35, 40)
+    tone(s + COUNT0 + COUNT, 0.9, 1046.5, 0.3, 4)
+    tone(s + COUNT0 + COUNT + 0.12, 0.9, 1568.0, 0.25, 4)
 tone(INTRO + NQ * QLEN, 1.2, 784.0, 0.2, 3)
 
 # fade out at the end
