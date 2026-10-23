@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; }
+  body {
+    font-family: 'Cairo', 'DejaVu Sans', sans-serif; color: #fff; position: relative;
+    background: linear-gradient(180deg, #10183a 0%, #1a2552 45%, #232e5e 70%, #2b2f4a 100%);
+  }
+  .abs { position: absolute; }
+  #vid { left: 0; top: 0; width: 1080px; height: 1920px; }
+  #edge { left: 0; top: 924px; width: 1080px; height: 8px; background: #5ee6ff; box-shadow: 0 0 30px #5ee6ff; }
+  #screen {
+    left: 70px; top: 170px; width: 940px; height: 720px; border-radius: 40px;
+    border: 14px solid #4b5788; background: #05081a; overflow: hidden;
+    box-shadow: 0 0 60px rgba(94,230,255,.35), inset 0 0 40px rgba(94,230,255,.15);
+  }
+  #screen svg { width: 100%; height: 100%; }
+  #label { left: 0; top: 70px; width: 100%; text-align: center; font-size: 40px; font-weight: 900; color: #5ee6ff; letter-spacing: 1px; text-shadow: 0 3px 10px rgba(0,0,0,.8); }
+  .bubble {
+    background: #fff; color: #1a1d33; border-radius: 34px; padding: 22px 34px; width: 760px;
+    font-size: 46px; font-weight: 900; line-height: 1.45; text-align: center;
+    box-shadow: 0 8px 0 rgba(0,0,0,.25);
+  }
+  .bubble::after {
+    content: ''; position: absolute; width: 0; height: 0;
+    border-left: 24px solid transparent; border-right: 24px solid transparent;
+  }
+  .bubble.top::after { bottom: -34px; border-top: 36px solid #fff; }
+  .bubble.bot::after { top: -34px; border-bottom: 36px solid #fff; }
+  #bbip { background: #d8f8ff; }
+  #bbip.top::after { border-top-color: #d8f8ff; }
+  #bbip.bot::after { border-bottom-color: #d8f8ff; }
+  /* Sami stands on the left of the clip, Bip floats on the right */
+  #bsami { left: 50px; }
+  #bsami::after { left: 150px; }
+  #bbip { right: 50px; }
+  #bbip::after { right: 130px; }
+  #dim { left: 0; top: 0; width: 1080px; height: 1920px; background: rgba(5,8,26,.78); }
+  #title { left: 0; top: 0; width: 1080px; height: 1920px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(5,8,26,.72); text-align: center; text-shadow: 0 4px 16px rgba(0,0,0,.8); }
+  #title .s { font-size: 150px; font-weight: 900; color: #ffd84a; line-height: 1.1; }
+  #title .e { font-size: 58px; font-weight: 900; margin-top: 30px; }
+  #title .n { font-size: 44px; color: #5ee6ff; margin-top: 10px; font-weight: 700; }
+  #end { left: 60px; top: 760px; width: 960px; text-align: center; }
+  #end .a { font-size: 44px; color: #5ee6ff; font-weight: 700; }
+  #end .b { font-size: 66px; font-weight: 900; line-height: 1.35; margin-top: 10px; }
+  #end .c { font-size: 50px; color: #ffd84a; font-weight: 900; margin-top: 40px; }
+</style>
+</head>
+<body>
+  <canvas id="vid" class="abs" width="1080" height="1920"></canvas>
+  <div id="edge" class="abs"></div>
+  <div id="label" class="abs">🔬 مخبر سامي</div>
+
+  <div id="screen" class="abs">
+    <svg viewBox="0 0 900 700" id="scr">
+      <g id="stars"></g>
+      <!-- earth & moon question -->
+      <g id="em">
+        <clipPath id="earthClip"><circle cx="230" cy="560" r="260"/></clipPath>
+        <circle cx="230" cy="560" r="260" fill="#1f6fd1"/>
+        <g clip-path="url(#earthClip)" fill="#2fa65a">
+          <path d="M20 420 q70 -80 150 -40 q50 25 90 -20 q50 -30 90 20 q-10 60 -80 70 q-60 10 -90 70 q-40 60 -120 40 q-60 -20 -40 -140 z"/>
+          <path d="M330 560 q60 -30 120 20 q20 60 -40 90 q-60 20 -90 -30 z"/>
+        </g>
+        <circle cx="230" cy="560" r="260" fill="none" stroke="#9fd8ff" stroke-width="10" opacity=".5"/>
+        <g id="emMoon">
+          <circle r="85" fill="#cfd2dc"/>
+          <circle cx="-25" cy="-20" r="16" fill="#aeb2c0"/>
+          <circle cx="30" cy="15" r="22" fill="#aeb2c0"/>
+          <circle cx="-10" cy="40" r="11" fill="#aeb2c0"/>
+        </g>
+        <text id="emQ" x="790" y="150" font-size="120" font-weight="900" fill="#ffd84a" font-family="Cairo">?</text>
+        <g id="emArrow">
+          <line x1="0" y1="0" x2="0" y2="110" stroke="#ff5470" stroke-width="12" stroke-linecap="round"/>
+          <path d="M-30 90 L0 135 L30 90 z" fill="#ff5470"/>
+        </g>
+      </g>
+      <!-- Newton's cannon -->
+      <g id="cn">
+        <circle cx="450" cy="400" r="150" fill="#1f6fd1"/>
+        <path d="M330 320 q50 -40 100 0 q40 30 90 0 q40 -20 60 40 q-20 60 -120 50 q-80 -10 -130 -90 z" fill="#2fa65a"/>
+        <path d="M400 262 L450 205 L500 262 z" fill="#8a6f55"/>
+        <rect x="438" y="190" width="40" height="18" rx="6" fill="#444"/>
+        <polyline id="tr0" fill="none" stroke="#ffd84a" stroke-width="5" stroke-dasharray="10 8"/>
+        <polyline id="tr1" fill="none" stroke="#ff9f43" stroke-width="5" stroke-dasharray="10 8"/>
+        <polyline id="tr2" fill="none" stroke="#5ee6ff" stroke-width="5" stroke-dasharray="10 8"/>
+        <circle id="ball" r="12" fill="#fff"/>
+        <text id="cnTxt" x="450" y="660" text-anchor="middle" font-size="44" font-weight="900" fill="#fff" font-family="Cairo"></text>
+      </g>
+      <!-- moon orbit -->
+      <g id="ob">
+        <circle cx="450" cy="350" r="250" fill="none" stroke="#5ee6ff" stroke-width="3" stroke-dasharray="6 10" opacity=".6"/>
+        <circle cx="450" cy="350" r="85" fill="#1f6fd1"/>
+        <path d="M385 320 q30 -30 70 -10 q30 15 60 -5 q10 40 -30 60 q-50 15 -100 -45 z" fill="#2fa65a"/>
+        <g id="obMoon">
+          <circle r="34" fill="#cfd2dc"/>
+          <circle cx="-10" cy="-8" r="7" fill="#aeb2c0"/>
+          <circle cx="12" cy="8" r="9" fill="#aeb2c0"/>
+        </g>
+        <g id="vArrow">
+          <line x1="0" y1="0" x2="110" y2="0" stroke="#ffd84a" stroke-width="8" stroke-linecap="round"/>
+          <path d="M100 -18 L130 0 L100 18 z" fill="#ffd84a"/>
+        </g>
+        <g id="gArrow">
+          <line x1="0" y1="0" x2="90" y2="0" stroke="#ff5470" stroke-width="8" stroke-linecap="round"/>
+          <path d="M80 -18 L110 0 L80 18 z" fill="#ff5470"/>
+        </g>
+        <text id="obTxt1" x="450" y="60" text-anchor="middle" font-size="40" font-weight="900" fill="#ffd84a" font-family="Cairo">يجري: ~1 كم في الثانية</text>
+        <text id="obTxt2" x="450" y="672" text-anchor="middle" font-size="40" font-weight="900" fill="#ff5470" font-family="Cairo">يطيح نحو الأرض</text>
+      </g>
+    </svg>
+  </div>
+
+  <div id="bsami" class="abs bubble"></div>
+  <div id="bbip" class="abs bubble"></div>
+  <div id="dim" class="abs"></div>
+  <div id="end" class="abs">
+    <div class="a">الحلقة الجاية</div>
+    <div class="b">كيفاش الصاروخ يخرج من الأرض؟ 🚀</div>
+    <div class="c">أبّوني باش ما تفوتكش 🔔</div>
+  </div>
+  <div id="title" class="abs">
+    <div style="font-size:150px">🔬</div>
+    <div class="s">مخبر سامي</div>
+    <div class="e">علاش القمر ما يطيحش؟</div>
+    <div class="n">الحلقة 1</div>
+  </div>
+
+<script>
+const LINES = [
+  [3.5, 8.0, 'sami', 'بيب! عندي سؤال ما خلّانيش نرقد البارح…'],
+  [8.0, 10.5, 'bip', 'بيب بوب؟ 🤖'],
+  [10.5, 16.0, 'sami', 'القمر تقيل برشا… علاش ما يطيحش علينا؟!'],
+  [16.0, 20.5, 'bip', 'الحقيقة؟ القمر يطيح… ديما! 😱'],
+  [20.5, 24.5, 'sami', 'شنوّة؟! كيفاش يطيح وما يوصلش؟'],
+  [24.5, 28.0, 'bip', 'شوف المدفع: بالشوية… تطيح قريب'],
+  [28.0, 31.5, 'bip', 'أسرع… تطيح أبعد'],
+  [31.5, 37.0, 'bip', 'وكي تولّي سريعة برشا… الأرض تهرب من تحتها! تدور وما توصلش 🌍'],
+  [37.0, 43.0, 'bip', 'القمر نفس الشي: يجري قريب 1 كيلومتر في الثانية… يطيح وهو يدور'],
+  [43.0, 47.5, 'sami', 'يعني القمر يطيح من 4.5 مليار سنة… وما وصلش؟! 🤯'],
+  [47.5, 50.0, 'bip', 'بيب بيب! ✅'],
+  [50.0, 54.0, 'sami', 'بيب… حضّر الصاروخ! 🚀'],
+];
+const TOTAL = 60;
+
+// AI clips (gen_clips.py), 480x832 @16fps, extracted to clips/<name>/NNN.jpg
+const FPS = 16, CW = 480, CH = 832;
+const CLIPS = { intro: 81, shock: 65 };
+// camera: [cx, cy, scale] = clip point at the centre of the view, screen px per clip px
+const CAM = {
+  full: [240, 416, 2.31], two: [240, 430, 2.75], sami: [150, 400, 3.5], bip: [330, 420, 3.5],
+  rocket: [245, 500, 4.4],
+  splitTwo: [240, 390, 2.25], splitSami: [150, 390, 2.8], splitBip: [330, 400, 2.8],
+};
+// [start, mode, clip, a, b, speed, loopFrom, cam0, cam1, moveIn]: plays a→b once, then ping-pongs loopFrom↔b
+const SHOTS = [
+  [0,    'full',  'intro', 0,   5.0, 0,   0,   'full',     'full',     0],
+  [3.5,  'full',  'intro', 0,   5.0, 1,   2.5, 'full',     'two',      0],
+  [8.0,  'full',  'intro', 3.0, 5.0, 0.8, 3.0, 'bip',      'bip',      0],
+  [10.5, 'split', 'intro', 1.0, 4.5, 1,   1.0, 'splitSami', 'splitTwo', 1],
+  [16.0, 'split', 'shock', 0.6, 4.0, 1,   2.6, 'splitTwo', 'splitSami', 0],
+  [24.5, 'split', 'intro', 2.0, 5.0, 0.7, 2.0, 'splitBip', 'splitBip', 0],
+  [31.5, 'split', 'intro', 0.5, 3.5, 0.7, 0.5, 'splitTwo', 'splitTwo', 0],
+  [37.0, 'split', 'intro', 2.5, 5.0, 0.6, 2.5, 'splitBip', 'splitTwo', 0],
+  [43.0, 'full',  'shock', 2.2, 4.0, 0.8, 2.4, 'two',      'sami',     1],
+  [47.5, 'full',  'shock', 2.5, 4.0, 1,   2.5, 'bip',      'bip',      0],
+  [50.0, 'full',  'intro', 1.5, 5.0, 0.8, 2.5, 'sami',     'rocket',   0],
+];
+const SHOT_END = (i) => i + 1 < SHOTS.length ? SHOTS[i + 1][0] : TOTAL;
+const DEST = { full: [0, 0, 1080, 1920], split: [0, 930, 1080, 990] };
+const MOVE = 0.7;
+
+const $ = id => document.getElementById(id);
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const ease = x => 1 - Math.pow(1 - clamp(x), 3);
+const smooth = x => { x = clamp(x); return x * x * (3 - 2 * x); };
+const lerp = (a, b, k) => a + (b - a) * k;
+const lerpA = (a, b, k) => a.map((v, i) => lerp(v, b[i], k));
+const typeDur = (l) => Math.min(l[1] - l[0] - 0.9, 0.3 + [...l[3]].length * 0.05);
+const vis = (id, on) => { $(id).style.display = on ? '' : 'none'; };
+
+const IMG = {};
+window.ready = Promise.all(Object.entries(CLIPS).flatMap(([name, n]) => {
+  IMG[name] = [];
+  return Array.from({ length: n }, (_, i) => new Promise((res, rej) => {
+    const im = new Image();
+    im.onload = () => res(im); im.onerror = rej;
+    im.src = `clips/${name}/${String(i + 1).padStart(3, '0')}.jpg`;
+    IMG[name][i] = im;
+  }));
+}));
+
+// deterministic stars
+(function () {
+  let s = 7, g = '';
+  const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < 90; i++) g += `<circle cx="${rnd() * 900}" cy="${rnd() * 700}" r="${0.8 + rnd() * 2.2}" fill="#fff" opacity="${0.3 + rnd() * 0.7}"/>`;
+  $('stars').innerHTML = g;
+})();
+
+// Newton's cannon: integrate three shots once (center 450,400; ground r=150; launch r=205)
+const C = { x: 450, y: 400 }, R0 = 205, GM = Math.pow(2 * Math.PI * R0 / 6, 2) * R0;
+const VC = Math.sqrt(GM / R0);
+const CANNON = [0.45, 0.7, 1.0].map(f => {
+  let x = 0, y = -R0, vx = f * VC, vy = 0, pts = [[x, y]];
+  const dt = 0.004;
+  for (let i = 0; i < 1600; i++) {
+    const r = Math.hypot(x, y), a = -GM / (r * r * r);
+    vx += a * x * dt; vy += a * y * dt; x += vx * dt; y += vy * dt;
+    if (Math.hypot(x, y) < 150) break;
+    pts.push([x, y]);
+  }
+  return pts.map(p => [C.x + p[0], C.y + p[1]]);
+});
+
+// where the camera of shot i is at time t: [dest rect, cam]
+function shotView(i, t) {
+  const s = SHOTS[i], k = smooth((t - s[0]) / (SHOT_END(i) - s[0]));
+  return [DEST[s[1]], lerpA(CAM[s[7]], CAM[s[8]], k)];
+}
+function clipTime(s, t) {
+  const [t0, , , a, b, speed, from] = s;
+  const p = a + (t - t0) * speed;
+  if (p <= b) return p;
+  const L = b - from, q = (p - b) % (2 * L);
+  return q < L ? b - q : from + (q - L);
+}
+const ctx = $('vid').getContext('2d');
+ctx.imageSmoothingQuality = 'high';
+function drawVideo(t) {
+  const i = SHOTS.findLastIndex(s => t >= s[0]), s = SHOTS[i];
+  let [dest, cam] = shotView(i, t);
+  if (s[9] && i > 0) { // camera move from the previous shot (also morphs full <-> split)
+    const k = smooth((t - s[0]) / MOVE), [d0, c0] = shotView(i - 1, s[0]);
+    dest = lerpA(d0, dest, k); cam = lerpA(c0, cam, k);
+  }
+  const [dx, dy, dw, dh] = dest;
+  const sw = Math.min(CW, dw / cam[2]), sh = Math.min(CH, dh / cam[2]);
+  const sx = clamp(cam[0] - sw / 2, 0, CW - sw), sy = clamp(cam[1] - sh / 2, 0, CH - sh);
+  const frames = IMG[s[2]], f = clamp(clipTime(s, t) * FPS, 0, frames.length - 1);
+  const f0 = Math.floor(f), f1 = Math.min(f0 + 1, frames.length - 1);
+  const k = 960 / CW; // extracted frames are 2x
+  ctx.clearRect(0, 0, 1080, 1920);
+  ctx.globalAlpha = 1;
+  ctx.drawImage(frames[f0], sx * k, sy * k, sw * k, sh * k, dx, dy, dw, dh);
+  ctx.globalAlpha = f - f0; // blend neighbours: 16fps clip -> smooth 30fps
+  ctx.drawImage(frames[f1], sx * k, sy * k, sw * k, sh * k, dx, dy, dw, dh);
+  ctx.globalAlpha = 1;
+  return dy / 930; // 0 = full frame, 1 = split
+}
+
+function render(t) {
+  const split = drawVideo(t);
+  $('edge').style.opacity = split;
+  $('screen').style.opacity = split;
+  $('screen').style.transform = `translateY(${(1 - split) * -80}px) scale(${0.9 + 0.1 * split})`;
+  $('label').style.opacity = t < 54 ? 1 : 0;
+
+  // ---- screen ----
+  const mode = t < 24.5 ? 'em' : t < 37 ? 'cn' : 'ob';
+  ['em', 'cn', 'ob'].forEach(m => vis(m, m === mode));
+  if (mode === 'em') {
+    const lt = t - 10.5;
+    let mx = 660, my = 210 + Math.sin(t * 1.5) * 8;
+    if (t >= 16 && t < 21) mx += Math.sin(t * 40) * 6;
+    $('emMoon').setAttribute('transform', `translate(${mx} ${my}) scale(${ease(lt / 0.6)})`);
+    $('emQ').style.opacity = t < 16 ? (Math.floor(t * 2) % 2 ? 1 : 0.4) : 0;
+    $('emArrow').setAttribute('transform', `translate(${mx} ${my + 100 + Math.sin(t * 6) * 10})`);
+    $('emArrow').style.opacity = t >= 16 ? 1 : 0;
+  }
+  if (mode === 'cn') {
+    const starts = [24.5, 28, 31.5], lens = [3.0, 3.0, 5.0];
+    let ball = null, label = '';
+    CANNON.forEach((pts, i) => {
+      const k = (t - starts[i]) / lens[i];
+      const el = $('tr' + i);
+      if (k < 0) { el.setAttribute('points', ''); return; }
+      const n = Math.min(pts.length, Math.floor(clamp(k) * pts.length) + 1);
+      el.setAttribute('points', pts.slice(0, n).map(p => p.join(',')).join(' '));
+      el.style.opacity = t > starts[i] + lens[i] && i < 2 ? 0.45 : 1;
+      if (k <= 1) { ball = pts[n - 1]; label = ['بالشوية 🐢', 'أسرع 🏃', 'سريعة برشا 🚀'][i]; }
+    });
+    if (ball) { $('ball').setAttribute('cx', ball[0]); $('ball').setAttribute('cy', ball[1]); $('ball').style.opacity = 1; }
+    else $('ball').style.opacity = 0;
+    $('cnTxt').textContent = label;
+  }
+  if (mode === 'ob') {
+    const a = -Math.PI / 2 + (t - 37) * 0.55;
+    const mx = 450 + 250 * Math.cos(a), my = 350 + 250 * Math.sin(a);
+    $('obMoon').setAttribute('transform', `translate(${mx} ${my})`);
+    const tang = a * 180 / Math.PI + 90, inward = a * 180 / Math.PI + 180;
+    $('vArrow').setAttribute('transform', `translate(${mx} ${my}) rotate(${tang}) translate(40 0)`);
+    $('gArrow').setAttribute('transform', `translate(${mx} ${my}) rotate(${inward}) translate(40 0)`);
+  }
+
+  // ---- bubbles: above the heads in full frame, under the screen in split ----
+  ['sami', 'bip'].forEach(who => {
+    const el = $(who === 'sami' ? 'bsami' : 'bbip');
+    const l = LINES.find(l => l[2] === who && t >= l[0] && t < l[1]);
+    if (!l) { el.style.opacity = 0; return; }
+    const top = SHOTS.findLast(s => l[0] >= s[0])[1] === 'full';
+    el.className = 'abs bubble ' + (top ? 'top' : 'bot');
+    el.style.top = top ? '170px' : '';
+    el.style.bottom = top ? '' : '50px';
+    const chars = [...l[3]];
+    const n = Math.ceil(chars.length * clamp((t - l[0]) / typeDur(l)));
+    el.textContent = chars.slice(0, n).join('');
+    const p = ease((t - l[0]) / 0.25);
+    el.style.opacity = p;
+    el.style.transform = `scale(${0.85 + 0.15 * p})`;
+  });
+
+  // ---- overlays ----
+  const tp = t < 3.5 ? (t < 3 ? 1 : 1 - (t - 3) / 0.5) : 0;
+  $('title').style.opacity = tp;
+  $('title').style.transform = `scale(${0.9 + 0.1 * ease(t / 0.6)})`;
+  $('dim').style.opacity = ease((t - 54) / 0.8);
+  $('end').style.opacity = t >= 54.8 ? ease((t - 54.8) / 0.6) : 0;
+}
+window.TOTAL = TOTAL;
+window.LINES = LINES;
+</script>
+</body>
+</html>

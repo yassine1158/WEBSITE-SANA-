@@ -11,17 +11,17 @@ Encode: `ffmpeg -framerate 30 -i frames/f%05d.jpg -i audio.wav -c:v libx264 -pix
 ## Mokhtabar Sami (مخبر سامي) — cartoon series
 
 Original characters: Sami (Tunisian kid scientist in a red chechia) and Bip (his robot).
-Voices are synthesized cartoon babble; dialogue is shown in speech bubbles.
+Dialogue is shown in speech bubbles; voices are recorded (`recording.py`), with synthesized cartoon babble as a placeholder.
 
 - `mokhtabar-sami/ep1.html` — episode 1 "علاش القمر ما يطيحش؟" (Newton's cannon, Moon orbit), 60s
 - Render: `PAGE=ep1.html NODE_PATH=$(npm root -g) node render.js 30`, audio: `python3 audio.py ep1.html`
 - `mokhtabar-sami/sami_bip_keyart.png` — 3D reference image of Sami and Bip (Nano Banana 2.1 via Weave); use it as the input image for image-to-video so the characters stay consistent
-- `mokhtabar-sami/mokhtabar_sami_ep1_ai.mp4` — episode 1 with AI video clips of Sami and Bip instead of the SVG drawings (same script and timings), 60s
+- `mokhtabar-sami/mokhtabar_sami_ep1_ai.mp4` — episode 1 with AI video clips of Sami and Bip: "علاش نشوفو البرق قبل ما نسمعو الرعد؟" (light vs sound, count the seconds ÷ 3 = km), 60s. Placeholder babble until the recorded voices are in
   - `gen_clips.py` — animates the keyart into `clips/<name>.mp4` (Wan 2.2 i2v on the ZeroGPU Space `zerogpu-aoti/wan2-2-fp8da-aoti-faster`): `HF_TOKEN=... [DURATION=5] python3 gen_clips.py [names]`
   - `clips/intro.mp4` (5s, Sami talks to Bip) and `clips/shock.mp4` (4s, Sami gasps) are the two clips in the episode
-  - `ep1_ai.html` — full-frame clip for dialogue, clip shrinks to a bottom panel while the lab screen explains; camera crops (`CAM`) and shot list (`SHOTS`) give close-ups, push-ins and loops from the two clips
-  - Voices in Tunisian Derja: `silma-tts-derja` (F5-TTS fine-tuned on Derja, CC-BY-NC-4.0) run locally on CPU. Edge's ar-TN voices read Derja with MSA pronunciation, so they only serve as the synthetic reference voices that F5 clones (`voices/ref_*.wav`). Sami = Reem reference pitched up as a kid, Bip = Hedi reference + robot filter
-  - `python3 voices.py ep1_ai.html [line numbers]` writes `voices/ep1_ai/NN.wav`: 3 takes per line, keeps the one whose Whisper transcript best matches the script, fits it to the line's slot, normalizes loudness. If a line's first word gets swallowed, redo it slower: `SPEED=0.6 python3 voices.py ep1_ai.html 3` (ep1: lines 3, 6 at 0.6, line 0 at 0.7, the rest at 0.8). Bip's beep-only lines ("بيب بوب") stay synthesized beeps
+  - `ep1_ai.html` — full-frame clip for dialogue, clip shrinks to a bottom panel while the lab screen explains; camera crops (`CAM`) and shot list (`SHOTS`) give close-ups, push-ins and loops from the two clips. `SFX` lists the sound effects (thunder) for `audio.py`
+  - `moon_ai.html` — the Moon script ("علاش القمر ما يطيحش؟") on the same AI clips, kept for a later episode
+  - Voices are recorded by a person: free Derja TTS (Edge ar-TN, `silma-tts-derja`) came out as MSA or broken Derja. Record the lines in order, skipping Bip's beep-only lines, with a clear pause between lines (or one file per line), then `python3 recording.py ep1_ai.html rec.m4a`: it cuts at the longest pauses, pitches Sami up to a kid's voice (`SAMI_PITCH`), puts a robot filter on Bip, fits each line to its slot and writes `voices/ep1_ai/NN.wav`
   - `audio.py` mixes the voice files (babble for lines without one) and ducks the music under speech
   - Extract frames, then render as usual: `for c in intro shock; do mkdir -p clips/$c; ffmpeg -i clips/$c.mp4 -vf scale=960:-1:flags=lanczos -q:v 2 clips/$c/%03d.jpg; done`, `PAGE=ep1_ai.html NODE_PATH=$(npm root -g) node render.js 30`, `python3 audio.py ep1_ai.html`
 

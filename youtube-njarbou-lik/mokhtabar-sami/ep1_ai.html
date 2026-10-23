@@ -39,10 +39,11 @@
   #bsami::after { left: 150px; }
   #bbip { right: 50px; }
   #bbip::after { right: 130px; }
+  #flash { left: 0; top: 0; width: 1080px; height: 1920px; background: #eaf2ff; mix-blend-mode: screen; }
   #dim { left: 0; top: 0; width: 1080px; height: 1920px; background: rgba(5,8,26,.78); }
   #title { left: 0; top: 0; width: 1080px; height: 1920px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(5,8,26,.72); text-align: center; text-shadow: 0 4px 16px rgba(0,0,0,.8); }
   #title .s { font-size: 150px; font-weight: 900; color: #ffd84a; line-height: 1.1; }
-  #title .e { font-size: 58px; font-weight: 900; margin-top: 30px; }
+  #title .e { font-size: 58px; font-weight: 900; margin-top: 30px; padding: 0 70px; line-height: 1.4; }
   #title .n { font-size: 44px; color: #5ee6ff; margin-top: 10px; font-weight: 700; }
   #end { left: 60px; top: 760px; width: 960px; text-align: center; }
   #end .a { font-size: 44px; color: #5ee6ff; font-weight: 700; }
@@ -56,96 +57,94 @@
   <div id="label" class="abs">🔬 مخبر سامي</div>
 
   <div id="screen" class="abs">
-    <svg viewBox="0 0 900 700" id="scr">
+    <svg viewBox="0 0 900 700" id="scr" font-family="Cairo" font-weight="900">
+      <defs>
+        <g id="cloud">
+          <ellipse cx="0" cy="0" rx="110" ry="50" fill="#4a5470"/>
+          <ellipse cx="-70" cy="15" rx="70" ry="40" fill="#424b66"/>
+          <ellipse cx="75" cy="18" rx="75" ry="38" fill="#3c4560"/>
+          <ellipse cx="10" cy="-30" rx="70" ry="45" fill="#56607d"/>
+        </g>
+      </defs>
       <g id="stars"></g>
-      <!-- earth & moon question -->
-      <g id="em">
-        <clipPath id="earthClip"><circle cx="230" cy="560" r="260"/></clipPath>
-        <circle cx="230" cy="560" r="260" fill="#1f6fd1"/>
-        <g clip-path="url(#earthClip)" fill="#2fa65a">
-          <path d="M20 420 q70 -80 150 -40 q50 25 90 -20 q50 -30 90 20 q-10 60 -80 70 q-60 10 -90 70 q-40 60 -120 40 q-60 -20 -40 -140 z"/>
-          <path d="M330 560 q60 -30 120 20 q20 60 -40 90 q-60 20 -90 -30 z"/>
-        </g>
-        <circle cx="230" cy="560" r="260" fill="none" stroke="#9fd8ff" stroke-width="10" opacity=".5"/>
-        <g id="emMoon">
-          <circle r="85" fill="#cfd2dc"/>
-          <circle cx="-25" cy="-20" r="16" fill="#aeb2c0"/>
-          <circle cx="30" cy="15" r="22" fill="#aeb2c0"/>
-          <circle cx="-10" cy="40" r="11" fill="#aeb2c0"/>
-        </g>
-        <text id="emQ" x="790" y="150" font-size="120" font-weight="900" fill="#ffd84a" font-family="Cairo">?</text>
-        <g id="emArrow">
-          <line x1="0" y1="0" x2="0" y2="110" stroke="#ff5470" stroke-width="12" stroke-linecap="round"/>
-          <path d="M-30 90 L0 135 L30 90 z" fill="#ff5470"/>
-        </g>
+      <!-- storm: the flash comes first, the thunder two seconds later -->
+      <g id="st">
+        <rect width="900" height="700" fill="#0a0f26"/>
+        <g id="rain"></g>
+        <path id="stBolt" d="M560 170 L505 330 L560 330 L480 560 L620 290 L560 290 L610 170 z" fill="#fff6a8" stroke="#ffe066" stroke-width="6"/>
+        <use href="#cloud" x="560" y="140"/>
+        <use href="#cloud" x="270" y="110" transform="scale(.9)"/>
+        <rect y="560" width="900" height="140" fill="#14301f"/>
+        <rect x="150" y="430" width="190" height="130" fill="#3a3550"/>
+        <path d="M130 435 L245 350 L360 435 z" fill="#5a2a3a"/>
+        <rect x="185" y="465" width="54" height="50" fill="#ffd84a"/>
+        <rect x="265" y="480" width="45" height="80" fill="#241f33"/>
+        <rect id="stFlash" width="900" height="700" fill="#eef4ff"/>
+        <text id="stCap1" x="700" y="640" text-anchor="middle" font-size="46" fill="#ffd84a">⚡ البرقة</text>
+        <text id="stCap2" x="700" y="640" text-anchor="middle" font-size="46" fill="#ff7a8a">🔊 الرعد</text>
       </g>
-      <!-- Newton's cannon -->
-      <g id="cn">
-        <circle cx="450" cy="400" r="150" fill="#1f6fd1"/>
-        <path d="M330 320 q50 -40 100 0 q40 30 90 0 q40 -20 60 40 q-20 60 -120 50 q-80 -10 -130 -90 z" fill="#2fa65a"/>
-        <path d="M400 262 L450 205 L500 262 z" fill="#8a6f55"/>
-        <rect x="438" y="190" width="40" height="18" rx="6" fill="#444"/>
-        <polyline id="tr0" fill="none" stroke="#ffd84a" stroke-width="5" stroke-dasharray="10 8"/>
-        <polyline id="tr1" fill="none" stroke="#ff9f43" stroke-width="5" stroke-dasharray="10 8"/>
-        <polyline id="tr2" fill="none" stroke="#5ee6ff" stroke-width="5" stroke-dasharray="10 8"/>
-        <circle id="ball" r="12" fill="#fff"/>
-        <text id="cnTxt" x="450" y="660" text-anchor="middle" font-size="44" font-weight="900" fill="#fff" font-family="Cairo"></text>
+      <!-- race: light arrives at once, sound takes its time -->
+      <g id="rc">
+        <use href="#cloud" x="150" y="150" transform="scale(.8) translate(37 37)"/>
+        <path id="rcBolt" d="M150 200 L120 300 L155 300 L110 420 L195 270 L160 270 L185 200 z" fill="#fff6a8" stroke="#ffe066" stroke-width="5"/>
+        <line id="rcBeam" x1="170" y1="360" x2="730" y2="360" stroke="#ffd84a" stroke-width="10" stroke-linecap="round"/>
+        <g id="rcRings" fill="none" stroke="#ff5470" stroke-width="6" stroke-dasharray="14 10"></g>
+        <text id="rcKid" x="790" y="400" text-anchor="middle" font-size="120">🧒</text>
+        <text id="rcBoom" x="790" y="250" text-anchor="middle" font-size="64" fill="#ff5470">بُوم!</text>
+        <text id="rcLight" x="450" y="80" text-anchor="middle" font-size="42" fill="#ffd84a">⚡ الضو: 300 ألف كم في الثانية</text>
+        <text id="rcSound" x="450" y="650" text-anchor="middle" font-size="42" fill="#ff7a8a">🔊 الصوت: 340 متر في الثانية</text>
       </g>
-      <!-- moon orbit -->
-      <g id="ob">
-        <circle cx="450" cy="350" r="250" fill="none" stroke="#5ee6ff" stroke-width="3" stroke-dasharray="6 10" opacity=".6"/>
-        <circle cx="450" cy="350" r="85" fill="#1f6fd1"/>
-        <path d="M385 320 q30 -30 70 -10 q30 15 60 -5 q10 40 -30 60 q-50 15 -100 -45 z" fill="#2fa65a"/>
-        <g id="obMoon">
-          <circle r="34" fill="#cfd2dc"/>
-          <circle cx="-10" cy="-8" r="7" fill="#aeb2c0"/>
-          <circle cx="12" cy="8" r="9" fill="#aeb2c0"/>
+      <!-- count the seconds, divide by 3 -->
+      <g id="ct">
+        <path id="ctBolt" d="M140 60 L110 160 L145 160 L100 280 L185 130 L150 130 L175 60 z" fill="#fff6a8" stroke="#ffe066" stroke-width="5"/>
+        <text x="520" y="120" text-anchor="middle" font-size="56" fill="#5ee6ff">عدّ الثواني ⏱️</text>
+        <text id="ctNum" x="450" y="430" text-anchor="middle" font-size="280" fill="#fff">1</text>
+        <g id="ctRes">
+          <text x="450" y="545" text-anchor="middle" font-size="70" fill="#ffd84a" direction="ltr">6 ÷ 3 = 2</text>
+          <text x="450" y="635" text-anchor="middle" font-size="50" fill="#fff">العاصفة بعيدة 2 كيلومتر ⛈️</text>
         </g>
-        <g id="vArrow">
-          <line x1="0" y1="0" x2="110" y2="0" stroke="#ffd84a" stroke-width="8" stroke-linecap="round"/>
-          <path d="M100 -18 L130 0 L100 18 z" fill="#ffd84a"/>
-        </g>
-        <g id="gArrow">
-          <line x1="0" y1="0" x2="90" y2="0" stroke="#ff5470" stroke-width="8" stroke-linecap="round"/>
-          <path d="M80 -18 L110 0 L80 18 z" fill="#ff5470"/>
-        </g>
-        <text id="obTxt1" x="450" y="60" text-anchor="middle" font-size="40" font-weight="900" fill="#ffd84a" font-family="Cairo">يجري: ~1 كم في الثانية</text>
-        <text id="obTxt2" x="450" y="672" text-anchor="middle" font-size="40" font-weight="900" fill="#ff5470" font-family="Cairo">يطيح نحو الأرض</text>
       </g>
     </svg>
   </div>
 
   <div id="bsami" class="abs bubble"></div>
   <div id="bbip" class="abs bubble"></div>
+  <div id="flash" class="abs"></div>
   <div id="dim" class="abs"></div>
   <div id="end" class="abs">
-    <div class="a">الحلقة الجاية</div>
-    <div class="b">كيفاش الصاروخ يخرج من الأرض؟ 🚀</div>
+    <div class="a">جرّبها في العاصفة الجاية ⛈️</div>
+    <div class="b">الحلقة الجاية: كيفاش الصاروخ يخرج من الأرض؟ 🚀</div>
     <div class="c">أبّوني باش ما تفوتكش 🔔</div>
   </div>
   <div id="title" class="abs">
     <div style="font-size:150px">🔬</div>
     <div class="s">مخبر سامي</div>
-    <div class="e">علاش القمر ما يطيحش؟</div>
+    <div class="e">علاش نشوفو البرق قبل ما نسمعو الرعد؟</div>
     <div class="n">الحلقة 1</div>
   </div>
 
 <script>
 const LINES = [
-  [3.5, 8.0, 'sami', 'بيب! عندي سؤال ما خلّانيش نرقد البارح…'],
-  [8.0, 10.5, 'bip', 'بيب بوب؟ 🤖'],
-  [10.5, 16.0, 'sami', 'القمر تقيل برشا… علاش ما يطيحش علينا؟!'],
-  [16.0, 20.5, 'bip', 'الحقيقة؟ القمر يطيح… ديما! 😱'],
-  [20.5, 24.5, 'sami', 'شنوّة؟! كيفاش يطيح وما يوصلش؟'],
-  [24.5, 28.0, 'bip', 'شوف المدفع: بالشوية… تطيح قريب'],
-  [28.0, 31.5, 'bip', 'أسرع… تطيح أبعد'],
-  [31.5, 37.0, 'bip', 'وكي تولّي سريعة برشا… الأرض تهرب من تحتها! تدور وما توصلش 🌍'],
-  [37.0, 43.0, 'bip', 'القمر نفس الشي: يجري قريب 1 كيلومتر في الثانية… يطيح وهو يدور'],
-  [43.0, 47.5, 'sami', 'يعني القمر يطيح من 4.5 مليار سنة… وما وصلش؟! 🤯'],
+  [3.5, 8.6, 'sami', 'بيب! البارح ما رقدتش… الرعد كان يدڨدڨ الشبابك!'],
+  [8.6, 10.5, 'bip', 'بيب بوب؟ 🤖'],
+  [10.5, 16.0, 'sami', 'ديما نشوف البرقة هي الأولى… ومن بعد يجي الرعد. علاش؟'],
+  [16.0, 20.5, 'bip', 'خاطر يخرجو في نفس الوقت… أما الضو أسرع! ⚡'],
+  [20.5, 24.5, 'sami', 'أسرع؟ قدّاش أسرع؟'],
+  [24.5, 28.0, 'bip', 'الضو يقطع 300 ألف كيلومتر في الثانية'],
+  [28.0, 31.5, 'bip', 'والصوت؟ 340 متر برك! 🐢'],
+  [31.5, 37.0, 'bip', 'الضو يوصلك طول… والرعد يجي يمشي على مهلو'],
+  [37.0, 43.0, 'bip', 'كي تشوف البرقة عدّ الثواني… وقسّم على 3: هذاكا البعد بالكيلومتر!'],
+  [43.0, 47.5, 'sami', 'عدّيت 6… يعني العاصفة بعيدة 2 كيلومتر! 🤯'],
   [47.5, 50.0, 'bip', 'بيب بيب! ✅'],
-  [50.0, 54.0, 'sami', 'بيب… حضّر الصاروخ! 🚀'],
+  [50.0, 54.0, 'sami', 'بيب… الحلقة الجاية نطيّرو الصاروخ! 🚀'],
 ];
 const TOTAL = 60;
+// sound effects for audio.py: [time, kind]
+const SFX = [
+  [0.0, 'whoosh'], [1.2, 'thunder'], [14.0, 'thunder'], [20.5, 'thunder'],
+  [33.0, 'thunder'], [43.3, 'thunder'], [47.5, 'surprise'], [54.8, 'rumble'],
+];
+const FLASHES = [0.9, 12.0, 18.5, 24.8, 37.3]; // lightning on screen (title flash lights up the whole frame)
 
 // AI clips (gen_clips.py), 480x832 @16fps, extracted to clips/<name>/NNN.jpg
 const FPS = 16, CW = 480, CH = 832;
@@ -160,14 +159,15 @@ const CAM = {
 const SHOTS = [
   [0,    'full',  'intro', 0,   5.0, 0,   0,   'full',     'full',     0],
   [3.5,  'full',  'intro', 0,   5.0, 1,   2.5, 'full',     'two',      0],
-  [8.0,  'full',  'intro', 3.0, 5.0, 0.8, 3.0, 'bip',      'bip',      0],
+  [8.6,  'full',  'intro', 3.0, 5.0, 0.8, 3.0, 'bip',      'bip',      0],
   [10.5, 'split', 'intro', 1.0, 4.5, 1,   1.0, 'splitSami', 'splitTwo', 1],
-  [16.0, 'split', 'shock', 0.6, 4.0, 1,   2.6, 'splitTwo', 'splitSami', 0],
+  [16.0, 'split', 'intro', 2.5, 5.0, 0.8, 2.5, 'splitBip', 'splitBip', 0],
+  [20.5, 'split', 'shock', 0.6, 4.0, 1,   2.6, 'splitTwo', 'splitSami', 0],
   [24.5, 'split', 'intro', 2.0, 5.0, 0.7, 2.0, 'splitBip', 'splitBip', 0],
   [31.5, 'split', 'intro', 0.5, 3.5, 0.7, 0.5, 'splitTwo', 'splitTwo', 0],
   [37.0, 'split', 'intro', 2.5, 5.0, 0.6, 2.5, 'splitBip', 'splitTwo', 0],
-  [43.0, 'full',  'shock', 2.2, 4.0, 0.8, 2.4, 'two',      'sami',     1],
-  [47.5, 'full',  'shock', 2.5, 4.0, 1,   2.5, 'bip',      'bip',      0],
+  [43.0, 'split', 'shock', 2.2, 4.0, 0.8, 2.4, 'splitTwo', 'splitSami', 0],
+  [47.5, 'full',  'shock', 2.5, 4.0, 1,   2.5, 'two',      'bip',      1],
   [50.0, 'full',  'intro', 1.5, 5.0, 0.8, 2.5, 'sami',     'rocket',   0],
 ];
 const SHOT_END = (i) => i + 1 < SHOTS.length ? SHOTS[i + 1][0] : TOTAL;
@@ -182,6 +182,9 @@ const lerp = (a, b, k) => a + (b - a) * k;
 const lerpA = (a, b, k) => a.map((v, i) => lerp(v, b[i], k));
 const typeDur = (l) => Math.min(l[1] - l[0] - 0.9, 0.3 + [...l[3]].length * 0.05);
 const vis = (id, on) => { $(id).style.display = on ? '' : 'none'; };
+// lightning: a bright flicker for ~0.35s after each flash time
+const flashAt = (t, t0) => { const d = t - t0; return d < 0 || d > 0.35 ? 0 : (d < 0.08 || (d > 0.15 && d < 0.22) ? 1 : 0.35); };
+const flash = t => Math.max(0, ...FLASHES.map(f => flashAt(t, f)));
 
 const IMG = {};
 window.ready = Promise.all(Object.entries(CLIPS).flatMap(([name, n]) => {
@@ -194,28 +197,23 @@ window.ready = Promise.all(Object.entries(CLIPS).flatMap(([name, n]) => {
   }));
 }));
 
-// deterministic stars
+// deterministic stars and rain
+const RAIN = [];
 (function () {
   let s = 7, g = '';
   const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647;
   for (let i = 0; i < 90; i++) g += `<circle cx="${rnd() * 900}" cy="${rnd() * 700}" r="${0.8 + rnd() * 2.2}" fill="#fff" opacity="${0.3 + rnd() * 0.7}"/>`;
   $('stars').innerHTML = g;
-})();
-
-// Newton's cannon: integrate three shots once (center 450,400; ground r=150; launch r=205)
-const C = { x: 450, y: 400 }, R0 = 205, GM = Math.pow(2 * Math.PI * R0 / 6, 2) * R0;
-const VC = Math.sqrt(GM / R0);
-const CANNON = [0.45, 0.7, 1.0].map(f => {
-  let x = 0, y = -R0, vx = f * VC, vy = 0, pts = [[x, y]];
-  const dt = 0.004;
-  for (let i = 0; i < 1600; i++) {
-    const r = Math.hypot(x, y), a = -GM / (r * r * r);
-    vx += a * x * dt; vy += a * y * dt; x += vx * dt; y += vy * dt;
-    if (Math.hypot(x, y) < 150) break;
-    pts.push([x, y]);
+  let r = '';
+  for (let i = 0; i < 70; i++) {
+    RAIN.push([rnd() * 940, rnd() * 700, 500 + rnd() * 300]);
+    r += `<line id="rain${i}" x1="0" y1="0" x2="-8" y2="34" stroke="#8fb6ff" stroke-width="3" opacity=".5"/>`;
   }
-  return pts.map(p => [C.x + p[0], C.y + p[1]]);
-});
+  $('rain').innerHTML = r;
+  let rings = '';
+  for (let i = 0; i < 3; i++) rings += `<circle id="ring${i}" cx="170" cy="360"/>`;
+  $('rcRings').innerHTML = rings;
+})();
 
 // where the camera of shot i is at time t: [dest rect, cam]
 function shotView(i, t) {
@@ -259,42 +257,50 @@ function render(t) {
   $('screen').style.opacity = split;
   $('screen').style.transform = `translateY(${(1 - split) * -80}px) scale(${0.9 + 0.1 * split})`;
   $('label').style.opacity = t < 54 ? 1 : 0;
+  const fl = flash(t);
 
   // ---- screen ----
-  const mode = t < 24.5 ? 'em' : t < 37 ? 'cn' : 'ob';
-  ['em', 'cn', 'ob'].forEach(m => vis(m, m === mode));
-  if (mode === 'em') {
-    const lt = t - 10.5;
-    let mx = 660, my = 210 + Math.sin(t * 1.5) * 8;
-    if (t >= 16 && t < 21) mx += Math.sin(t * 40) * 6;
-    $('emMoon').setAttribute('transform', `translate(${mx} ${my}) scale(${ease(lt / 0.6)})`);
-    $('emQ').style.opacity = t < 16 ? (Math.floor(t * 2) % 2 ? 1 : 0.4) : 0;
-    $('emArrow').setAttribute('transform', `translate(${mx} ${my + 100 + Math.sin(t * 6) * 10})`);
-    $('emArrow').style.opacity = t >= 16 ? 1 : 0;
-  }
-  if (mode === 'cn') {
-    const starts = [24.5, 28, 31.5], lens = [3.0, 3.0, 5.0];
-    let ball = null, label = '';
-    CANNON.forEach((pts, i) => {
-      const k = (t - starts[i]) / lens[i];
-      const el = $('tr' + i);
-      if (k < 0) { el.setAttribute('points', ''); return; }
-      const n = Math.min(pts.length, Math.floor(clamp(k) * pts.length) + 1);
-      el.setAttribute('points', pts.slice(0, n).map(p => p.join(',')).join(' '));
-      el.style.opacity = t > starts[i] + lens[i] && i < 2 ? 0.45 : 1;
-      if (k <= 1) { ball = pts[n - 1]; label = ['بالشوية 🐢', 'أسرع 🏃', 'سريعة برشا 🚀'][i]; }
+  const mode = t < 24.5 ? 'st' : t < 37 ? 'rc' : 'ct';
+  ['st', 'rc', 'ct'].forEach(m => vis(m, m === mode));
+  vis('stars', mode !== 'st');
+  if (mode === 'st') {
+    RAIN.forEach(([x, y, v], i) => {
+      const yy = (y + t * v) % 760 - 40, xx = (x - t * v * 0.25) % 940;
+      $('rain' + i).setAttribute('transform', `translate(${xx < 0 ? xx + 940 : xx} ${yy})`);
     });
-    if (ball) { $('ball').setAttribute('cx', ball[0]); $('ball').setAttribute('cy', ball[1]); $('ball').style.opacity = 1; }
-    else $('ball').style.opacity = 0;
-    $('cnTxt').textContent = label;
+    $('stBolt').style.opacity = fl;
+    $('stFlash').style.opacity = fl * 0.55;
+    // captions: the flash, then two seconds later the thunder
+    const cap = (t0) => t >= t0 && t < t0 + 1.6;
+    $('stCap1').style.opacity = cap(12.0) || cap(18.5) ? 1 : 0;
+    $('stCap2').style.opacity = cap(14.0) || cap(20.5) ? 1 : 0;
+    $('scr').setAttribute('transform', cap(14.0) || cap(20.5) ? `translate(${Math.sin(t * 60) * 4} 0)` : '');
+  } else $('scr').setAttribute('transform', '');
+  if (mode === 'rc') {
+    const t0 = 24.8, arrive = 33.0, dist = 560;
+    $('rcBolt').style.opacity = t < t0 ? 0.25 : Math.max(0.6, fl);
+    $('rcBeam').style.opacity = t < t0 ? 0 : (t < t0 + 0.6 ? 1 : 0.35);
+    for (let i = 0; i < 3; i++) {
+      const r = (t - t0 - i * 0.35) / (arrive - t0) * dist;
+      const el = $('ring' + i);
+      el.setAttribute('r', Math.max(0, r));
+      el.style.opacity = r <= 0 || r > dist + 40 ? 0 : 1 - i * 0.25;
+    }
+    const boom = t >= arrive && t < arrive + 2;
+    $('rcBoom').style.opacity = boom ? 1 : 0;
+    $('rcKid').setAttribute('transform', boom ? `translate(${Math.sin(t * 50) * 6} 0)` : '');
+    $('rcLight').style.opacity = ease((t - 24.5) / 0.4);
+    $('rcSound').style.opacity = ease((t - 28) / 0.4);
   }
-  if (mode === 'ob') {
-    const a = -Math.PI / 2 + (t - 37) * 0.55;
-    const mx = 450 + 250 * Math.cos(a), my = 350 + 250 * Math.sin(a);
-    $('obMoon').setAttribute('transform', `translate(${mx} ${my})`);
-    const tang = a * 180 / Math.PI + 90, inward = a * 180 / Math.PI + 180;
-    $('vArrow').setAttribute('transform', `translate(${mx} ${my}) rotate(${tang}) translate(40 0)`);
-    $('gArrow').setAttribute('transform', `translate(${mx} ${my}) rotate(${inward}) translate(40 0)`);
+  if (mode === 'ct') {
+    const t0 = 37.3;
+    $('ctBolt').style.opacity = t < t0 ? 0.25 : Math.max(0.25, fl);
+    const n = clamp(Math.floor(t - t0) + 1, 1, 6);
+    $('ctNum').textContent = t < t0 ? '0' : n;
+    $('ctNum').setAttribute('fill', t >= 43.3 ? '#ff5470' : '#fff');
+    const pop = (t - t0) % 1;
+    $('ctNum').setAttribute('transform', t >= t0 && t < 43.3 ? `translate(450 330) scale(${1 + 0.15 * (1 - ease(pop / 0.3))}) translate(-450 -330)` : '');
+    $('ctRes').style.opacity = ease((t - 43.6) / 0.5);
   }
 
   // ---- bubbles: above the heads in full frame, under the screen in split ----
@@ -315,6 +321,7 @@ function render(t) {
   });
 
   // ---- overlays ----
+  $('flash').style.opacity = t < 3.5 ? fl * 0.8 : fl * 0.12; // the storm lights up the lab too
   const tp = t < 3.5 ? (t < 3 ? 1 : 1 - (t - 3) / 0.5) : 0;
   $('title').style.opacity = tp;
   $('title').style.transform = `scale(${0.9 + 0.1 * ease(t / 0.6)})`;

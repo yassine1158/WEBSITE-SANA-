@@ -1,5 +1,6 @@
 # Soundtrack for an episode: dialogue voices, space pad music, SFX.
-# Voices come from voices/<page>/NN.wav (voices.py) when present, else cartoon babble from the dialogue timings.
+# Voices come from voices/<page>/NN.wav (recording.py) when present, else cartoon babble from the dialogue timings.
+# Sound effects: the page's `const SFX = [[time, 'kind'], ...]`, else the moon episode's set.
 import math, os, random, re, struct, sys, wave
 SR = 22050
 html = open(sys.argv[1], encoding='utf-8').read()
@@ -62,11 +63,30 @@ while t < TOTAL:
 def sweep(t0, dur, f0, f1, vol):
     add(t0, dur, lambda x: vol * env(x, dur) * math.sin(2*math.pi*(f0*x + (f1 - f0) * x * x / (2 * dur))))
 
-sweep(0.0, 0.8, 200, 900, 0.25)                    # title whoosh up
-for s in (24.5, 28.0, 31.5): sweep(s, 0.35, 900, 200, 0.3)   # cannon shots
-sweep(16.0, 0.5, 300, 700, 0.2)                    # surprise
 nz = [rnd.uniform(-1, 1) for _ in range(SR)]
-add(54.8, 5.0, lambda x: 0.18 * min(1, x / 0.5) * max(0, 1 - x / 5) * nz[int(x * SR) % SR] * (0.5 + 0.5 * math.sin(2*math.pi*7*x)))  # rocket rumble
+def rumble(t0):  # rocket
+    add(t0, 5.0, lambda x: 0.18 * min(1, x / 0.5) * max(0, 1 - x / 5) * nz[int(x * SR) % SR] * (0.5 + 0.5 * math.sin(2*math.pi*7*x)))
+
+def thunder(t0):  # sharp crack, then a long low rumble (brown noise with a wobbling envelope)
+    dur, b, rum = 3.2, 0.0, []
+    for i in range(int(dur * SR)):
+        b = 0.985 * b + 0.05 * rnd.uniform(-1, 1)
+        rum.append(b)
+    add(t0, dur, lambda x: 0.9 * min(1, x / 0.08) * math.exp(-x / 1.1) * (0.6 + 0.4 * math.sin(2*math.pi*1.7*x) * math.sin(2*math.pi*0.6*x)) * rum[int(x * SR)])
+    add(t0, 0.25, lambda x: 0.3 * math.exp(-x / 0.05) * nz[int(x * SR * 3) % SR])
+
+SOUNDS = {
+    'whoosh': lambda t0: sweep(t0, 0.8, 200, 900, 0.25),
+    'shot': lambda t0: sweep(t0, 0.35, 900, 200, 0.3),
+    'surprise': lambda t0: sweep(t0, 0.5, 300, 700, 0.2),
+    'rumble': rumble,
+    'thunder': thunder,
+}
+m = re.search(r"const SFX = \[(.*?)\];", html, re.S)
+SFX = [(float(a), k) for a, k in re.findall(r"\[([\d.]+), '(\w+)'\]", m.group(1))] if m else \
+      [(0.0, 'whoosh'), (24.5, 'shot'), (28.0, 'shot'), (31.5, 'shot'), (16.0, 'surprise'), (54.8, 'rumble')]
+for t0, kind in SFX:
+    SOUNDS[kind](t0)
 
 if use_tts:  # duck music/SFX to 45% under speech (50ms attack, 400ms release)
     g, att, rel = 0.0, 1 / (0.05 * SR), 1 / (0.4 * SR)
