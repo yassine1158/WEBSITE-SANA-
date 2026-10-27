@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;800;900&display=swap" rel="stylesheet">
+<!-- One float-or-sink question per Short (make_shorts.py fills in Q). Built from the analytics of Shorts 1-3:
+     the hook is moving on frame 0, the comment ask is one keystroke (1 or 2), and there is no outro: the last
+     frames rewind to the first one so the Short loops. -->
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; }
+  body {
+    font-family: 'Cairo', 'DejaVu Sans', sans-serif;
+    background: radial-gradient(circle at 50% 30%, #3a2a8c 0%, #1b1446 55%, #0d0a24 100%);
+    color: #fff; position: relative;
+  }
+  .abs { position: absolute; }
+  #hook { top: 80px; left: 0; width: 100%; text-align: center; font-size: 48px; font-weight: 900; color: #ffd84a; }
+  #question { top: 150px; left: 70px; width: 940px; text-align: center; font-size: 66px; font-weight: 900; line-height: 1.35; }
+  #glass {
+    top: 640px; left: 360px; width: 360px; height: 380px;
+    border: 10px solid rgba(255,255,255,.85); border-top: none; border-radius: 0 0 50px 50px; overflow: hidden;
+  }
+  #water { position: absolute; left: 0; bottom: 0; width: 100%; height: 260px; }
+  #water::before {
+    content: ''; position: absolute; top: -8px; left: 0; width: 100%; height: 16px;
+    background: rgba(200,235,255,.9); border-radius: 50%;
+  }
+  #liquid { top: 1028px; left: 0; width: 100%; text-align: center; font-size: 38px; font-weight: 800; color: #b9e6ff; }
+  #item { line-height: 1; text-align: center; }
+  #stop {
+    top: 420px; left: 640px; font-size: 64px; font-weight: 900; color: #fff; background: #ff3b5c;
+    border-radius: 22px; padding: 4px 26px; transform-origin: center; box-shadow: 0 8px 0 rgba(0,0,0,.25);
+  }
+  .opt {
+    left: 140px; width: 800px; height: 112px; border-radius: 30px;
+    background: rgba(255,255,255,.1); border: 4px solid rgba(255,255,255,.25);
+    font-size: 54px; font-weight: 900; display: flex; align-items: center; padding: 0 36px; gap: 26px;
+  }
+  .opt .l {
+    width: 74px; height: 74px; border-radius: 50%; background: #ffd84a; color: #1b1446;
+    display: flex; align-items: center; justify-content: center; font-size: 46px; flex: none;
+  }
+  #cta { top: 1350px; left: 90px; width: 900px; text-align: center; font-size: 50px; font-weight: 900; color: #1b1446; background: #ffd84a; border-radius: 30px; padding: 16px 20px; }
+  #timer {
+    top: 1490px; left: 465px; width: 150px; height: 150px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-size: 78px; font-weight: 900;
+  }
+  #tnum { width: 118px; height: 118px; border-radius: 50%; background: #1b1446; display: flex; align-items: center; justify-content: center; }
+  #why {
+    top: 1350px; left: 90px; width: 900px; text-align: center; font-size: 46px; font-weight: 800; line-height: 1.5;
+    background: rgba(0,0,0,.4); border-radius: 30px; padding: 26px 30px;
+  }
+  #why .ask { display: block; margin-top: 14px; color: #ffd84a; font-weight: 900; }
+</style>
+</head>
+<body>
+  <div id="hook" class="abs"></div>
+  <div id="question" class="abs"></div>
+  <div id="glass" class="abs"><div id="water"></div></div>
+  <div id="liquid" class="abs"></div>
+  <div id="item" class="abs"></div>
+  <div id="stop" class="abs">✋ STOP</div>
+  <div id="o0" class="abs opt"><span class="l">1</span><span class="t"></span></div>
+  <div id="o1" class="abs opt"><span class="l">2</span><span class="t"></span></div>
+  <div id="cta" class="abs">اكتب 1 ولّا 2 في الكومنتار 👇</div>
+  <div id="timer" class="abs"><span id="tnum"></span></div>
+  <div id="why" class="abs"></div>
+<script>
+const Q = /*Q*/;
+const SVG = {
+  drop_honey: '<svg viewBox="0 0 100 130" width="104" height="135"><path d="M50 5 C50 5 12 60 12 85 a38 38 0 0 0 76 0 C88 60 50 5 50 5z" fill="#e8a317" stroke="#b57400" stroke-width="5"/><ellipse cx="36" cy="80" rx="9" ry="14" fill="#ffd77a" opacity=".7"/></svg>',
+  drop_oil: '<svg viewBox="0 0 100 130" width="104" height="135"><path d="M50 5 C50 5 12 60 12 85 a38 38 0 0 0 76 0 C88 60 50 5 50 5z" fill="#c9c23a" stroke="#8f8a12" stroke-width="5"/><ellipse cx="36" cy="80" rx="9" ry="14" fill="#f4f0a0" opacity=".7"/></svg>',
+};
+const LIQUID = {
+  water: ['linear-gradient(180deg, rgba(90,190,255,.75), rgba(40,110,230,.9))', ''],
+  salt: ['linear-gradient(180deg, rgba(170,225,255,.85), rgba(90,150,230,.95))', 'ماء + برشا ملح 🧂'],
+};
+// timings: falls in and freezes (STOP) at 0.35s, 4s countdown, answer at REVEAL, rewind to frame 0 at the end
+const NQ = 1, INTRO = 0, QLEN = 9.4, OUTRO = 0;
+const COUNT0 = 1.0, COUNT = 4, REVEAL = COUNT0 + COUNT, SFX_STOP = 0.35, REWIND = 9.0;
+const TOTAL = QLEN;
+const $ = id => document.getElementById(id);
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const ease = x => 1 - Math.pow(1 - clamp(x), 3);
+const lerp = (a, b, k) => a + (b - a) * k;
+const GLASS_TOP = 640, GLASS_H = 380, WATER_H = 260, SIZE = Q.size || 150;
+const SURFACE = GLASS_TOP + GLASS_H - WATER_H;
+
+function show(el, op, dy = 0, sc = 1) {
+  el.style.opacity = op;
+  el.style.transform = `translateY(${dy}px) scale(${sc})`;
+}
+
+$('hook').textContent = Q.hook;
+$('question').textContent = Q.q;
+$('water').style.background = LIQUID[Q.liquid || 'water'][0];
+$('liquid').textContent = LIQUID[Q.liquid || 'water'][1];
+if (Q.svg) $('item').innerHTML = SVG[Q.svg]; else $('item').textContent = Q.e;
+$('item').style.fontSize = SIZE + 'px';
+$('item').style.width = SIZE + 'px';
+$('item').style.left = (540 - SIZE / 2) + 'px';
+Q.o.forEach((txt, i) => { $('o' + i).querySelector('.t').textContent = txt; $('o' + i).style.top = (1085 + i * 132) + 'px'; });
+
+// where the item is at time t (before the rewind)
+function itemY(t) {
+  const hover = GLASS_TOP - SIZE - 10;
+  const start = hover - 180; // just under the question text
+  if (t < SFX_STOP) return lerp(start, hover, ease(t / SFX_STOP) * 0.6 + 0.4 * (t / SFX_STOP)); // already falling on frame 0
+  if (t < REVEAL) return hover + Math.sin((t - SFX_STOP) * 3) * 10 + Math.sin(t * 40) * 4 * clamp((t - 1) / (REVEAL - 1));
+  const d = t - REVEAL;
+  const bottom = GLASS_TOP + GLASS_H - SIZE - 20;
+  const surf = SURFACE - SIZE * 0.55;
+  if (Q.motion === 'surface') { // set down gently: it stays on the surface
+    const top = SURFACE - SIZE * 0.8;
+    return d < 0.8 ? lerp(hover, top, ease(d / 0.8)) : top + Math.sin(d * 4) * 3;
+  }
+  if (Q.motion === 'float') {
+    const deep = surf + 110;
+    if (d < 0.4) return lerp(hover, deep, ease(d / 0.4));
+    return surf + (deep - surf) * Math.exp(-(d - 0.4) * 4) * Math.cos((d - 0.4) * 9);
+  }
+  if (d < 0.4) return lerp(hover, surf + 60, ease(d / 0.4));
+  return lerp(surf + 60, bottom, ease((d - 0.4) / 1.2));
+}
+
+function render(t) {
+  const back = ease((t - REWIND) / (TOTAL - REWIND)); // 0 until the rewind, 1 on the last frame (= frame 0)
+  ['question', 'glass', 'liquid', 'hook'].forEach(id => show($(id), 1));
+  $('item').style.top = lerp(itemY(Math.min(t, REWIND)), itemY(0), back) + 'px';
+  show($('item'), 1);
+  const st = t - SFX_STOP;
+  show($('stop'), st < 0 ? 0 : 1 - clamp((t - 1.6) / 0.3), 0, st < 0 ? 0.5 : 1 + 0.4 * Math.exp(-st * 10) * Math.cos(st * 30));
+
+  const revealed = t >= REVEAL && back < 0.5;
+  Q.o.forEach((txt, i) => {
+    const el = $('o' + i);
+    let op = 1, bg = 'rgba(255,255,255,.1)', bd = 'rgba(255,255,255,.25)', sc = 1;
+    if (revealed) {
+      const r = ease((t - REVEAL) / 0.3);
+      if (i === Q.a) { bg = '#22b45a'; bd = '#7dffb0'; sc = 1 + 0.05 * Math.sin(clamp((t - REVEAL) / 0.4) * Math.PI); }
+      else op = 1 - 0.65 * r;
+    }
+    el.style.background = bg;
+    el.style.borderColor = bd;
+    el.querySelector('.t').textContent = txt + (revealed && i === Q.a ? '  ✅' : '');
+    show(el, op, 0, sc);
+  });
+
+  // the comment ask stays up until the answer, and comes back with the rewind
+  show($('cta'), t < REVEAL ? 1 : back, 0, 1 + 0.04 * Math.sin(t * 6));
+  if (t >= COUNT0 && t < REVEAL) {
+    const left = Math.ceil(COUNT - (t - COUNT0)), frac = (t - COUNT0) % 1;
+    const col = left <= 2 ? '#ff5470' : '#ffd84a';
+    $('tnum').textContent = left;
+    $('timer').style.background = `conic-gradient(${col} ${360 * (1 - (t - COUNT0) / COUNT)}deg, rgba(255,255,255,.12) 0)`;
+    $('timer').style.color = col;
+    show($('timer'), 1, 0, 1 + 0.12 * (1 - ease(frac / 0.3)));
+  } else show($('timer'), 0);
+  if (t >= REVEAL + 0.4) {
+    $('why').innerHTML = '';
+    $('why').append(Q.why, Object.assign(document.createElement('span'), { className: 'ask', textContent: 'جاوبت صحيح؟ 👇' }));
+    const p = ease((t - REVEAL - 0.4) / 0.4);
+    show($('why'), p * (1 - back), 30 * (1 - p));
+  } else show($('why'), 0);
+}
+window.TOTAL = TOTAL;
+</script>
+</body>
+</html>

@@ -2,10 +2,13 @@
 import math, re, struct, wave, sys
 SR = 44100
 page = open(sys.argv[1] if len(sys.argv) > 1 else 'short.html', encoding='utf-8').read()  # python3 audio.py [short2.html]
-INTRO, QLEN, OUTRO = map(float, re.search(r'const INTRO = ([\d.]+), QLEN = ([\d.]+), OUTRO = ([\d.]+)', page).groups())
+INTRO, QLEN, OUTRO = map(float, re.search(r'INTRO = ([\d.]+), QLEN = ([\d.]+), OUTRO = ([\d.]+)', page).groups())
 m = re.search(r'const COUNT0 = ([\d.]+), COUNT = (\d+)', page)
 COUNT0, COUNT = (float(m.group(1)), int(m.group(2))) if m else (1.5, 5)
-NQ = page.count('{ q:')
+m = re.search(r'\bNQ = (\d+)', page)
+NQ = int(m.group(1)) if m else page.count('{ q:')
+m = re.search(r'SFX_STOP = ([\d.]+)', page)
+SFX_STOP = float(m.group(1)) if m else None  # shorts/template.html: the item falls in and freezes
 TOTAL = INTRO + NQ * QLEN + OUTRO
 buf = [0.0] * int(TOTAL * SR)
 
@@ -31,7 +34,13 @@ for q in range(NQ):
         tone(s + COUNT0 + j, 0.08, 1500 if j < COUNT - 2 else 1900, 0.35, 40)
     tone(s + COUNT0 + COUNT, 0.9, 1046.5, 0.3, 4)
     tone(s + COUNT0 + COUNT + 0.12, 0.9, 1568.0, 0.25, 4)
-tone(INTRO + NQ * QLEN, 1.2, 784.0, 0.2, 3)
+if OUTRO: tone(INTRO + NQ * QLEN, 1.2, 784.0, 0.2, 3)
+if SFX_STOP is not None:
+    for i in range(int(SFX_STOP * SR)):  # falling whistle, then a hit on the freeze
+        x = i / SR
+        buf[i] += 0.12 * math.sin(2 * math.pi * (1400 * x - 900 * x * x / (2 * SFX_STOP)))
+    tone(SFX_STOP, 0.4, 90.0, 0.6, 9)
+    tone(SFX_STOP, 0.12, 2400.0, 0.2, 30)
 
 # fade out at the end
 for i in range(int(SR * 1.0)):
