@@ -27,6 +27,11 @@ Dialogue is shown in speech bubbles; voices are recorded (`recording.py`), with 
   - `audio.py` mixes the voice files (babble for lines without one) and ducks the music under speech
   - Extract frames, then render as usual: `for c in intro shock; do mkdir -p clips/$c; ffmpeg -i clips/$c.mp4 -vf scale=960:-1:flags=lanczos -q:v 2 clips/$c/%03d.jpg; done`, `PAGE=ep1_ai.html NODE_PATH=$(npm root -g) node render.js 30`, `python3 audio.py ep1_ai.html`
 
+### One-question Shorts (`shorts/`)
+- `questions.json` (14 float-or-sink questions) + `template.html` → `python3 shorts/make_shorts.py [numbers]` → `shorts/njarbou_lik_qNN.mp4` (9.4s)
+- Scheduled on YouTube + TikTok through Metricool, 2 a day (10:00 and 16:00 Tunis, Metricool's best hours): q01 Oct 28 10:00, q02 Oct 28 18:00, then q03-q14 Oct 29 - Nov 3 at 10:00 and 16:00
+- Short #3 analytics (day 1): 961 views, 37.2% stayed, 89.0% viewed, but a drop from 68% to 39% at 10.6s on the outro card and still 0 comments. Hence no outro (rewind to frame 0 for the loop), the item already falling on frame 0, and a one-keystroke comment ask (1 or 2)
+
 ### Shorts: what the analytics say
 - Short #2 (day 1): 772 views (×3.4), 35.6% stayed (frame-0 hook: +15 pts), but 52.3% average viewed (13s of 26s: viewers leave once question 1 is answered) and 0 comments. Hence one question per Short and an explicit "comment your guess" before the reveal
 
