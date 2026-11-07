@@ -3,3 +3,5 @@ audio.wav
 preview_*.png
 clips/*/
 clips/keyart_768.png
+voice_tests/
+*.m4a
