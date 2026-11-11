@@ -174,6 +174,9 @@ function waLink(text) {
   return `https://wa.me/${waNumber()}?text=${encodeURIComponent(body)}`;
 }
 $("#ctaWa").href = waLink(`Bonjour ${C.company.name}, je souhaite un devis.`);
+// numéro WhatsApp affiché dans le bloc Contact : +225 07 15 50 00 00
+$("#waContact").textContent = waNumber().replace(/^225(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/, "+225 $1 $2 $3 $4 $5");
+$("#waContact").href = waLink(`Bonjour ${C.company.name}, `);
 
 // ---------------------------------------------------------
 // Produits
