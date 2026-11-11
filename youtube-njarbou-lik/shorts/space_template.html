@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;800;900&display=swap" rel="stylesheet">
+<!-- One space question per Short, read aloud (make_space.py fills in Q and the timings from the voice-over).
+     Same rules as template.html: moving on frame 0, one-keystroke comment ask, rewind to frame 0 for the loop. -->
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; }
+  body {
+    font-family: 'Cairo', 'DejaVu Sans', sans-serif; color: #fff; position: relative;
+    background: radial-gradient(ellipse at 30% 35%, #3b1d6e 0%, #140b33 45%, #05040f 100%);
+  }
+  .abs { position: absolute; }
+  #stars, #glow { left: 0; top: 0; width: 1080px; height: 1920px; }
+  #glow { background: radial-gradient(circle at 50% 36%, rgba(120,170,255,.35), transparent 30%); }
+  #hook { top: 80px; left: 0; width: 100%; text-align: center; font-size: 48px; font-weight: 900; color: #ffd84a; }
+  #question { top: 150px; left: 70px; width: 940px; text-align: center; font-size: 64px; font-weight: 900; line-height: 1.35; }
+  #item { width: 440px; left: 320px; font-size: 400px; line-height: 1; text-align: center; filter: drop-shadow(0 0 40px rgba(140,190,255,.6)); }
+  #stop {
+    top: 420px; left: 700px; font-size: 64px; font-weight: 900; color: #fff; background: #ff3b5c;
+    border-radius: 22px; padding: 4px 26px; box-shadow: 0 8px 0 rgba(0,0,0,.25);
+  }
+  .opt {
+    left: 140px; width: 800px; height: 112px; border-radius: 30px;
+    background: rgba(255,255,255,.1); border: 4px solid rgba(255,255,255,.25);
+    font-size: 54px; font-weight: 900; display: flex; align-items: center; padding: 0 36px; gap: 26px;
+  }
+  .opt .l {
+    width: 74px; height: 74px; border-radius: 50%; background: #ffd84a; color: #1b1446;
+    display: flex; align-items: center; justify-content: center; font-size: 46px; flex: none;
+  }
+  #cta { top: 1350px; left: 90px; width: 900px; text-align: center; font-size: 50px; font-weight: 900; color: #1b1446; background: #ffd84a; border-radius: 30px; padding: 16px 20px; }
+  #timer {
+    top: 1490px; left: 465px; width: 150px; height: 150px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-size: 78px; font-weight: 900;
+  }
+  #tnum { width: 118px; height: 118px; border-radius: 50%; background: #140b33; display: flex; align-items: center; justify-content: center; }
+  #why {
+    top: 1350px; left: 90px; width: 900px; text-align: center; font-size: 46px; font-weight: 800; line-height: 1.5;
+    background: rgba(0,0,0,.45); border-radius: 30px; padding: 26px 30px;
+  }
+  #why .ask { display: block; margin-top: 14px; color: #ffd84a; font-weight: 900; }
+</style>
+</head>
+<body>
+  <svg id="stars" class="abs" viewBox="0 0 1080 1920"></svg>
+  <div id="glow" class="abs"></div>
+  <div id="hook" class="abs"></div>
+  <div id="question" class="abs"></div>
+  <div id="item" class="abs"></div>
+  <div id="stop" class="abs">✋ STOP</div>
+  <div id="o0" class="abs opt"><span class="l">1</span><span class="t"></span></div>
+  <div id="o1" class="abs opt"><span class="l">2</span><span class="t"></span></div>
+  <div id="cta" class="abs">اكتب 1 ولّا 2 في الكومنتار 👇</div>
+  <div id="timer" class="abs"><span id="tnum"></span></div>
+  <div id="why" class="abs"></div>
+<script>
+const Q = /*Q*/;
+// timings (seconds) come from the voice-over: the question is read from SFX_STOP, the answer from REVEAL + 0.3
+const NQ = 1, INTRO = 0, QLEN = /*QLEN*/, OUTRO = 0;
+const COUNT0 = 1.0, COUNT = /*COUNT*/, REVEAL = COUNT0 + COUNT, SFX_STOP = 0.35, REWIND = QLEN - 0.4;
+const TOTAL = QLEN;
+const $ = id => document.getElementById(id);
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const ease = x => 1 - Math.pow(1 - clamp(x), 3);
+const lerp = (a, b, k) => a + (b - a) * k;
+
+function show(el, op, dy = 0, sc = 1) {
+  el.style.opacity = op;
+  el.style.transform = `translateY(${dy}px) scale(${sc})`;
+}
+
+// deterministic star field, twinkling in render()
+const STARS = [];
+(function () {
+  let s = 11, g = '';
+  const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < 160; i++) {
+    STARS.push([rnd() * 6.28, 0.5 + rnd() * 2]);
+    g += `<circle id="s${i}" cx="${rnd() * 1080}" cy="${rnd() * 1920}" r="${0.8 + rnd() * 2.6}" fill="#fff"/>`;
+  }
+  $('stars').innerHTML = g;
+})();
+
+$('hook').textContent = Q.hook;
+$('question').textContent = Q.q;
+$('item').textContent = Q.e;
+Q.o.forEach((txt, i) => { $('o' + i).querySelector('.t').textContent = txt; $('o' + i).style.top = (1085 + i * 132) + 'px'; });
+
+// the planet flies in from the top corner, freezes (STOP) and floats; it pulses at the answer
+function itemPose(t) {
+  const x0 = 320, y0 = 470;
+  if (t < SFX_STOP) { const k = ease(t / SFX_STOP) * 0.6 + 0.4 * (t / SFX_STOP); return [lerp(x0 + 420, x0, k), lerp(y0 - 260, y0, k), lerp(-40, 0, k), lerp(0.5, 1, k)]; }
+  const f = t - SFX_STOP;
+  const pulse = t >= REVEAL ? 1 + 0.12 * Math.exp(-(t - REVEAL) * 4) * Math.cos((t - REVEAL) * 12) : 1;
+  return [x0, y0 + Math.sin(f * 2) * 14, Math.sin(f * 0.8) * 6, pulse];
+}
+
+function render(t) {
+  const back = ease((t - REWIND) / (TOTAL - REWIND)); // 0 until the rewind, 1 on the last frame (= frame 0)
+  STARS.forEach(([ph, sp], i) => $('s' + i).setAttribute('opacity', 0.35 + 0.65 * Math.abs(Math.sin(ph + t * sp))));
+  ['question', 'hook'].forEach(id => show($(id), 1));
+  const a = itemPose(Math.min(t, REWIND)), b = itemPose(0), p = a.map((v, i) => lerp(v, b[i], back));
+  $('item').style.left = p[0] + 'px';
+  $('item').style.top = p[1] + 'px';
+  $('item').style.transform = `rotate(${p[2]}deg) scale(${p[3]})`;
+  $('glow').style.opacity = t >= REVEAL && back < 0.5 ? 1 : 0.5;
+  const st = t - SFX_STOP;
+  show($('stop'), st < 0 ? 0 : 1 - clamp((t - 1.6) / 0.3), 0, st < 0 ? 0.5 : 1 + 0.4 * Math.exp(-st * 10) * Math.cos(st * 30));
+
+  const revealed = t >= REVEAL && back < 0.5;
+  Q.o.forEach((txt, i) => {
+    const el = $('o' + i);
+    let op = 1, bg = 'rgba(255,255,255,.1)', bd = 'rgba(255,255,255,.25)', sc = 1;
+    if (revealed) {
+      const r = ease((t - REVEAL) / 0.3);
+      if (i === Q.a) { bg = '#22b45a'; bd = '#7dffb0'; sc = 1 + 0.05 * Math.sin(clamp((t - REVEAL) / 0.4) * Math.PI); }
+      else op = 1 - 0.65 * r;
+    }
+    el.style.background = bg;
+    el.style.borderColor = bd;
+    el.querySelector('.t').textContent = txt + (revealed && i === Q.a ? '  ✅' : '');
+    show(el, op, 0, sc);
+  });
+
+  show($('cta'), t < REVEAL ? 1 : back, 0, 1 + 0.04 * Math.sin(t * 6));
+  if (t >= COUNT0 && t < REVEAL) {
+    const left = Math.ceil(COUNT - (t - COUNT0)), frac = (t - COUNT0) % 1;
+    const col = left <= 2 ? '#ff5470' : '#ffd84a';
+    $('tnum').textContent = left;
+    $('timer').style.background = `conic-gradient(${col} ${360 * (1 - (t - COUNT0) / COUNT)}deg, rgba(255,255,255,.12) 0)`;
+    $('timer').style.color = col;
+    show($('timer'), 1, 0, 1 + 0.12 * (1 - ease(frac / 0.3)));
+  } else show($('timer'), 0);
+  if (t >= REVEAL + 0.3) {
+    $('why').innerHTML = '';
+    $('why').append(Q.why, Object.assign(document.createElement('span'), { className: 'ask', textContent: 'جاوبت صحيح؟ 👇' }));
+    const p2 = ease((t - REVEAL - 0.3) / 0.4);
+    show($('why'), p2 * (1 - back), 30 * (1 - p2));
+  } else show($('why'), 0);
+}
+window.TOTAL = TOTAL;
+</script>
+</body>
+</html>
