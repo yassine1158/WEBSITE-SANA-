@@ -111,6 +111,6 @@ mix = ';'.join(chains) + ';[m]' + ''.join(f'[v{k}]' for k in range(len(voices)))
       f'amix=inputs={len(voices) + 1}:normalize=0,loudnorm=I=-14:TP=-1.5[out]'
 out = f'long/njarbou_lik_{name}.mp4'
 subprocess.run(['ffmpeg', '-v', 'error', '-y', '-framerate', '30', '-i', 'frames/f%05d.jpg', *inputs,
-                '-filter_complex', mix, '-map', '0:v', '-map', '[out]', '-c:v', 'libx264', '-preset', 'medium', '-crf', '22',
+                '-filter_complex', mix, '-map', '0:v', '-map', '[out]', '-c:v', 'libx264', '-preset', 'slow', '-crf', '27', '-maxrate', '2.2M', '-bufsize', '4.4M',  # stays under GitHub's 100 MB
                 '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '160k', '-movflags', '+faststart', '-shortest', out], check=True)
 print(out, flush=True)
