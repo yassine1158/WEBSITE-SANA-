@@ -21,6 +21,14 @@
     left: 160px; width: 1600px; top: 900px; text-align: center; font-size: 46px; font-weight: 800; line-height: 1.45;
     background: rgba(0,0,0,.55); border-radius: 22px; padding: 14px 30px;
   }
+  #photo { left: 0; top: 0; width: 1300px; height: 1080px; overflow: hidden; }
+  #photo img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; display: none; }
+  #shade { left: 0; top: 0; width: 1920px; height: 1080px;
+           background: linear-gradient(to left, rgba(5,4,15,.96) 0%, rgba(5,4,15,.85) 38%, rgba(5,4,15,0) 62%),
+                       linear-gradient(to top, rgba(5,4,15,.85) 0%, rgba(5,4,15,0) 30%); }
+  #fx { left: 0; top: 0; }
+  #flash { left: 0; top: 0; width: 1920px; height: 1080px; background: #fff; }
+  #credit { left: 40px; top: 845px; font-size: 22px; font-weight: 600; color: rgba(255,255,255,.7); direction: ltr; }
   #card { left: 0; top: 0; width: 1920px; height: 1080px; display: flex; flex-direction: column; align-items: center; justify-content: center;
           background: rgba(5,4,15,.82); }
   #card .a { font-size: 60px; font-weight: 800; color: #5ee6ff; }
@@ -29,11 +37,16 @@
 </head>
 <body>
   <canvas id="bg" width="1920" height="1080"></canvas>
+  <div id="photo" class="abs"></div>
   <canvas id="vis" width="1000" height="840"></canvas>
+  <div id="shade" class="abs"></div>
+  <canvas id="fx" width="1920" height="1080"></canvas>
+  <div id="credit" class="abs"></div>
   <div id="brand" class="abs">🔬 نجرّبو ليك</div>
   <div id="panel" class="abs"><div id="num"></div><div id="title"></div><div id="big"></div></div>
   <div id="sub" class="abs"></div>
   <div id="card" class="abs"><div class="a">المعلومة</div><div class="b"></div></div>
+  <div id="flash" class="abs"></div>
 <script>
 const DATA = /*DATA*/;
 const TOTAL = DATA.total;
@@ -42,7 +55,15 @@ const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
 const ease = x => 1 - Math.pow(1 - clamp(x), 3);
 const lerp = (a, b, k) => a + (b - a) * k;
 const W = 1000, H = 840, CX = 500, CY = 420;
-const bg = $('bg').getContext('2d'), cx = $('vis').getContext('2d');
+const bg = $('bg').getContext('2d'), cx = $('vis').getContext('2d'), fx = $('fx').getContext('2d');
+// real NASA photos, one per scene (scenes without one keep their drawn animation)
+const PHOTOS = {};
+window.ready = Promise.all(DATA.scenes.filter(s => s.img).map(s => new Promise(res => {
+  if (PHOTOS[s.img]) return res();
+  const im = new Image(); im.onload = res; im.onerror = res; im.src = `media/${s.img}.jpg`;
+  PHOTOS[s.img] = im; $('photo').appendChild(im);
+})));
+const DUST = Array.from({ length: 140 }, () => [Math.random() * 1920, Math.random() * 1080, 0.6 + Math.random() * 2.2, 8 + Math.random() * 30, Math.random() * 6.28]);
 
 // star field (deterministic)
 let seed = 5;
@@ -224,15 +245,42 @@ function render(t) {
   drawBg(t);
   cx.clearRect(0, 0, W, H);
   const s = DATA.scenes.find(s => t >= s.start && t < s.end) || DATA.scenes[DATA.scenes.length - 1];
-  const lt = t - s.start;
-  SCENES[s.kind](t, lt, s);
+  const lt = t - s.start, dur = s.end - s.start;
   const fade = Math.min(ease(lt / 0.5), ease((s.end - t) / 0.5));
-  $('vis').style.opacity = fade;
+  // photo: zoom punch on the cut, then a slow Ken Burns push-in and drift
+  Object.values(PHOTOS).forEach(im => { im.style.display = 'none'; });
+  if (s.img) {
+    const im = PHOTOS[s.img];
+    const k = lt / dur, punch = 0.22 * Math.pow(1 - ease(lt / 0.6), 2);
+    im.style.display = 'block';
+    im.style.transform = `scale(${1.04 + 0.12 * k + punch}) translate(${(s.n % 2 ? -1 : 1) * 30 * k}px, ${-12 * k}px)`;
+    im.style.opacity = fade;
+    $('vis').style.opacity = 0;
+    $('credit').textContent = s.credit ? `Image: ${s.credit}` : '';
+  } else {
+    SCENES[s.kind](t, lt, s);
+    $('vis').style.opacity = fade;
+    $('credit').textContent = '';
+  }
+  // drifting dust and a soft lens glow over the picture
+  fx.clearRect(0, 0, 1920, 1080);
+  for (const [x, y, r, sp, ph] of DUST) {
+    fx.globalAlpha = 0.25 + 0.35 * Math.abs(Math.sin(ph + t));
+    fx.fillStyle = '#cfe3ff'; fx.beginPath(); fx.arc((x + t * sp) % 1920, (y - t * sp * 0.4 + 1080) % 1080, r, 0, 7); fx.fill();
+  }
+  const gl = fx.createRadialGradient(260 + 60 * Math.sin(t * .3), 160, 0, 260, 160, 380);
+  gl.addColorStop(0, 'rgba(255,230,180,.18)'); gl.addColorStop(1, 'rgba(0,0,0,0)');
+  fx.globalAlpha = 1; fx.fillStyle = gl; fx.fillRect(0, 0, 1920, 1080);
+  // white flash on every cut, shake when the big number lands
+  $('flash').style.opacity = 0.85 * Math.pow(1 - clamp(lt / 0.28), 2);
+  const hit = lt - (s.n ? 2.2 : 0.6), shake = hit > 0 && hit < 0.35 ? 9 * (1 - hit / 0.35) : 0;
+  document.body.style.transform = shake ? `translate(${Math.sin(t * 90) * shake}px, ${Math.cos(t * 77) * shake}px)` : '';
   $('num').textContent = s.n ? `المعلومة ${s.n} / ${DATA.count}` : '';
   $('title').textContent = s.title;
   $('big').textContent = s.big || '';
   $('panel').style.opacity = ease((lt - (s.n ? 1.4 : 0.2)) / 0.5) * ease((s.end - t) / 0.4);
-  $('big').style.transform = `scale(${0.85 + 0.15 * ease((lt - (s.n ? 2.2 : 0.6)) / 0.5)})`;
+  const bp = clamp((lt - (s.n ? 2.2 : 0.6)) / 0.45);
+  $('big').style.transform = `scale(${bp < 1 ? 1.6 - 0.6 * ease(bp) + 0.12 * Math.sin(bp * Math.PI) : 1})`;
   $('big').style.opacity = ease((lt - (s.n ? 2.2 : 0.6)) / 0.5);
   const sub = s.subs.find(u => t >= u.t0 && t < u.t1);
   $('sub').textContent = sub ? sub.text : '';

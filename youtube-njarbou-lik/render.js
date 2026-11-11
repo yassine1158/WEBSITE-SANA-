@@ -10,6 +10,7 @@ const fs = require('fs');
   const page = await browser.newPage({ viewport: { width: Number(process.env.W || 1080), height: Number(process.env.H || 1920) } });
   await page.goto('file://' + path.resolve(process.env.PAGE || 'short.html'));
   await page.evaluate(() => document.fonts.ready);
+  await page.evaluate(() => window.ready); // pages that preload images (long videos)
   await page.waitForTimeout(500);
   if (only) {
     for (const t of only.split(',')) {
