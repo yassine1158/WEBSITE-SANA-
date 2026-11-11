@@ -6,7 +6,8 @@ const fs = require('fs');
   const fps = Number(process.argv[2] || 30);
   const only = process.argv[3]; // optional: single time for a preview still
   const browser = await chromium.launch();
-  const page = await browser.newPage({ viewport: { width: 1080, height: 1920 } });
+  // W/H env: 1080x1920 for Shorts (default), 1920x1080 for long videos
+  const page = await browser.newPage({ viewport: { width: Number(process.env.W || 1080), height: Number(process.env.H || 1920) } });
   await page.goto('file://' + path.resolve(process.env.PAGE || 'short.html'));
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(500);

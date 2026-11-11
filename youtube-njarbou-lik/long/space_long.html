@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;800;900&display=swap" rel="stylesheet">
+<!-- Long 16:9 video: one animated scene per fact, narrated (make_long.py fills in DATA with the timeline). -->
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; }
+  body { font-family: 'Cairo', 'DejaVu Sans', sans-serif; color: #fff; position: relative; background: #05040f; }
+  .abs { position: absolute; }
+  canvas { position: absolute; }
+  #bg { left: 0; top: 0; }
+  #vis { left: 60px; top: 40px; }
+  #brand { left: 50px; top: 30px; font-size: 32px; font-weight: 800; color: #ffd84a; opacity: .85; direction: rtl; }
+  #panel { right: 90px; top: 170px; width: 820px; text-align: right; }
+  #num { font-size: 40px; font-weight: 800; color: #5ee6ff; }
+  #title { font-size: 72px; font-weight: 900; line-height: 1.25; margin-top: 10px; }
+  #big { font-size: 130px; font-weight: 900; color: #ffd84a; margin-top: 30px; line-height: 1.1; text-shadow: 0 0 40px rgba(255,216,74,.35); }
+  #sub {
+    left: 160px; width: 1600px; top: 900px; text-align: center; font-size: 46px; font-weight: 800; line-height: 1.45;
+    background: rgba(0,0,0,.55); border-radius: 22px; padding: 14px 30px;
+  }
+  #card { left: 0; top: 0; width: 1920px; height: 1080px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+          background: rgba(5,4,15,.82); }
+  #card .a { font-size: 60px; font-weight: 800; color: #5ee6ff; }
+  #card .b { font-size: 180px; font-weight: 900; color: #ffd84a; line-height: 1.1; }
+</style>
+</head>
+<body>
+  <canvas id="bg" width="1920" height="1080"></canvas>
+  <canvas id="vis" width="1000" height="840"></canvas>
+  <div id="brand" class="abs">🔬 نجرّبو ليك</div>
+  <div id="panel" class="abs"><div id="num"></div><div id="title"></div><div id="big"></div></div>
+  <div id="sub" class="abs"></div>
+  <div id="card" class="abs"><div class="a">المعلومة</div><div class="b"></div></div>
+<script>
+const DATA = /*DATA*/;
+const TOTAL = DATA.total;
+const $ = id => document.getElementById(id);
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const ease = x => 1 - Math.pow(1 - clamp(x), 3);
+const lerp = (a, b, k) => a + (b - a) * k;
+const W = 1000, H = 840, CX = 500, CY = 420;
+const bg = $('bg').getContext('2d'), cx = $('vis').getContext('2d');
+
+// star field (deterministic)
+let seed = 5;
+const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+const STARS = Array.from({ length: 420 }, () => [rnd() * 1920, rnd() * 1080, 0.4 + rnd() * 1.8, rnd() * 6.28, 0.3 + rnd() * 1.5]);
+const SAND = Array.from({ length: 900 }, () => [rnd() * W, 640 + rnd() * 200, 0.6 + rnd() * 1.6]);
+const SPIRAL = Array.from({ length: 1400 }, (_, i) => { const arm = i % 2, r = 20 + rnd() * 330, a = r / 55 + arm * Math.PI + (rnd() - .5) * .6; return [r, a, 0.5 + rnd() * 1.8]; });
+
+function drawBg(t) {
+  const g = bg.createRadialGradient(560, 420, 50, 960, 540, 1300);
+  g.addColorStop(0, '#2a1650'); g.addColorStop(.45, '#100a2a'); g.addColorStop(1, '#03030a');
+  bg.fillStyle = g; bg.fillRect(0, 0, 1920, 1080);
+  for (const [x, y, r, ph, sp] of STARS) {
+    bg.globalAlpha = 0.3 + 0.7 * Math.abs(Math.sin(ph + t * sp));
+    bg.fillStyle = '#fff'; bg.beginPath(); bg.arc((x - t * 4 + 1920) % 1920, y, r, 0, 7); bg.fill();
+  }
+  bg.globalAlpha = 1;
+}
+
+function sphere(x, y, r, c1, c2, c3 = '#000') {
+  const g = cx.createRadialGradient(x - r * .35, y - r * .35, r * .1, x, y, r);
+  g.addColorStop(0, c1); g.addColorStop(.7, c2); g.addColorStop(1, c3);
+  cx.fillStyle = g; cx.beginPath(); cx.arc(x, y, r, 0, 7); cx.fill();
+}
+function glow(x, y, r, color, a = 1) {
+  const g = cx.createRadialGradient(x, y, 0, x, y, r);
+  g.addColorStop(0, color); g.addColorStop(1, 'rgba(0,0,0,0)');
+  cx.globalAlpha = a; cx.fillStyle = g; cx.beginPath(); cx.arc(x, y, r, 0, 7); cx.fill(); cx.globalAlpha = 1;
+}
+function bands(x, y, r, colors, shift) { // horizontal bands clipped to the sphere, scrolling sideways
+  cx.save(); cx.beginPath(); cx.arc(x, y, r, 0, 7); cx.clip();
+  colors.forEach((c, i) => {
+    const yy = y - r + (i + 0.5) * (2 * r / colors.length);
+    cx.globalAlpha = .35; cx.fillStyle = c;
+    for (let k = -1; k <= 1; k++) cx.fillRect(x - r + ((shift * (i % 2 ? 1 : 1.4)) % (2 * r)) + k * 2 * r - r, yy - r / colors.length * .45, 4 * r, r / colors.length * .9);
+  });
+  cx.globalAlpha = 1;
+  const sh = cx.createRadialGradient(x - r * .4, y - r * .4, r * .2, x, y, r);
+  sh.addColorStop(0, 'rgba(255,255,255,.15)'); sh.addColorStop(.75, 'rgba(0,0,0,0)'); sh.addColorStop(1, 'rgba(0,0,0,.65)');
+  cx.fillStyle = sh; cx.fillRect(x - r, y - r, 2 * r, 2 * r);
+  cx.restore();
+}
+function label(text, x, y, size = 40, color = '#fff') {
+  cx.font = `900 ${size}px Cairo`; cx.textAlign = 'center'; cx.fillStyle = color; cx.fillText(text, x, y);
+}
+
+const SCENES = {
+  neutron(t) {
+    glow(CX, CY, 330, 'rgba(120,170,255,.35)', 0.6 + 0.4 * Math.sin(t * 6));
+    const a = t * 2.2;
+    cx.save(); cx.translate(CX, CY); cx.rotate(a);
+    for (const s of [1, -1]) {
+      const g = cx.createLinearGradient(0, 0, 0, s * 420);
+      g.addColorStop(0, 'rgba(170,220,255,.9)'); g.addColorStop(1, 'rgba(170,220,255,0)');
+      cx.fillStyle = g; cx.beginPath(); cx.moveTo(-14, 0); cx.lineTo(-70, s * 420); cx.lineTo(70, s * 420); cx.lineTo(14, 0); cx.fill();
+    }
+    cx.restore();
+    sphere(CX, CY, 70, '#ffffff', '#9fd0ff', '#2a5aa8');
+    label('قطره ~20 كم', CX, CY + 160, 38, '#cfe6ff');
+  },
+  venus(t, lt, s) {
+    sphere(CX, CY, 290, '#ffe6a3', '#e3a84a', '#5a3208');
+    bands(CX, CY, 290, ['#f7d98c', '#d79a3c', '#f2c774', '#c98a2e', '#f7d98c', '#d79a3c'], -t * 25);
+    cx.strokeStyle = '#5ee6ff'; cx.lineWidth = 10; cx.beginPath(); cx.arc(CX, CY, 345, -2.6, -0.5); cx.stroke();
+    const ah = -2.6; cx.fillStyle = '#5ee6ff'; cx.beginPath();
+    cx.moveTo(CX + 345 * Math.cos(ah) - 22, CY + 345 * Math.sin(ah)); cx.lineTo(CX + 345 * Math.cos(ah) + 22, CY + 345 * Math.sin(ah) - 18); cx.lineTo(CX + 345 * Math.cos(ah) + 18, CY + 345 * Math.sin(ah) + 22); cx.fill();
+    label(s.tag || 'يدور بالعكس ↺', CX, 60, 44, '#5ee6ff');
+  },
+  mars(t, lt) {
+    sphere(200, 180, 130, '#ff9a6b', '#c2462a', '#3a0d05');
+    const k = ease((lt - 1) / 3), base = 760;
+    const peaks = [[420, 8.8, '#9aa3b5', 'إيفرست 8.8 كم'], [720, 22, '#d2502e', 'أوليمبوس 22 كم']];
+    for (const [x, km, c, txt] of peaks) {
+      const h = km * 25 * k;
+      cx.fillStyle = c; cx.beginPath(); cx.moveTo(x - (km > 10 ? 260 : 120), base); cx.lineTo(x, base - h); cx.lineTo(x + (km > 10 ? 260 : 120), base); cx.fill();
+      label(txt, x, base - h - 24, 38);
+    }
+    cx.fillStyle = '#5a2a1a'; cx.fillRect(0, base, W, 80);
+  },
+  moon(t, lt, s) {
+    sphere(220, CY, 160, '#7fc6ff', '#2a6fd6', '#06204a');
+    cx.save(); cx.beginPath(); cx.arc(220, CY, 160, 0, 7); cx.clip(); cx.fillStyle = 'rgba(60,170,90,.7)';
+    cx.beginPath(); cx.ellipse(190, CY - 30, 70, 45, .4, 0, 7); cx.fill(); cx.beginPath(); cx.ellipse(270, CY + 60, 50, 35, -.3, 0, 7); cx.fill(); cx.restore();
+    const mx = 700 + 120 * ease(lt / 12);
+    sphere(mx, CY, 60, '#f2f2f2', '#a9acb6', '#3a3c44');
+    cx.setLineDash([16, 14]); cx.strokeStyle = 'rgba(255,255,255,.6)'; cx.lineWidth = 4;
+    cx.beginPath(); cx.moveTo(390, CY); cx.lineTo(mx - 75, CY); cx.stroke(); cx.setLineDash([]);
+    const lp = (t * 0.8) % 1; // laser pulse going out and back
+    const lx = lp < .5 ? lerp(390, mx - 60, lp * 2) : lerp(mx - 60, 390, (lp - .5) * 2);
+    glow(lx, CY - 40, 26, 'rgba(255,60,80,.95)'); cx.strokeStyle = 'rgba(255,60,80,.6)'; cx.beginPath(); cx.moveTo(390, CY - 40); cx.lineTo(mx - 60, CY - 40); cx.stroke();
+    label(s.tag || '← يبتعد', mx + 10, CY + 120, 40, '#ffd84a');
+  },
+  saturn(t) {
+    const rx = 440, ry = 70, tilt = -0.25;
+    const ring = (front) => {
+      cx.save(); cx.translate(CX, CY); cx.rotate(tilt);
+      [[1, '#d9c79a'], [0.86, '#a8946a'], [0.74, '#e8d9b0']].forEach(([s, c]) => {
+        cx.strokeStyle = c; cx.lineWidth = 16; cx.beginPath(); cx.ellipse(0, 0, rx * s, ry * s, 0, front ? 0 : Math.PI, front ? Math.PI : 2 * Math.PI); cx.stroke();
+      });
+      cx.restore();
+    };
+    ring(false);
+    sphere(CX, CY, 190, '#f6e3b4', '#d2ae6c', '#4a3410');
+    bands(CX, CY, 190, ['#efd9a6', '#cfa765', '#e9cf94', '#c79b58', '#efd9a6'], t * 12);
+    ring(true);
+    label('سمك ~10 أمتار فقط', CX, 790, 40, '#ffd84a');
+  },
+  jupiter(t) {
+    sphere(CX - 40, CY, 330, '#f3d6b0', '#c98d5c', '#3b1d0a');
+    bands(CX - 40, CY, 330, ['#e9c9a0', '#b97a4a', '#f0d6b6', '#a8673c', '#e6c39a', '#b97a4a', '#f0d6b6'], t * 18);
+    const sx = CX - 40 + 120 * Math.cos(t * 0.25), sy = CY + 110;
+    cx.fillStyle = '#c8452c'; cx.beginPath(); cx.ellipse(sx, sy, 95, 55, 0, 0, 7); cx.fill();
+    cx.strokeStyle = '#ffb59a'; cx.lineWidth = 6; cx.stroke();
+    sphere(sx, sy - 120, 34, '#7fc6ff', '#2a6fd6', '#06204a');
+    label('الأرض', sx, sy - 165, 30);
+  },
+  stars(t) {
+    for (let i = 0; i < 700; i++) { const x = (i * 97.3) % W, y = (i * 53.7) % 600; cx.globalAlpha = .3 + .7 * Math.abs(Math.sin(i + t * (1 + i % 3))); cx.fillStyle = '#fff'; cx.fillRect(x, y, 2.4, 2.4); }
+    cx.globalAlpha = 1;
+    for (const [x, y, r] of SAND) { cx.fillStyle = '#e8c87a'; cx.beginPath(); cx.arc(x, y, r, 0, 7); cx.fill(); }
+    cx.direction = 'ltr'; label('⭐ > 🏖️', CX, 330, 90); cx.direction = 'rtl'; // stars outnumber sand
+  },
+  galaxy(t, lt) {
+    cx.save(); cx.translate(320, CY); cx.scale(1, .55); cx.rotate(t * .05);
+    glow(0, 0, 160, 'rgba(255,230,200,.8)');
+    for (const [r, a, s] of SPIRAL) { cx.fillStyle = r < 120 ? '#ffe9c4' : '#b9c9ff'; cx.globalAlpha = .7; cx.fillRect(r * Math.cos(a), r * Math.sin(a), s, s); }
+    cx.restore(); cx.globalAlpha = 1;
+    const k = (lt * 0.25) % 1, x = lerp(560, 960, k);
+    glow(x, CY, 30, 'rgba(255,240,180,1)'); cx.strokeStyle = 'rgba(255,240,180,.4)'; cx.lineWidth = 3;
+    cx.beginPath(); cx.moveTo(560, CY); cx.lineTo(x, CY); cx.stroke();
+    label('أندروميدا', 320, CY + 240, 38, '#b9c9ff');
+  },
+  diamond(t) {
+    sphere(CX, CY, 320, '#9ed7ff', '#2e6ee0', '#06143a');
+    bands(CX, CY, 320, ['#7fb8ff', '#3d7de6', '#8cc4ff', '#2e6ee0'], t * 10);
+    cx.save(); cx.beginPath(); cx.arc(CX, CY, 320, 0, 7); cx.clip();
+    cx.font = '50px serif'; cx.textAlign = 'center';
+    for (let i = 0; i < 14; i++) { const x = CX - 260 + (i * 41) % 520, y = (CY - 320 + ((t * 110 + i * 97) % 640)); cx.fillText('💎', x, y); }
+    cx.restore();
+  },
+  sun(t, lt, s) {
+    glow(CX - 80, CY, 470, 'rgba(255,170,40,.45)', .8 + .2 * Math.sin(t * 3));
+    sphere(CX - 80, CY, 330, '#fff6c2', '#ffb02e', '#c2410c');
+    [[860, 2.5, '#a9acb6'], [900, 4, '#e8b867'], [935, 4.5, '#3d8bff'], [965, 3, '#d2502e']].forEach(([x, r, c], i) => {
+      cx.fillStyle = c; cx.beginPath(); cx.arc(x, CY + Math.sin(t + i) * 40, r * 2, 0, 7); cx.fill();
+    });
+    label('الكواكب ←', 905, CY - 90, 30);
+    if (s.tag) label(s.tag, CX - 80, 800, 44, '#ffd84a');
+  },
+  blackhole(t, lt) {
+    const k = ease(lt / 4);
+    if (k < 1) sphere(CX, CY, lerp(220, 14, k), '#7fc6ff', '#2a6fd6', '#06204a');
+    const r = 120 * ease((lt - 3.5) / 1.5);
+    if (r > 1) {
+      cx.save(); cx.translate(CX, CY);
+      for (let i = 0; i < 3; i++) { cx.strokeStyle = ['#ffb02e', '#ff7a1a', '#ffe08a'][i]; cx.lineWidth = 14 - i * 3; cx.globalAlpha = .8;
+        cx.beginPath(); cx.ellipse(0, 0, r * (2.4 + i * .2), r * (.55 + i * .05), Math.sin(t * .5) * .05, 0, 7); cx.stroke(); }
+      cx.globalAlpha = 1; glow(0, 0, r * 1.6, 'rgba(255,160,60,.6)');
+      cx.fillStyle = '#000'; cx.beginPath(); cx.arc(0, 0, r, 0, 7); cx.fill(); cx.restore();
+      label('🍒 ~1.8 سم', CX, 790, 40, '#ffd84a');
+    }
+  },
+  gps(t, lt, s) {
+    sphere(CX, CY, 190, '#7fc6ff', '#2a6fd6', '#06204a');
+    cx.strokeStyle = 'rgba(94,230,255,.4)'; cx.setLineDash([10, 12]); cx.lineWidth = 3;
+    cx.beginPath(); cx.ellipse(CX, CY, 380, 150, -.2, 0, 7); cx.stroke(); cx.setLineDash([]);
+    const a = t * .7;
+    const r = -.2, px = CX + 380 * Math.cos(a) * Math.cos(r) - 150 * Math.sin(a) * Math.sin(r), py = CY + 380 * Math.cos(a) * Math.sin(r) + 150 * Math.sin(a) * Math.cos(r);
+    cx.font = '80px serif'; cx.textAlign = 'center'; cx.fillText('🛰️', px, py + 28);
+    label(s.tag || '⏱️ 38 ميكروثانية كل يوم', CX, 790, 40, '#ffd84a');
+  },
+  outro(t) {
+    sphere(CX, CY, 230, '#7fc6ff', '#2a6fd6', '#06204a');
+    cx.font = '160px serif'; cx.textAlign = 'center'; cx.fillText('🔔', CX, CY + 60 + Math.sin(t * 6) * 8);
+  },
+};
+
+function render(t) {
+  drawBg(t);
+  cx.clearRect(0, 0, W, H);
+  const s = DATA.scenes.find(s => t >= s.start && t < s.end) || DATA.scenes[DATA.scenes.length - 1];
+  const lt = t - s.start;
+  SCENES[s.kind](t, lt, s);
+  const fade = Math.min(ease(lt / 0.5), ease((s.end - t) / 0.5));
+  $('vis').style.opacity = fade;
+  $('num').textContent = s.n ? `المعلومة ${s.n} / ${DATA.count}` : '';
+  $('title').textContent = s.title;
+  $('big').textContent = s.big || '';
+  $('panel').style.opacity = ease((lt - (s.n ? 1.4 : 0.2)) / 0.5) * ease((s.end - t) / 0.4);
+  $('big').style.transform = `scale(${0.85 + 0.15 * ease((lt - (s.n ? 2.2 : 0.6)) / 0.5)})`;
+  $('big').style.opacity = ease((lt - (s.n ? 2.2 : 0.6)) / 0.5);
+  const sub = s.subs.find(u => t >= u.t0 && t < u.t1);
+  $('sub').textContent = sub ? sub.text : '';
+  $('sub').style.opacity = sub ? 1 : 0;
+  const card = s.n ? clamp(Math.min(lt / 0.2, (1.4 - lt) / 0.3)) : 0;
+  $('card').style.opacity = card;
+  $('card').querySelector('.b').textContent = s.n || '';
+}
+window.TOTAL = TOTAL;
+</script>
+</body>
+</html>
